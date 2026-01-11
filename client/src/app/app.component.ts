@@ -192,7 +192,7 @@ import { HandHistory } from './services/supabase.service';
                  <!-- History View -->
                  <ng-container *ngIf="viewMode === 'history'">
                     <div *ngIf="currentUser; else loginBlocked">
-                        <app-history-view />
+                        <app-history-view (restore)="onRestoreHistory($event)" />
                     </div>
                     <ng-template #loginBlocked>
                         <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-700 rounded-xl text-gray-500 bg-slate-800/20">
