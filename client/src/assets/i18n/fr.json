@@ -1,0 +1,50 @@
+{
+    "APP": {
+        "TITLE": "Maître du Cribbage",
+        "SUBTITLE": "Moteur d'optimisation de défausse avancé",
+        "ANALYZER": "Analyseur",
+        "HISTORY": "Historique",
+        "GAME_SETUP": "Configuration",
+        "PLAYERS": "Joueurs",
+        "ROLE": "Rôle",
+        "DEALER": "Donneur",
+        "NON_DEALER": "Non-Donneur",
+        "DEALER_DESC": "Les points du Crib comptent pour vous",
+        "NON_DEALER_DESC": "Les points du Crib comptent pour l'adversaire",
+        "ANALYZE_HAND": "Analyser la main",
+        "PROCESSING": "Traitement...",
+        "RESET": "Réinitialiser",
+        "NAVIGATION": "Navigation",
+        "LANGUAGE": "Langue",
+        "THEME": "Thème",
+        "EMPTY_STATE": "Sélectionnez les cartes ci-dessus et configurez la partie.",
+        "ERROR_SELECT_CARDS": "Veuillez sélectionner {{count}} cartes.",
+        "ERROR_CALCULATING": "Erreur de calcul : "
+    },
+    "CARD_PICKER": {
+        "SELECT_HAND": "Sélectionnez votre main",
+        "CLEAR_ALL": "Tout effacer"
+    },
+    "ANALYSIS_VIEW": {
+        "BEST": "MEILLEUR",
+        "EXPECTED": "Espéré",
+        "RANGE": "Intervalle",
+        "HAND": "Main",
+        "CRIB": "Crib",
+        "PEG": "Peg",
+        "MORE_DETAILS": "Plus de détails",
+        "FIFTEENS": "15",
+        "PAIRS": "Paire",
+        "RUNS": "Suite",
+        "FLUSH": "Couleur",
+        "NOBS": "Nobs"
+    },
+    "HISTORY_VIEW": {
+        "TITLE": "Historique d'analyse",
+        "LOADING": "Chargement de l'historique...",
+        "NO_HISTORY": "Aucun historique disponible.",
+        "ORIGINAL_HAND": "Main originale",
+        "DISCARDED": "Défaussé",
+        "REANALYZE": "Ré-analyser"
+    }
+}

@@ -1,0 +1,22 @@
+.mini-card {
+    width: 32px;
+    height: 48px;
+    background-color: var(--card-bg, #1e293b);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #475569;
+    user-select: none;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.mini-card.red {
+    color: #e11d48;
+}
+
+.mini-card.black {
+    color: #0f172a;
+}

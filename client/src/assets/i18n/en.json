@@ -1,0 +1,50 @@
+{
+    "APP": {
+        "TITLE": "Cribbage Master",
+        "SUBTITLE": "Advanced Discard Optimization Engine",
+        "ANALYZER": "Analyzer",
+        "HISTORY": "History",
+        "GAME_SETUP": "Game Setup",
+        "PLAYERS": "Players",
+        "ROLE": "Role",
+        "DEALER": "Dealer",
+        "NON_DEALER": "Non-Dealer",
+        "DEALER_DESC": "Points in Crib count for you",
+        "NON_DEALER_DESC": "Points in Crib count for Opponent",
+        "ANALYZE_HAND": "Analyze Hand",
+        "PROCESSING": "Processing...",
+        "RESET": "Reset",
+        "NAVIGATION": "Navigation",
+        "LANGUAGE": "Language",
+        "THEME": "Theme",
+        "EMPTY_STATE": "Select cards above and configure game settings.",
+        "ERROR_SELECT_CARDS": "Please select {{count}} cards.",
+        "ERROR_CALCULATING": "Error calculating: "
+    },
+    "CARD_PICKER": {
+        "SELECT_HAND": "Select Your Hand",
+        "CLEAR_ALL": "Clear All"
+    },
+    "ANALYSIS_VIEW": {
+        "BEST": "BEST",
+        "EXPECTED": "Expected",
+        "RANGE": "Range",
+        "HAND": "Hand",
+        "CRIB": "Crib",
+        "PEG": "Peg",
+        "MORE_DETAILS": "More Details",
+        "FIFTEENS": "15s",
+        "PAIRS": "Pair",
+        "RUNS": "Run",
+        "FLUSH": "Flush",
+        "NOBS": "Nobs"
+    },
+    "HISTORY_VIEW": {
+        "TITLE": "Analysis History",
+        "LOADING": "Loading history...",
+        "NO_HISTORY": "No history available yet.",
+        "ORIGINAL_HAND": "Original Hand",
+        "DISCARDED": "Discarded",
+        "REANALYZE": "Re-analyze"
+    }
+}

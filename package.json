@@ -1,0 +1,10 @@
+{
+    "name": "cribbage-master",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "npm run start:client",
+        "start:client": "cd client && npm start",
+        "start:server": "cd server && npm start",
+        "install:all": "cd client && npm install && cd ../server && npm install"
+    }
+}
