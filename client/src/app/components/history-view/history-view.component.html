@@ -18,12 +18,12 @@
             <div class="flex justify-between items-start mb-4 border-b border-gray-200 dark:border-white/5 pb-2">
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2 text-xs text-slate-400 uppercase tracking-wider font-bold">
-                        <span>{{ item.timestamp | date:'short' }}</span>
+                        <span>{{ item.created_at | date:'short' }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs text-slate-500">
-                        <span>{{ item.numPlayers }} {{ 'APP.PLAYERS' | translate }}</span>
+                        <span>{{ item.num_players }} {{ 'APP.PLAYERS' | translate }}</span>
                         <span>•</span>
-                        <span>{{ (item.isDealer ? 'APP.DEALER' : 'APP.NON_DEALER') | translate }}</span>
+                        <span>{{ (item.is_dealer ? 'APP.DEALER' : 'APP.NON_DEALER') | translate }}</span>
                     </div>
                 </div>
 
@@ -36,7 +36,7 @@
                     <div>
                         <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">{{
                             'ANALYSIS_VIEW.EXPECTED' | translate }}</span>
-                        <span class="text-3xl font-bold text-emerald-400 leading-none ml-2">{{ item.expectedValue |
+                        <span class="text-3xl font-bold text-emerald-400 leading-none ml-2">{{ item.expected_value |
                             number:'1.1-1' }}</span>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
 
                 <!-- Kept Cards -->
                 <div class="flex gap-1 flex-nowrap shrink-0">
-                    <div *ngFor="let code of getKeptCards(item.originalHand, item.discarded)"
+                    <div *ngFor="let code of getKeptCards(item.original_hand, item.discarded)"
                         class="mini-card shadow-sm" [class.red]="getCardDetails(code).color === 'red'"
                         [class.black]="getCardDetails(code).color === 'black'">
                         <span class="font-bold">{{getCardDetails(code).rank}}</span>

@@ -1,0 +1,6 @@
+{
+    "buildCommand": "cd client && npm install && npx ng build",
+    "outputDirectory": "client/dist/client/browser",
+    "devCommand": "cd client && npx ng serve --port $PORT",
+    "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+}

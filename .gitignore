@@ -44,3 +44,4 @@ tracings/
 *.swp
 *.swo
 *.sqlite
+.vercel

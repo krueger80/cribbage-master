@@ -6,5 +6,9 @@
         "start:client": "cd client && npm start",
         "start:server": "cd server && npm start",
         "install:all": "cd client && npm install && cd ../server && npm install"
+    },
+    "dependencies": {
+        "@types/node": "^25.0.6",
+        "@vercel/node": "^5.5.16"
     }
 }

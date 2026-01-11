@@ -25,4 +25,8 @@ export class ToastService {
     success(text: string, duration: number = 3000) {
         this.show(text, 'success', duration);
     }
+
+    info(text: string, duration: number = 3000) {
+        this.show(text, 'info', duration);
+    }
 }

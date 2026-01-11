@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
+import { SupabaseService, HandHistory } from './supabase.service';
 
 export interface Card {
   rank: string;
@@ -34,33 +35,27 @@ export interface AnalysisResult {
   totalExpectedValue: number;
 }
 
-export interface HandHistory {
-  id: number;
-  originalHand: string[];
-  discarded: string[];
-  expectedValue: number;
-  isDealer: boolean;
-  numPlayers: number;
-  timestamp: Date;
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api';
+  // Point to Vercel API (relative path works if served same domain, or absolute)
+  // For local dev with 'vercel dev', /api/analyze is standard.
+  private apiUrl = '/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private supabase: SupabaseService) { }
 
   analyze(cards: string[], isDealer: boolean, numPlayers: number): Observable<{ results: AnalysisResult[] }> {
     return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers });
   }
 
   saveHistory(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/history`, data);
+    // Delegate to Supabase
+    return from(this.supabase.saveHistory(data));
   }
 
   getHistory(): Observable<HandHistory[]> {
-    return this.http.get<HandHistory[]>(`${this.apiUrl}/history`);
+    // Delegate to Supabase
+    return this.supabase.getHistory();
   }
 }

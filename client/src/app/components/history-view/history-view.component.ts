@@ -1,7 +1,8 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { ApiService, HandHistory } from '../../services/api.service';
+import { ApiService } from '../../services/api.service';
+import { HandHistory } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-history-view',
