@@ -57,10 +57,14 @@ export class SupabaseService {
     }
 
     async signInWithGoogle() {
+        const redirectTo = window.location.origin;
+        console.log('Authenticating with Google. Redirecting to:', redirectTo);
+        // NOTE: This URL must be whitelisted in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs
+        // If it is not whitelisted, Supabase will fallback to the default "Site URL" (often localhost:3000).
         return this.supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin
+                redirectTo
             }
         });
     }

@@ -15,7 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </label>
       
       <!-- Grid of all cards -->
-      <div class="flex flex-col gap-2 overflow-x-auto pb-4">
+      <div class="flex flex-col gap-2 overflow-x-auto pb-4 pt-2">
         <div *ngFor="let suit of suits" class="flex gap-2 min-w-max">
 
             

@@ -85,7 +85,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
             <!-- Breakdown Toggle -->
              <!-- Breakdown Toggle -->
              <div class="mt-2 text-[10px] text-gray-500 cursor-pointer">
-                <div (click)="toggleDetails()" class="hover:text-gray-300 flex items-center gap-1">
+                <div (click)="toggleDetails()" class="hover:text-gray-300 flex items-center gap-1 select-none">
                     <span>{{ areDetailsOpen ? '▼' : '▶' }}</span> {{ 'ANALYSIS_VIEW.MORE_DETAILS' | translate }}
                 </div>
                 <div *ngIf="areDetailsOpen" class="mt-2 grid grid-cols-2 gap-2 bg-gray-100 dark:bg-black/40 p-2 rounded animate-fade-in">
