@@ -27,8 +27,8 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
             <!-- Header Stats -->
             <div class="flex justify-between items-end mb-3 border-b border-gray-200 dark:border-white/5 pb-2">
                  <div class="flex flex-col">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.EXPECTED' | translate }}</span>
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider leading-none mb-0">{{ 'ANALYSIS_VIEW.EXPECTED' | translate }}</span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-white leading-none">
                         {{ res.totalExpectedValue | number:'1.1-1' }}
                     </span>
                  </div>
