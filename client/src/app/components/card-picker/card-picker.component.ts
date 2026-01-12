@@ -27,7 +27,7 @@ import { TranslateModule } from '@ngx-translate/core';
                  [class.black]="suit.color === 'black'"
                  (click)="toggleCard(rank, suit.code)">
                  <span class="text-xs font-bold">{{rank}}</span>
-                 <span class="text-xs">{{suit.symbol}}</span>
+                 <span class="text-base leading-none pb-1">{{suit.symbol}}</span>
             </div>
         </div>
       </div>
