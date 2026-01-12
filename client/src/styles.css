@@ -39,8 +39,6 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  touch-action: auto;
-  overflow-y: auto;
 }
 
 /* Allow text selection in inputs and textareas */

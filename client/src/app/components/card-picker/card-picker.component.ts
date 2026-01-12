@@ -51,7 +51,6 @@ import { TranslateModule } from '@ngx-translate/core';
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
-      touch-action: manipulation;
     }
     .playing-card-mini:hover { transform: translateY(-2px); border-color: var(--primary-color); }
     .playing-card-mini.red { color: #e11d48; }
