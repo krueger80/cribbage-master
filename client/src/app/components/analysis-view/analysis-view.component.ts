@@ -20,7 +20,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
              style="min-width: 250px">
              
             <!-- Badge for Best Choice -->
-            <div *ngIf="i===0" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl">
+            <div *ngIf="i===0" class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl rounded-tr-xl">
                 {{ 'ANALYSIS_VIEW.BEST' | translate }}
             </div>
 
