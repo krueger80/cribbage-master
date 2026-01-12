@@ -65,10 +65,10 @@ import { ToastService } from './services/toast.service';
               <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
                   
                   <!-- 1. CONFIGURATION -->
-                  <div class="flex flex-col gap-6 w-full lg:w-auto min-w-[200px]">
+                  <div class="flex flex-row lg:flex-col gap-4 lg:gap-6 w-full lg:w-auto min-w-[200px] justify-between lg:justify-start">
                       
                       <!-- Players -->
-                      <div>
+                      <div class="flex-1 lg:flex-none">
                           <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.PLAYERS' | translate }}</label>
                           <div class="flex gap-2">
                               <button *ngFor="let n of [2, 3, 4]" 
@@ -91,7 +91,7 @@ import { ToastService } from './services/toast.service';
                       </div>
 
                       <!-- Role -->
-                      <div>
+                      <div class="flex-1 lg:flex-none">
                            <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
                             <div (click)="isDealer = !isDealer" 
                                  class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50 select-none"
