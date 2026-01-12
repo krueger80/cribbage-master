@@ -64,74 +64,86 @@ import { ToastService } from './services/toast.service';
               <!-- Setup Flow: Conf -> Cards -> Actions -->
               <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
                   
-                  <!-- 1. CONFIGURATION -->
-                  <div class="flex flex-row lg:flex-col gap-4 lg:gap-6 w-full lg:w-auto min-w-[200px] justify-between lg:justify-start">
+                  <!-- 1. CONFIGURATION + DESKTOP ACTION -->
+                  <div class="flex flex-col gap-6 w-full lg:w-auto min-w-[200px]">
                       
-                      <!-- Players -->
-                      <div class="flex-1 lg:flex-none">
-                          <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.PLAYERS' | translate }}</label>
-                          <div class="flex gap-2">
-                              <button *ngFor="let n of [2, 3, 4]" 
-                                      class="flex-1 py-2 px-4 rounded border text-sm font-bold transition-all select-none"
-                                      [class.bg-emerald-600]="numPlayers === n"
-                                      [class.border-emerald-500]="numPlayers === n"
-                                      [class.text-white]="numPlayers === n"
-                                      [class.bg-gray-100]="numPlayers !== n"
-                                      [class.dark:bg-slate-800]="numPlayers !== n"
-                                      [class.border-gray-200]="numPlayers !== n"
-                                      [class.dark:border-slate-700]="numPlayers !== n"
-                                      [class.text-slate-600]="numPlayers !== n"
-                                      [class.dark:text-slate-400]="numPlayers !== n"
-                                      [class.hover:bg-gray-200]="numPlayers !== n"
-                                      [class.dark:hover:bg-slate-700]="numPlayers !== n"
-                                      (click)="setPlayers(n)">
-                                  {{n}}
-                              </button>
+                      <!-- Players & Role Container -->
+                      <div class="flex flex-row lg:flex-col gap-4 lg:gap-6 w-full justify-between lg:justify-start">
+                          <!-- Players -->
+                          <div class="flex-1 lg:flex-none">
+                              <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.PLAYERS' | translate }}</label>
+                              <div class="flex gap-2">
+                                  <button *ngFor="let n of [2, 3, 4]" 
+                                          class="flex-1 py-2 px-4 rounded border text-sm font-bold transition-all select-none"
+                                          [class.bg-emerald-600]="numPlayers === n"
+                                          [class.border-emerald-500]="numPlayers === n"
+                                          [class.text-white]="numPlayers === n"
+                                          [class.bg-gray-100]="numPlayers !== n"
+                                          [class.dark:bg-slate-800]="numPlayers !== n"
+                                          [class.border-gray-200]="numPlayers !== n"
+                                          [class.dark:border-slate-700]="numPlayers !== n"
+                                          [class.text-slate-600]="numPlayers !== n"
+                                          [class.dark:text-slate-400]="numPlayers !== n"
+                                          [class.hover:bg-gray-200]="numPlayers !== n"
+                                          [class.dark:hover:bg-slate-700]="numPlayers !== n"
+                                          (click)="setPlayers(n)">
+                                      {{n}}
+                                  </button>
+                              </div>
+                          </div>
+
+                          <!-- Role -->
+                          <div class="flex-1 lg:flex-none">
+                               <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
+                                <div (click)="isDealer = !isDealer" 
+                                     class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50 select-none"
+                                     [ngClass]="{
+                                        'bg-emerald-100 border-emerald-500 dark:bg-emerald-900/40 dark:border-emerald-600': isDealer,
+                                        'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700': !isDealer
+                                     }">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl group-hover:scale-110 transition">{{ isDealer ? '👑' : '👤' }}</span>
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ isDealer ? ('APP.DEALER' | translate) : ('APP.NON_DEALER' | translate) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-4 h-4 rounded-full border border-gray-400 dark:border-slate-600 flex items-center justify-center">
+                                        <div *ngIf="isDealer" class="w-2.5 h-2.5 bg-emerald-500 dark:bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                    </div>
+                               </div>
                           </div>
                       </div>
 
-                      <!-- Role -->
-                      <div class="flex-1 lg:flex-none">
-                           <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
-                            <div (click)="isDealer = !isDealer" 
-                                 class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50 select-none"
-                                 [ngClass]="{
-                                    'bg-emerald-100 border-emerald-500 dark:bg-emerald-900/40 dark:border-emerald-600': isDealer,
-                                    'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700': !isDealer
-                                 }">
-                               <div class="flex items-center gap-3">
-                                   <span class="text-2xl group-hover:scale-110 transition">{{ isDealer ? '👑' : '👤' }}</span>
-                                   <div class="flex flex-col">
-                                       <span class="text-sm font-bold text-slate-900 dark:text-white">{{ isDealer ? ('APP.DEALER' | translate) : ('APP.NON_DEALER' | translate) }}</span>
-                                   </div>
-                               </div>
-                               <div class="w-4 h-4 rounded-full border border-gray-400 dark:border-slate-600 flex items-center justify-center">
-                                   <div *ngIf="isDealer" class="w-2.5 h-2.5 bg-emerald-500 dark:bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                               </div>
-                           </div>
+                      <!-- DESKTOP ANALYZE BUTTON (Hidden on mobile) -->
+                      <div class="hidden lg:block w-full">
+                           <button class="btn btn-primary w-full py-3 px-4 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center justify-center" 
+                                   [disabled]="isLoading"
+                                   (click)="analyze()">
+                              <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
+                              <span *ngIf="isLoading" class="flex items-center gap-2 justify-center">
+                                  <span class="animate-spin">↻</span>
+                              </span>
+                          </button>
                       </div>
                   </div>
 
                   <!-- 2. HAND SELECTION (Center) -->
-                  <div class="w-full lg:flex-1 lg:px-8 border-t lg:border-t-0 lg:border-l lg:border-r border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
+                  <div class="w-full lg:flex-1 lg:px-8 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
                       <app-card-picker 
                           [selectedCards]="cards" 
                           [numPlayers]="numPlayers"
                           (cardsChange)="onCardsChange($event)" />
                   </div>
 
-                  <!-- 3. ACTIONS -->
-                  <div class="flex flex-col gap-3 w-full lg:w-auto min-w-[200px] border-t lg:border-t-0 border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
-                       <button class="btn btn-primary w-full py-4 text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none" 
-                               [disabled]="cards.length < requiredCards || isLoading"
+                  <!-- 3. MOBILE ANALYZE BUTTON (Hidden on desktop) -->
+                  <div class="lg:hidden w-full flex justify-center pt-6 border-t border-gray-200 dark:border-slate-700/50">
+                       <button class="btn btn-primary py-3 px-8 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center" 
+                               [disabled]="isLoading"
                                (click)="analyze()">
                           <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
                           <span *ngIf="isLoading" class="flex items-center gap-2 justify-center">
                               <span class="animate-spin">↻</span>
                           </span>
-                      </button>
-                      <button class="btn btn-sm btn-ghost text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 select-none" (click)="reset()">
-                          {{ 'APP.RESET' | translate }}
                       </button>
                   </div>
 
@@ -247,7 +259,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   analyze(saveToHistory: boolean = true) {
     if (this.cards.length !== this.requiredCards) {
-      const msg = this.translate.instant('APP.ERROR_SELECT_CARDS') || `Select ${this.requiredCards} cards`;
+      const msg = this.translate.instant('APP.ERROR_SELECT_CARDS', { count: this.requiredCards }) || `Select ${this.requiredCards} cards`;
       this.toast.error(msg);
       return;
     }
