@@ -47,6 +47,9 @@ import { TranslateModule } from '@ngx-translate/core';
       cursor: pointer;
       border: 1px solid #ccc;
       transition: all 0.1s;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
       user-select: none;
     }
     .playing-card-mini:hover { transform: translateY(-2px); border-color: var(--primary-color); }

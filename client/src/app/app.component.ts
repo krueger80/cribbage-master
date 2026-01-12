@@ -72,7 +72,7 @@ import { ToastService } from './services/toast.service';
                           <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.PLAYERS' | translate }}</label>
                           <div class="flex gap-2">
                               <button *ngFor="let n of [2, 3, 4]" 
-                                      class="flex-1 py-2 px-4 rounded border text-sm font-bold transition-all"
+                                      class="flex-1 py-2 px-4 rounded border text-sm font-bold transition-all select-none"
                                       [class.bg-emerald-600]="numPlayers === n"
                                       [class.border-emerald-500]="numPlayers === n"
                                       [class.text-white]="numPlayers === n"
@@ -94,7 +94,7 @@ import { ToastService } from './services/toast.service';
                       <div>
                            <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
                             <div (click)="isDealer = !isDealer" 
-                                 class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50"
+                                 class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50 select-none"
                                  [ngClass]="{
                                     'bg-emerald-100 border-emerald-500 dark:bg-emerald-900/40 dark:border-emerald-600': isDealer,
                                     'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700': !isDealer
@@ -122,7 +122,7 @@ import { ToastService } from './services/toast.service';
 
                   <!-- 3. ACTIONS -->
                   <div class="flex flex-col gap-3 w-full lg:w-auto min-w-[200px] border-t lg:border-t-0 border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
-                       <button class="btn btn-primary w-full py-4 text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white" 
+                       <button class="btn btn-primary w-full py-4 text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none" 
                                [disabled]="cards.length < requiredCards || isLoading"
                                (click)="analyze()">
                           <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
@@ -130,7 +130,7 @@ import { ToastService } from './services/toast.service';
                               <span class="animate-spin">↻</span>
                           </span>
                       </button>
-                      <button class="btn btn-sm btn-ghost text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700" (click)="reset()">
+                      <button class="btn btn-sm btn-ghost text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 select-none" (click)="reset()">
                           {{ 'APP.RESET' | translate }}
                       </button>
                   </div>

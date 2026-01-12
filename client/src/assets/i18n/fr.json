@@ -28,7 +28,8 @@
         "JOIN": "Rejoindre",
         "EMAIL": "Courriel",
         "PASSWORD": "Mot de passe",
-        "SIGN_IN_GOOGLE": "Se connecter avec Google"
+        "SIGN_IN_GOOGLE": "Se connecter avec Google",
+        "OR": "OU"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Sélectionnez votre main",

@@ -28,7 +28,8 @@
         "JOIN": "Join",
         "EMAIL": "Email",
         "PASSWORD": "Password",
-        "SIGN_IN_GOOGLE": "Sign in with Google"
+        "SIGN_IN_GOOGLE": "Sign in with Google",
+        "OR": "OR"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Select Your Hand",

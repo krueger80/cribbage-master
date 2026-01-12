@@ -57,7 +57,7 @@ import { ToastService } from '../../services/toast.service';
                     
                     <div class="relative flex py-2 items-center">
                         <div class="flex-grow border-t border-gray-300 dark:border-slate-700"></div>
-                        <span class="flex-shrink-0 mx-4 text-gray-400 text-xs">OR</span>
+                        <span class="flex-shrink-0 mx-4 text-gray-400 text-xs">{{ 'APP.OR' | translate }}</span>
                         <div class="flex-grow border-t border-gray-300 dark:border-slate-700"></div>
                     </div>
 
@@ -82,7 +82,7 @@ import { ToastService } from '../../services/toast.service';
                 <span>🧭</span> {{ 'APP.NAVIGATION' | translate }}
             </h3>
             <div class="flex flex-col gap-2">
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg" 
+                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-50]="viewMode === 'analyze'" 
                         [class.dark:bg-emerald-500_10]="viewMode === 'analyze'" 
                         [class.text-emerald-600]="viewMode === 'analyze'" 
@@ -98,7 +98,7 @@ import { ToastService } from '../../services/toast.service';
                         (click)="setView('analyze')">
                     <span class="text-xl">🃏</span> {{ 'APP.ANALYZER' | translate }}
                 </button>
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg" 
+                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-50]="viewMode === 'history'" 
                         [class.dark:bg-emerald-500_10]="viewMode === 'history'" 
                         [class.text-emerald-600]="viewMode === 'history'" 
@@ -126,12 +126,12 @@ import { ToastService } from '../../services/toast.service';
                     <span>🌐</span> {{ 'APP.LANGUAGE' | translate }}
                 </h3>
                 <div class="flex p-1 bg-gray-100 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-                    <button (click)="switchLanguage('en')" class="flex-1 py-2 text-xs font-bold rounded transition-all" 
+                    <button (click)="switchLanguage('en')" class="flex-1 py-2 text-xs font-bold rounded transition-all select-none" 
                         [class.bg-white]="currentLang === 'en'" [class.dark:bg-slate-700]="currentLang === 'en'" 
                         [class.shadow-sm]="currentLang === 'en'"
                         [class.text-slate-900]="currentLang === 'en'" [class.dark:text-white]="currentLang === 'en'" 
                         [class.text-slate-500]="currentLang !== 'en'">English</button>
-                    <button (click)="switchLanguage('fr')" class="flex-1 py-2 text-xs font-bold rounded transition-all" 
+                    <button (click)="switchLanguage('fr')" class="flex-1 py-2 text-xs font-bold rounded transition-all select-none" 
                         [class.bg-white]="currentLang === 'fr'" [class.dark:bg-slate-700]="currentLang === 'fr'" 
                         [class.shadow-sm]="currentLang === 'fr'"
                         [class.text-slate-900]="currentLang === 'fr'" [class.dark:text-white]="currentLang === 'fr'" 
@@ -146,7 +146,7 @@ import { ToastService } from '../../services/toast.service';
                 </h3>
                 <div class="grid grid-cols-3 gap-3">
                     <button (click)="setTheme('light')" 
-                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all"
+                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all select-none"
                             [class.bg-emerald-50]="theme === 'light'"
                             [class.dark:bg-emerald-500_10]="theme === 'light'"
                             [class.border-emerald-200]="theme === 'light'"
@@ -162,7 +162,7 @@ import { ToastService } from '../../services/toast.service';
                         <span class="text-[10px] font-bold uppercase">Light</span>
                     </button>
                     <button (click)="setTheme('dark')" 
-                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all"
+                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all select-none"
                             [class.bg-emerald-50]="theme === 'dark'"
                             [class.dark:bg-emerald-500_10]="theme === 'dark'"
                             [class.border-emerald-200]="theme === 'dark'"
@@ -178,7 +178,7 @@ import { ToastService } from '../../services/toast.service';
                         <span class="text-[10px] font-bold uppercase">Dark</span>
                     </button>
                     <button (click)="setTheme('auto')" 
-                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all"
+                            class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all select-none"
                             [class.bg-emerald-50]="theme === 'auto'"
                             [class.dark:bg-emerald-500_10]="theme === 'auto'"
                             [class.border-emerald-200]="theme === 'auto'"
@@ -198,7 +198,7 @@ import { ToastService } from '../../services/toast.service';
         </div>
 
         <div class="mt-12 pt-6 border-t border-gray-200 dark:border-slate-800 text-center">
-             <p class="text-xs text-slate-400 dark:text-slate-600 font-mono">v1.2.0 • Cribbage Master</p>
+             <p class="text-xs text-slate-400 dark:text-slate-600 font-mono">v1.2.0 • {{ 'APP.TITLE' | translate }}</p>
         </div>
     </div>
   `,
