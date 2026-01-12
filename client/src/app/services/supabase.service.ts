@@ -52,11 +52,20 @@ export class SupabaseService {
         return this.supabase.auth.signUp({ email, password });
     }
 
-    async signIn(email: string, password: string): Promise<any> {
+    async signIn(email: string, password: string) {
         return this.supabase.auth.signInWithPassword({ email, password });
     }
 
-    async signOut(): Promise<any> {
+    async signInWithGoogle() {
+        return this.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+    }
+
+    async signOut() {
         return this.supabase.auth.signOut();
     }
 

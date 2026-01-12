@@ -1,7 +1,7 @@
 {
     "APP": {
-        "TITLE": "Maître du Cribbage",
-        "SUBTITLE": "Moteur d'optimisation de défausse avancé",
+        "TITLE": "Maître du Crib",
+        "SUBTITLE": "Meilleur choix de cartes à discarter",
         "ANALYZER": "Analyseur",
         "HISTORY": "Historique",
         "GAME_SETUP": "Configuration",
@@ -19,7 +19,16 @@
         "THEME": "Thème",
         "EMPTY_STATE": "Sélectionnez les cartes ci-dessus et configurez la partie.",
         "ERROR_SELECT_CARDS": "Veuillez sélectionner {{count}} cartes.",
-        "ERROR_CALCULATING": "Erreur de calcul : "
+        "ERROR_CALCULATING": "Erreur de calcul : ",
+        "MENU": "Menu",
+        "ACCOUNT": "Compte",
+        "SIGNED_IN_AS": "Connecté en tant que",
+        "SIGN_OUT": "Se déconnecter",
+        "LOGIN": "Connexion",
+        "JOIN": "Rejoindre",
+        "EMAIL": "Courriel",
+        "PASSWORD": "Mot de passe",
+        "SIGN_IN_GOOGLE": "Se connecter avec Google"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Sélectionnez votre main",

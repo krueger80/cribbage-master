@@ -7,10 +7,10 @@ import { CardPickerComponent } from './components/card-picker/card-picker.compon
 import { AnalysisViewComponent } from './components/analysis-view/analysis-view.component';
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { HamburgerMenuComponent } from './components/hamburger-menu/hamburger-menu.component';
 import { ApiService, AnalysisResult } from './services/api.service';
-import { SupabaseService } from './services/supabase.service';
+import { SupabaseService, HandHistory } from './services/supabase.service';
 import { ToastService } from './services/toast.service';
-import { HandHistory } from './services/supabase.service';
 
 @Component({
   selector: 'app-root',
@@ -23,209 +23,165 @@ import { HandHistory } from './services/supabase.service';
     CardPickerComponent,
     AnalysisViewComponent,
     HistoryViewComponent,
-    ToastComponent
+    ToastComponent,
+    HamburgerMenuComponent
   ],
   template: `
-    <div class="relative min-h-screen">
+    <div class="relative min-h-screen pb-12 transition-colors duration-200">
         
-      <!-- BACKDROP -->
-      <div *ngIf="isMenuOpen" (click)="isMenuOpen = false" class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"></div>
+      <!-- HAMBURGER MENU COMPONENT -->
+      <app-hamburger-menu 
+          [isOpen]="isMenuOpen" 
+          [viewMode]="viewMode"
+          [currentLang]="currentLang"
+          [theme]="theme"
+          (closeMenu)="isMenuOpen = false"
+          (viewModeChange)="setView($event)"
+          (langChange)="switchLanguage($event)"
+          (themeChange)="setTheme($event)" />
 
-      <!-- HAMBURGER MENU BUTTON -->
-      <button (click)="isMenuOpen = !isMenuOpen" class="fixed top-4 left-4 z-50 text-2xl p-2 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 transition shadow-lg" [attr.aria-label]="isMenuOpen ? 'Close Menu' : 'Open Menu'">
+      <!-- MENU TOGGLE -->
+      <button (click)="isMenuOpen = !isMenuOpen" class="fixed top-4 left-4 z-30 text-2xl p-2 rounded-lg bg-white/80 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-white transition backdrop-blur-md shadow-lg">
             {{ isMenuOpen ? '✕' : '☰' }}
       </button>
 
-      <!-- MENU OVERLAY -->
-      <div *ngIf="isMenuOpen" class="fixed top-16 left-4 z-50 flex flex-col gap-4 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl animate-fade-in min-w-[200px]">
-             
-            <!-- Navigation -->
-            <div class="flex flex-col gap-2 border-b border-gray-200 dark:border-slate-700 pb-2">
-                <span class="text-xs text-gray-500 uppercase tracking-wider font-bold px-2">{{ 'APP.NAVIGATION' | translate }}</span>
-                <button class="btn btn-sm justify-start w-full" [class.btn-primary]="viewMode === 'analyze'" [class.btn-ghost]="viewMode !== 'analyze'" (click)="setView('analyze'); isMenuOpen = false">
-                    🃏 {{ 'APP.ANALYZER' | translate }}
-                </button>
-                <button class="btn btn-sm justify-start w-full" [class.btn-primary]="viewMode === 'history'" [class.btn-ghost]="viewMode !== 'history'" (click)="setView('history'); isMenuOpen = false">
-                    📜 {{ 'APP.HISTORY' | translate }}
-                </button>
-            </div>
-
-            <!-- Language -->
-            <div class="flex flex-col gap-2 border-b border-gray-200 dark:border-slate-700 pb-2">
-                <span class="text-xs text-gray-500 uppercase tracking-wider font-bold px-2">{{ 'APP.LANGUAGE' | translate }}</span>
-                <div class="flex gap-1">
-                    <button (click)="switchLanguage('en')" class="flex-1 btn btn-xs" [class.btn-primary]="currentLang === 'en'" [class.btn-ghost]="currentLang !== 'en'">EN</button>
-                    <button (click)="switchLanguage('fr')" class="flex-1 btn btn-xs" [class.btn-primary]="currentLang === 'fr'" [class.btn-ghost]="currentLang !== 'fr'">FR</button>
-                </div>
-            </div>
-
-            <!-- Theme -->
-            <div class="flex flex-col gap-2">
-                <span class="text-xs text-gray-500 uppercase tracking-wider font-bold px-2">{{ 'APP.THEME' | translate }}</span>
-                <div class="grid grid-cols-3 gap-1">
-                    <button (click)="setTheme('light')" class="btn btn-xs flex items-center justify-center text-lg" [class.btn-primary]="theme === 'light'" [class.btn-ghost]="theme !== 'light'" title="Light">☀️</button>
-                    <button (click)="setTheme('dark')" class="btn btn-xs flex items-center justify-center text-lg" [class.btn-primary]="theme === 'dark'" [class.btn-ghost]="theme !== 'dark'" title="Dark">🌙</button>
-                    <button (click)="setTheme('auto')" class="btn btn-xs flex items-center justify-center text-lg" [class.btn-primary]="theme === 'auto'" [class.btn-ghost]="theme !== 'auto'" title="Auto">⚙️</button>
-                </div>
-            </div>
-      </div>
-
-    <div class="container animate-fade-in pt-8">
-      <header class="mb-12 text-center">
-        <h1 class="text-5xl mb-2 font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500"
-            style="color: transparent; -webkit-background-clip: text; background-image: linear-gradient(to right, #34d399, #22d3ee);">
-            Cribbage Master
-        </h1>
-        <p class="text-slate-400">Advanced Discard Optimization Engine</p>
-      </header>
-
-      <div class="flex flex-col gap-6">
+      <div class="container animate-fade-in pt-8 max-w-7xl mx-auto px-4">
         
-        <!-- MAIN CONTENT GRID -->
-        <div class="grid lg:grid-cols-[1fr_3fr] gap-6">
-            
-            <!-- SIDEBAR -->
-            <div class="flex flex-col gap-4">
-                 
-                 <!-- Auth -->
-                 <div class="card p-4">
-                    <div *ngIf="currentUser; else loginForm" class="flex flex-col gap-2">
-                        <div class="flex items-center gap-2 text-emerald-400 font-bold truncate">
-                            <span>👤</span> <span class="text-xs">{{ currentUser.email }}</span>
-                        </div>
-                        <button class="btn btn-sm btn-ghost border-slate-700 w-full" (click)="signOut()">Sign Out</button>
-                    </div>
-                    <ng-template #loginForm>
-                        <div class="flex flex-col gap-2">
-                             <input type="email" [(ngModel)]="email" placeholder="Email" class="p-2 rounded bg-slate-800 border border-slate-700 text-sm w-full">
-                             <input type="password" [(ngModel)]="password" placeholder="Password" class="p-2 rounded bg-slate-800 border border-slate-700 text-sm w-full">
-                             <div class="flex gap-2">
-                                 <button class="btn btn-sm btn-primary flex-1" (click)="signIn()">Login</button>
-                                 <button class="btn btn-sm btn-secondary flex-1" (click)="signUp()">Join</button>
-                             </div>
-                             <p *ngIf="authError" class="text-xs text-red-400">{{ authError }}</p>
-                        </div>
-                    </ng-template>
-                 </div>
+        <!-- HEADER -->
+        <header class="mb-8 text-center pt-8 md:pt-0">
+            <h1 class="text-4xl md:text-5xl mb-2 pb-2 font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-600 dark:from-emerald-400 dark:to-cyan-500">
+                {{ 'APP.TITLE' | translate }}
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400">{{ 'APP.SUBTITLE' | translate }}</p>
+        </header>
+  
+        <!-- CONTENT -->
+        <div class="flex flex-col gap-6">
+          
+          <!-- SETUP SECTION (Only in Analyze Mode) -->
+          <div *ngIf="viewMode === 'analyze'" class="card p-6 animate-fade-in border-gray-200 dark:border-slate-700/50 shadow-xl bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm transition-colors duration-200">
+              
+              <!-- Setup Flow: Conf -> Cards -> Actions -->
+              <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+                  
+                  <!-- 1. CONFIGURATION -->
+                  <div class="flex flex-col gap-6 w-full lg:w-auto min-w-[200px]">
+                      
+                      <!-- Players -->
+                      <div>
+                          <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.PLAYERS' | translate }}</label>
+                          <div class="flex gap-2">
+                              <button *ngFor="let n of [2, 3, 4]" 
+                                      class="flex-1 py-2 px-4 rounded border text-sm font-bold transition-all"
+                                      [class.bg-emerald-600]="numPlayers === n"
+                                      [class.border-emerald-500]="numPlayers === n"
+                                      [class.text-white]="numPlayers === n"
+                                      [class.bg-gray-100]="numPlayers !== n"
+                                      [class.dark:bg-slate-800]="numPlayers !== n"
+                                      [class.border-gray-200]="numPlayers !== n"
+                                      [class.dark:border-slate-700]="numPlayers !== n"
+                                      [class.text-slate-600]="numPlayers !== n"
+                                      [class.dark:text-slate-400]="numPlayers !== n"
+                                      [class.hover:bg-gray-200]="numPlayers !== n"
+                                      [class.dark:hover:bg-slate-700]="numPlayers !== n"
+                                      (click)="setPlayers(n)">
+                                  {{n}}
+                              </button>
+                          </div>
+                      </div>
 
-                 <!-- Game Setup (Analyze Mode) -->
-                 <div *ngIf="viewMode === 'analyze'" class="card p-4 animate-fade-in">
-                    <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <span>⚙️</span> {{ 'APP.SETUP' | translate }}
-                    </h2>
+                      <!-- Role -->
+                      <div>
+                           <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
+                            <div (click)="isDealer = !isDealer" 
+                                 class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50"
+                                 [ngClass]="{
+                                    'bg-emerald-100 border-emerald-500 dark:bg-emerald-900/40 dark:border-emerald-600': isDealer,
+                                    'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700': !isDealer
+                                 }">
+                               <div class="flex items-center gap-3">
+                                   <span class="text-2xl group-hover:scale-110 transition">{{ isDealer ? '👑' : '👤' }}</span>
+                                   <div class="flex flex-col">
+                                       <span class="text-sm font-bold text-slate-900 dark:text-white">{{ isDealer ? ('APP.DEALER' | translate) : ('APP.NON_DEALER' | translate) }}</span>
+                                   </div>
+                               </div>
+                               <div class="w-4 h-4 rounded-full border border-gray-400 dark:border-slate-600 flex items-center justify-center">
+                                   <div *ngIf="isDealer" class="w-2.5 h-2.5 bg-emerald-500 dark:bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                               </div>
+                           </div>
+                      </div>
+                  </div>
 
-                    <!-- Players -->
-                    <div class="mb-4">
-                        <label class="text-xs text-gray-400 uppercase tracking-wider mb-2 block">{{ 'APP.PLAYERS' | translate }}</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button *ngFor="let n of [2, 3, 4]" 
-                                    class="py-2 rounded-lg border border-slate-700 text-sm font-bold transition-all"
-                                    [class.bg-emerald-600]="numPlayers === n"
-                                    [class.border-emerald-500]="numPlayers === n"
-                                    [class.text-white]="numPlayers === n"
-                                    [class.bg-slate-800]="numPlayers !== n"
-                                    [class.text-gray-400]="numPlayers !== n"
-                                    [class.hover:bg-slate-700]="numPlayers !== n"
-                                    (click)="setPlayers(n)">
-                                {{n}}
-                            </button>
-                        </div>
-                    </div>
+                  <!-- 2. HAND SELECTION (Center) -->
+                  <div class="w-full lg:flex-1 lg:px-8 border-t lg:border-t-0 lg:border-l lg:border-r border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
+                      <app-card-picker 
+                          [selectedCards]="cards" 
+                          [numPlayers]="numPlayers"
+                          (cardsChange)="onCardsChange($event)" />
+                  </div>
 
-                    <!-- Dealer -->
-                    <div class="mb-6">
-                         <label class="text-xs text-gray-400 uppercase tracking-wider mb-2 block">{{ 'APP.ROLE' | translate }}</label>
-                         <div (click)="isDealer = !isDealer" 
-                              class="flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all"
-                              [class.bg-emerald-900]="isDealer"
-                              [class.border-emerald-600]="isDealer"
-                              [class.bg-slate-800]="!isDealer"
-                              [class.border-slate-700]="!isDealer">
-                             <div class="flex items-center gap-3">
-                                 <span class="text-2xl">{{ isDealer ? '👑' : '👤' }}</span>
-                                 <div class="flex flex-col">
-                                     <span class="text-sm font-bold text-white">{{ isDealer ? 'Dealer' : 'Non-Dealer' }}</span>
-                                 </div>
-                             </div>
-                             <div class="w-5 h-5 rounded-full border border-gray-500 flex items-center justify-center">
-                                 <div *ngIf="isDealer" class="w-3 h-3 bg-emerald-400 rounded-full"></div>
-                             </div>
-                         </div>
-                    </div>
+                  <!-- 3. ACTIONS -->
+                  <div class="flex flex-col gap-3 w-full lg:w-auto min-w-[200px] border-t lg:border-t-0 border-gray-200 dark:border-slate-700/50 pt-6 lg:pt-0">
+                       <button class="btn btn-primary w-full py-4 text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white" 
+                               [disabled]="cards.length < requiredCards || isLoading"
+                               (click)="analyze()">
+                          <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
+                          <span *ngIf="isLoading" class="flex items-center gap-2 justify-center">
+                              <span class="animate-spin">↻</span>
+                          </span>
+                      </button>
+                      <button class="btn btn-sm btn-ghost text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700" (click)="reset()">
+                          {{ 'APP.RESET' | translate }}
+                      </button>
+                  </div>
 
-                    <!-- Actions -->
-                    <div class="flex flex-col gap-2">
-                         <button class="btn btn-primary w-full py-3 text-lg shadow-lg shadow-emerald-900/50" 
-                                 [disabled]="cards.length < requiredCards || isLoading"
-                                 (click)="analyze()">
-                            <span *ngIf="!isLoading">🚀 {{ 'APP.ANALYZE_HAND' | translate }}</span>
-                            <span *ngIf="isLoading" class="flex items-center gap-2 justify-center">
-                                <span class="animate-spin">↻</span>
-                            </span>
-                        </button>
-                        <button class="btn btn-secondary w-full" (click)="reset()">
-                            {{ 'APP.RESET' | translate }}
-                        </button>
-                    </div>
-                 </div>
-            </div>
+              </div>
+          </div>
 
-            <!-- RIGHT COLUMN -->
-            <div class="flex flex-col gap-6">
-                 
-                <!-- CARD PICKER (If Analyze) -->
-                <app-card-picker *ngIf="viewMode === 'analyze'" 
-                                 [selectedCards]="cards" 
-                                 (cardsChange)="onCardsChange($event)" />
+          <!-- RESULTS SECTION -->
+          <div class="flex flex-col gap-6">
+               <!-- Analyze View -->
+               <ng-container *ngIf="viewMode === 'analyze'">
+                   <div *ngIf="analysisResults.length > 0" class="animate-fade-in">
+                      <app-analysis-view [results]="analysisResults" [isDealer]="isDealer" />
+                   </div>
+                   <!-- Clean Empty State via Opacity -->
+                   <div *ngIf="analysisResults.length === 0 && !isLoading" class="text-center py-12 opacity-60 pointer-events-none transition-opacity duration-500">
+                      <div class="text-6xl mb-4 grayscale opacity-50">🃏</div>
+                      <p class="text-sm uppercase tracking-widest text-slate-600 dark:text-slate-400 font-semibold">{{ 'APP.EMPTY_STATE' | translate }}</p>
+                   </div>
+               </ng-container>
 
-                 <!-- Analyze View -->
-                 <ng-container *ngIf="viewMode === 'analyze'">
-                     <div *ngIf="analysisResults.length > 0" class="animate-fade-in">
-                        <app-analysis-view [results]="analysisResults" [isDealer]="isDealer" />
-                     </div>
-                     <div *ngIf="analysisResults.length === 0 && !isLoading" class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-700 rounded-xl text-gray-500 bg-slate-800/20">
-                        <span class="text-4xl mb-2 opacity-50">🃏</span>
-                        <p>{{ 'APP.EMPTY_STATE' | translate }}</p>
-                     </div>
-                 </ng-container>
+               <!-- History View -->
+               <ng-container *ngIf="viewMode === 'history'">
+                  <div *ngIf="currentUser; else loginBlocked">
+                      <app-history-view (restore)="onRestoreHistory($event)" />
+                  </div>
+                  <ng-template #loginBlocked>
+                      <div class="flex flex-col items-center justify-center p-12 border border-dashed border-gray-300 dark:border-slate-700 rounded-xl text-gray-500 dark:text-slate-500 bg-gray-50 dark:bg-slate-800/20">
+                          <span class="text-4xl mb-2">🔒</span>
+                          <h3 class="text-lg font-bold text-slate-600 dark:text-slate-300">Login Required</h3>
+                          <p>Please open the menu (☰) and sign in to access history.</p>
+                      </div>
+                  </ng-template>
+               </ng-container>
+          </div>
 
-                 <!-- History View -->
-                 <ng-container *ngIf="viewMode === 'history'">
-                    <div *ngIf="currentUser; else loginBlocked">
-                        <app-history-view (restore)="onRestoreHistory($event)" />
-                    </div>
-                    <ng-template #loginBlocked>
-                        <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-700 rounded-xl text-gray-500 bg-slate-800/20">
-                            <span class="text-4xl mb-2">🔒</span>
-                            <h3 class="text-lg font-bold text-slate-300">Login Required</h3>
-                            <p>Please sign in to view your history.</p>
-                        </div>
-                    </ng-template>
-                 </ng-container>
-
-            </div>
         </div>
       </div>
+      <app-toast />
     </div>
-    <app-toast />
-  `
+  `,
+  styles: []
 })
 export class AppComponent implements OnInit, OnDestroy {
   viewMode: 'analyze' | 'history' = 'analyze';
   numPlayers = 2;
   isDealer = false;
   cards: string[] = [];
-
   analysisResults: AnalysisResult[] = [];
   isLoading = false;
-
-  // Supabase Auth
   currentUser: any = null;
-  email = '';
-  password = '';
-  authError = '';
-
-  // Theme & Lang
   currentLang = 'en';
   isMenuOpen = false;
   theme: 'light' | 'dark' | 'auto' = 'auto';
@@ -241,17 +197,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.translate.setDefaultLang('en');
     this.translate.use('en');
 
-    // Initialize Theme
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'auto';
-    if (savedTheme) {
-      this.setTheme(savedTheme);
-    } else {
-      this.setTheme('auto');
-    }
+    this.setTheme(savedTheme || 'auto');
   }
 
   ngOnInit() {
-    // Auth Subscription
     this.supabase.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
@@ -261,71 +211,10 @@ export class AppComponent implements OnInit, OnDestroy {
     this.darkQuery.removeEventListener('change', this.handleThemeChange);
   }
 
-  // --- AUTH METHODS ---
-
-  async signIn() {
-    try {
-      const { error } = await this.supabase.signIn(this.email, this.password);
-      if (error) throw error;
-      this.authError = '';
-      this.toast.success('Logged in successfully');
-    } catch (e: any) {
-      this.authError = e.message;
-      this.toast.error(e.message);
-    }
+  // Delegates
+  get requiredCards(): number {
+    return this.numPlayers === 2 ? 6 : 5;
   }
-
-  async signUp() {
-    try {
-      const { error } = await this.supabase.signUp(this.email, this.password);
-      if (error) throw error;
-      this.authError = 'Check email for confirmation link!';
-      this.toast.success('Check email for confirmation link!');
-    } catch (e: any) {
-      this.authError = e.message;
-      this.toast.error(e.message);
-    }
-  }
-
-  async signOut() {
-    await this.supabase.signOut();
-    this.viewMode = 'analyze'; // Reset view
-    this.toast.info('Logged out');
-  }
-
-  // --- THEME METHODS ---
-
-  setTheme(mode: 'light' | 'dark' | 'auto') {
-    this.theme = mode;
-    localStorage.setItem('theme', mode);
-    this.darkQuery.removeEventListener('change', this.handleThemeChange);
-
-    if (mode === 'auto') {
-      this.applyAutoTheme();
-      this.darkQuery.addEventListener('change', this.handleThemeChange);
-    } else {
-      this.applyManualTheme(mode);
-    }
-  }
-
-  private handleThemeChange = (e: MediaQueryListEvent) => {
-    if (this.theme === 'auto') {
-      if (e.matches) document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-    }
-  };
-
-  private applyAutoTheme() {
-    if (this.darkQuery.matches) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  }
-
-  private applyManualTheme(mode: 'light' | 'dark') {
-    if (mode === 'dark') document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  }
-
-  // --- APP LOGIC ---
 
   switchLanguage(lang: string) {
     this.currentLang = lang;
@@ -350,13 +239,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.analysisResults = [];
   }
 
-  get requiredCards(): number {
-    return this.numPlayers === 2 ? 6 : 5;
-  }
-
   analyze(saveToHistory: boolean = true) {
     if (this.cards.length !== this.requiredCards) {
-      // Basic fallback if translation missing
       const msg = this.translate.instant('APP.ERROR_SELECT_CARDS') || `Select ${this.requiredCards} cards`;
       this.toast.error(msg);
       return;
@@ -367,7 +251,6 @@ export class AppComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.analysisResults = res.results;
         this.isLoading = false;
-
         if (saveToHistory && this.analysisResults.length > 0) {
           const best = this.analysisResults[0];
           this.saveToHistory(best);
@@ -383,7 +266,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private saveToHistory(result: AnalysisResult) {
     if (!this.currentUser) return;
-
     const discardedCodes = result.discarded.map(c => c.rank + c.suit);
     const historyEntry = {
       original_hand: this.cards,
@@ -392,7 +274,6 @@ export class AppComponent implements OnInit, OnDestroy {
       is_dealer: this.isDealer,
       num_players: this.numPlayers
     };
-
     this.api.saveHistory(historyEntry).subscribe({
       next: () => console.log('History saved'),
       error: (e) => console.error('Failed to save history', e)
@@ -400,14 +281,41 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onRestoreHistory(item: HandHistory) {
-    // Use original_hand (from DB)
     this.cards = [...item.original_hand];
     this.numPlayers = item.num_players;
     this.isDealer = item.is_dealer;
-
     this.viewMode = 'analyze';
-    // Analyze without saving a duplicate
     setTimeout(() => this.analyze(false), 0);
     window.scrollTo(0, 0);
+  }
+
+  // --- THEME ---
+  setTheme(mode: 'light' | 'dark' | 'auto') {
+    this.theme = mode;
+    localStorage.setItem('theme', mode);
+    this.darkQuery.removeEventListener('change', this.handleThemeChange);
+    if (mode === 'auto') {
+      this.applyAutoTheme();
+      this.darkQuery.addEventListener('change', this.handleThemeChange);
+    } else {
+      this.applyManualTheme(mode);
+    }
+  }
+
+  private handleThemeChange = (e: MediaQueryListEvent) => {
+    if (this.theme === 'auto') {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    }
+  };
+
+  private applyAutoTheme() {
+    if (this.darkQuery.matches) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }
+
+  private applyManualTheme(mode: 'light' | 'dark') {
+    if (mode === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }
 }
