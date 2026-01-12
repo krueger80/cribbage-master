@@ -195,7 +195,13 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
     this.translate.addLangs(['en', 'fr']);
     this.translate.setDefaultLang('en');
-    this.translate.use('en');
+
+    // Auto-detect language
+    const browserLang = this.translate.getBrowserLang();
+    const useLang = browserLang && ['en', 'fr'].includes(browserLang) ? browserLang : 'en';
+
+    this.translate.use(useLang);
+    this.currentLang = useLang;
 
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'auto';
     this.setTheme(savedTheme || 'auto');
