@@ -154,7 +154,7 @@ import { ToastService } from './services/toast.service';
           <div class="flex flex-col gap-6">
                <!-- Analyze View -->
                <ng-container *ngIf="viewMode === 'analyze'">
-                   <div *ngIf="analysisResults.length > 0" class="animate-fade-in">
+                   <div id="results-anchor" *ngIf="analysisResults.length > 0" class="animate-fade-in">
                       <app-analysis-view [results]="analysisResults" [isDealer]="isDealer" />
                    </div>
                    <!-- Clean Empty State via Opacity -->
@@ -269,6 +269,14 @@ export class AppComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.analysisResults = res.results;
         this.isLoading = false;
+
+        setTimeout(() => {
+          const el = document.getElementById('results-anchor');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+
         if (saveToHistory && this.analysisResults.length > 0) {
           const best = this.analysisResults[0];
           this.saveToHistory(best);
