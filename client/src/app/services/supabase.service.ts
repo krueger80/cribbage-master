@@ -2,10 +2,7 @@ import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-// Placeholder - Replace with your actual Supabase keys from the dashboard
-export const SUPABASE_URL = 'https://ymlzucwvdwnhndooctmb.supabase.co';
-export const SUPABASE_ANON_KEY = 'sb_publishable_JKEaZCcP81MOe-VpLnOUYA_RF1eFq2k';
+import { environment } from '../../environments/environment';
 
 export interface HandHistory {
     id?: number;
@@ -26,7 +23,7 @@ export class SupabaseService {
     private _currentUser = new BehaviorSubject<User | null>(null);
 
     constructor() {
-        this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        this.supabase = createClient(environment.supabase.url, environment.supabase.key);
 
         // Check initial session
         this.supabase.auth.getSession().then(({ data: { session } }) => {
