@@ -84,17 +84,17 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                     <!-- Hand -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.HAND' | translate }}</span>
-                         <span *ngIf="!isExpanded(i)" class="font-bold text-blue-500 dark:text-blue-400 text-sm leading-none mt-0.5">{{ res.handStats.avg | number:'1.1-1' }}</span>
+                         <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</span>
                     </div>
                     <!-- Crib -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.CRIB' | translate }}</span>
-                        <span *ngIf="!isExpanded(i)" class="font-bold text-purple-500 dark:text-purple-400 text-sm leading-none mt-0.5">{{ res.cribStats.avg | number:'1.1-1' }}</span>
+                        <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</span>
                     </div>
                     <!-- Peg -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.PEG' | translate }}</span>
-                        <span *ngIf="!isExpanded(i)" class="font-bold text-orange-500 dark:text-orange-400 text-sm leading-none mt-0.5">{{ res.peggingScore | number:'1.1-1' }}</span>
+                        <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="pegColorClass">{{ res.peggingScore | number:'1.1-1' }}</span>
                     </div>
                 </div>
 
@@ -104,32 +104,32 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                     <div class="grid grid-cols-4 gap-y-1 gap-x-2 items-center">
                         <!-- 15s -->
                         <div class="text-left text-gray-500 font-medium whitespace-nowrap">{{ 'ANALYSIS_VIEW.FIFTEENS' | translate }}</div>
-                        <div class="text-center text-blue-900 dark:text-blue-100">{{res.handStats.breakdown.fifteens | number:'1.0-1'}}</div>
-                        <div class="text-center text-purple-900 dark:text-purple-100">{{res.cribStats.breakdown.fifteens | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="handBreakdownColorClass">{{res.handStats.breakdown.fifteens | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="cribBreakdownColorClass">{{res.cribStats.breakdown.fifteens | number:'1.0-1'}}</div>
                         <div class="text-center text-gray-300">-</div>
 
                         <!-- Pairs -->
                         <div class="text-left text-gray-500 font-medium whitespace-nowrap">{{ 'ANALYSIS_VIEW.PAIRS' | translate }}</div>
-                        <div class="text-center text-blue-900 dark:text-blue-100">{{res.handStats.breakdown.pairs | number:'1.0-1'}}</div>
-                        <div class="text-center text-purple-900 dark:text-purple-100">{{res.cribStats.breakdown.pairs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="handBreakdownColorClass">{{res.handStats.breakdown.pairs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="cribBreakdownColorClass">{{res.cribStats.breakdown.pairs | number:'1.0-1'}}</div>
                         <div class="text-center text-gray-300">-</div>
 
                         <!-- Runs -->
                         <div class="text-left text-gray-500 font-medium whitespace-nowrap">{{ 'ANALYSIS_VIEW.RUNS' | translate }}</div>
-                        <div class="text-center text-blue-900 dark:text-blue-100">{{res.handStats.breakdown.runs | number:'1.0-1'}}</div>
-                        <div class="text-center text-purple-900 dark:text-purple-100">{{res.cribStats.breakdown.runs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="handBreakdownColorClass">{{res.handStats.breakdown.runs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="cribBreakdownColorClass">{{res.cribStats.breakdown.runs | number:'1.0-1'}}</div>
                         <div class="text-center text-gray-300">-</div>
 
                         <!-- Flush -->
                         <div class="text-left text-gray-500 font-medium whitespace-nowrap">{{ 'ANALYSIS_VIEW.FLUSH' | translate }}</div>
-                        <div class="text-center text-blue-900 dark:text-blue-100">{{res.handStats.breakdown.flush | number:'1.0-1'}}</div>
-                        <div class="text-center text-purple-900 dark:text-purple-100">{{res.cribStats.breakdown.flush | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="handBreakdownColorClass">{{res.handStats.breakdown.flush | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="cribBreakdownColorClass">{{res.cribStats.breakdown.flush | number:'1.0-1'}}</div>
                         <div class="text-center text-gray-300">-</div>
 
                         <!-- Nobs -->
                         <div class="text-left text-gray-500 font-medium whitespace-nowrap">{{ 'ANALYSIS_VIEW.NOBS' | translate }}</div>
-                        <div class="text-center text-blue-900 dark:text-blue-100">{{res.handStats.breakdown.nobs | number:'1.0-1'}}</div>
-                        <div class="text-center text-purple-900 dark:text-purple-100">{{res.cribStats.breakdown.nobs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="handBreakdownColorClass">{{res.handStats.breakdown.nobs | number:'1.0-1'}}</div>
+                        <div class="text-center" [ngClass]="cribBreakdownColorClass">{{res.cribStats.breakdown.nobs | number:'1.0-1'}}</div>
                         <div class="text-center text-gray-300">-</div>
 
                         <!-- Divider -->
@@ -137,9 +137,9 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
 
                         <!-- Totals -->
                         <div class="text-left font-bold text-gray-800 dark:text-white">Total</div>
-                        <div class="font-bold text-blue-500 text-center text-xs">{{ res.handStats.avg | number:'1.1-1' }}</div>
-                        <div class="font-bold text-purple-500 text-center text-xs">{{ res.cribStats.avg | number:'1.1-1' }}</div>
-                        <div class="font-bold text-orange-500 text-center text-xs">{{ res.peggingScore | number:'1.1-1' }}</div>
+                        <div class="font-bold text-center text-xs" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</div>
+                        <div class="font-bold text-center text-xs" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</div>
+                        <div class="font-bold text-center text-xs" [ngClass]="pegColorClass">{{ res.peggingScore | number:'1.1-1' }}</div>
                     </div>
                 </div>
             </div>
@@ -193,5 +193,29 @@ export class AnalysisViewComponent {
     getSuitSymbol(suit: string): string {
         const map: any = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
         return map[suit] || '?';
+    }
+
+    get handColorClass(): string {
+        return 'text-emerald-500 dark:text-emerald-400';
+    }
+
+    get pegColorClass(): string {
+        return 'text-emerald-500 dark:text-emerald-400';
+    }
+
+    get cribColorClass(): string {
+        return this.isDealer
+            ? 'text-emerald-500 dark:text-emerald-400'
+            : 'text-rose-500 dark:text-rose-400';
+    }
+
+    get handBreakdownColorClass(): string {
+        return 'text-emerald-900 dark:text-emerald-100';
+    }
+
+    get cribBreakdownColorClass(): string {
+        return this.isDealer
+            ? 'text-emerald-900 dark:text-emerald-100'
+            : 'text-rose-900 dark:text-rose-100';
     }
 }
