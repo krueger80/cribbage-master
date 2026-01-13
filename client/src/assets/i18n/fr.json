@@ -1,6 +1,6 @@
 {
     "APP": {
-        "TITLE": "Maître du Crib",
+        "TITLE": "Maître du Crible",
         "SUBTITLE": "Meilleur choix de cartes à discarter",
         "ANALYZER": "Analyseur",
         "HISTORY": "Historique",
@@ -9,8 +9,8 @@
         "ROLE": "Rôle",
         "DEALER": "Donneur",
         "NON_DEALER": "Non-Donneur",
-        "DEALER_DESC": "Les points du Crib comptent pour vous",
-        "NON_DEALER_DESC": "Les points du Crib comptent pour l'adversaire",
+        "DEALER_DESC": "Les points du Crible comptent pour vous",
+        "NON_DEALER_DESC": "Les points du Crible comptent pour l'adversaire",
         "ANALYZE_HAND": "Analyser la main",
         "PROCESSING": "Traitement...",
         "RESET": "Réinitialiser",
