@@ -30,3 +30,4 @@ The backend is hosted on Vercel. For local development, you can use `vercel dev`
 
 ## Development
 - **Client**: The client is a standard Angular application. Use `ng test` to run unit tests.
+- **Configuration**: Environment variables (Supabase keys) are managed in `client/src/environments/`.
