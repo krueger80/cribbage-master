@@ -84,17 +84,17 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                     <!-- Hand -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.HAND' | translate }}</span>
-                         <span [class.invisible]="isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</span>
+                         <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</span>
                     </div>
                     <!-- Crib -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.CRIB' | translate }}</span>
-                        <span [class.invisible]="isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</span>
+                        <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</span>
                     </div>
                     <!-- Peg -->
                     <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                         <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.PEG' | translate }}</span>
-                        <span [class.invisible]="isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="pegColorClass">{{ res.peggingScore | number:'1.1-1' }}</span>
+                        <span *ngIf="!isExpanded(i)" class="font-bold text-sm leading-none mt-0.5" [ngClass]="pegColorClass">{{ res.peggingScore | number:'1.1-1' }}</span>
                     </div>
                 </div>
 
@@ -196,17 +196,17 @@ export class AnalysisViewComponent {
     }
 
     get handColorClass(): string {
-        return 'text-emerald-900 dark:text-emerald-100';
+        return 'text-emerald-500 dark:text-emerald-400';
     }
 
     get pegColorClass(): string {
-        return 'text-emerald-900 dark:text-emerald-100';
+        return 'text-emerald-500 dark:text-emerald-400';
     }
 
     get cribColorClass(): string {
         return this.isDealer
-            ? 'text-emerald-900 dark:text-emerald-100'
-            : 'text-rose-900 dark:text-rose-100';
+            ? 'text-emerald-500 dark:text-emerald-400'
+            : 'text-rose-500 dark:text-rose-400';
     }
 
     get handBreakdownColorClass(): string {
