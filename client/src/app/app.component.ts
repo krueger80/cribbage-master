@@ -95,7 +95,7 @@ import { ToastService } from './services/toast.service';
                           <!-- Role -->
                           <div class="flex-1 lg:flex-none">
                                <label class="text-xs text-slate-500 uppercase tracking-wider mb-2 block font-bold">{{ 'APP.ROLE' | translate }}</label>
-                                <div (click)="isDealer = !isDealer" 
+                                <div (click)="setRole(!isDealer)" 
                                      class="flex items-center justify-between p-3 rounded border cursor-pointer transition-all group hover:border-emerald-500/50 select-none"
                                      [ngClass]="{
                                         'bg-emerald-100 border-emerald-500 dark:bg-emerald-900/40 dark:border-emerald-600': isDealer,
@@ -245,6 +245,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   setPlayers(n: number) {
     this.numPlayers = n;
+    this.analysisResults = [];
+  }
+
+  setRole(isDealer: boolean) {
+    this.isDealer = isDealer;
     this.analysisResults = [];
   }
 
