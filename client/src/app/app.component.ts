@@ -184,7 +184,7 @@ import { ToastService } from './services/toast.service';
       <app-toast />
     </div>
   `,
-  styles: []
+  styles: ['#results-anchor { scroll-margin-top: 150px; }']
 })
 export class AppComponent implements OnInit, OnDestroy {
   viewMode: 'analyze' | 'history' = 'analyze';
@@ -274,13 +274,11 @@ export class AppComponent implements OnInit, OnDestroy {
           const el = document.getElementById('results-anchor');
           if (el) {
             const rect = el.getBoundingClientRect();
-            const isInViewport = (
-              rect.top >= 0 &&
-              rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-            );
+            // Check if top is roughly visible
+            const isTopVisible = rect.top >= 0 && rect.top <= window.innerHeight;
 
-            if (!isInViewport) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            if (!isTopVisible) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }
         }, 250);
