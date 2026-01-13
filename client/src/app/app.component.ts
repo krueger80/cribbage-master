@@ -273,9 +273,17 @@ export class AppComponent implements OnInit, OnDestroy {
         setTimeout(() => {
           const el = document.getElementById('results-anchor');
           if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const rect = el.getBoundingClientRect();
+            const isInViewport = (
+              rect.top >= 0 &&
+              rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+            );
+
+            if (!isInViewport) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            }
           }
-        }, 100);
+        }, 250);
 
         if (saveToHistory && this.analysisResults.length > 0) {
           const best = this.analysisResults[0];
