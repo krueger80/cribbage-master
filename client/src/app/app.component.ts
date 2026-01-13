@@ -255,6 +255,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   onCardsChange(newCards: string[]) {
     this.cards = newCards;
+    this.analysisResults = [];
   }
 
   reset() {
