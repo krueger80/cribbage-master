@@ -127,7 +127,7 @@ export function calculateScore(hand: Card[], cutCard: Card | null = null, isCrib
     return score;
 }
 
-function isRun(cards: Card[]): boolean {
+export function isRun(cards: Card[]): boolean {
     if (cards.length < 3) return false;
     const sorted = [...cards].sort((a, b) => a.order - b.order);
     for (let i = 0; i < sorted.length - 1; i++) {

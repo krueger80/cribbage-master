@@ -1,0 +1,41 @@
+
+> client@0.0.0 test
+> ng test --watch=false --browsers=ChromeHeadless
+
+Node.js version v25.2.1 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+- Generating browser application bundles (phase: setup)...
+Γ£ö Browser application bundle generation complete.
+[32m13 01 2026 23:44:55.133:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m13 01 2026 23:44:55.134:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[32m13 01 2026 23:44:55.138:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m13 01 2026 23:44:55.898:INFO [Chrome Headless 143.0.0.0 (Windows 10)]: [39mConnected on socket xo0A0e6AfINgORCBAAAB with id 72523261
+Chrome Headless 143.0.0.0 (Windows 10): Executed 0 of 8[32m SUCCESS[39m (0 secs / 0 secs)
+[1A[2KWARN: [36m'Spec 'GameService Scoring Logic (His Heels) should give dealer 2 points if cut card is a Jack' has no expectations.'[39m
+Chrome Headless 143.0.0.0 (Windows 10): Executed 0 of 8[32m SUCCESS[39m (0 secs / 0 secs)
+WARN: 'Spec 'GameService Scoring Logic (His Heels) should give dealer 2 points if cut card is a Jack' has no expectations.'
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 1 of 8[32m SUCCESS[39m (0 secs / 0.013 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 2 of 8[32m SUCCESS[39m (0 secs / 0.016 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 3 of 8[32m SUCCESS[39m (0 secs / 0.019 secs)
+[1A[2KWARN: [36m'Spec 'GameService Game Initialization should alternate dealer correctly (logic pending)' has no expectations.'[39m
+Chrome Headless 143.0.0.0 (Windows 10): Executed 3 of 8[32m SUCCESS[39m (0 secs / 0.019 secs)
+WARN: 'Spec 'GameService Game Initialization should alternate dealer correctly (logic pending)' has no expectations.'
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 4 of 8[32m SUCCESS[39m (0 secs / 0.021 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 5 of 8[32m SUCCESS[39m (0 secs / 0.023 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 6 of 8[32m SUCCESS[39m (0 secs / 0.025 secs)
+[1A[2K[31mChrome Headless 143.0.0.0 (Windows 10) GameService Discard Phase should transition to pegging after all players discard FAILED[39m
+	Error: 1 timer(s) still in the queue.
+	    at UserContext.apply (node_modules/zone.js/fesm2015/zone-testing.js:1719:27)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:369:28)
+	    at ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:2081:39)
+	    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:368:34)
+	    at ZoneImpl.run (node_modules/zone.js/fesm2015/zone.js:111:43)
+	    at runInTestZone (node_modules/zone.js/fesm2015/zone-testing.js:216:38)
+	    at UserContext.<anonymous> (node_modules/zone.js/fesm2015/zone-testing.js:234:32)
+	    at <Jasmine>
+Chrome Headless 143.0.0.0 (Windows 10): Executed 7 of 8[31m (1 FAILED)[39m (0 secs / 0.029 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 8 of 8[31m (1 FAILED)[39m (0 secs / 0.031 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 8 of 8[31m (1 FAILED)[39m (0.047 secs / 0.031 secs)
+[31mTOTAL: 1 FAILED, 7 SUCCESS[39m
+Γ£ö Browser application bundle generation complete.
+Γ£ö Browser application bundle generation complete.

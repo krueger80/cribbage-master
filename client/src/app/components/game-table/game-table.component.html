@@ -2,7 +2,16 @@
     <!-- Debug Info -->
     <div class="mb-4 p-2 bg-black/50 text-xs font-mono">
         Phase: {{ state.phase }} | Dealer: {{ state.players[0].isDealer ? state.players[0].name : state.players[1].name
-        }}
+        }} | Selected: {{ selectedCardIndices.size }}
+    </div>
+
+    <!-- Counting Overlay -->
+    <div *ngIf="state.phase === 'counting'"
+        class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 pointer-events-none">
+        <div class="text-4xl text-amber-400 font-bold animate-pulse text-center">
+            Counting Points...<br>
+            <span class="text-sm text-white font-normal">Please wait for next round</span>
+        </div>
     </div>
 
     <div class="flex flex-col h-full gap-8">
@@ -28,15 +37,48 @@
                     <span class="absolute inset-0 flex items-center justify-center text-xs">Deck</span>
                 </div>
                 <div *ngIf="state.cutCard"
-                    class="w-16 h-24 bg-white text-black border-2 border-gray-300 rounded-lg flex items-center justify-center font-bold">
-                    {{ state.cutCard.rank }}{{ state.cutCard.suit }}
+                    class="playing-card w-16 h-24 flex flex-col items-center justify-center bg-white rounded-lg shadow-md border-2 border-gray-300"
+                    [ngClass]="getCardClasses(state.cutCard, -1)">
+                    <span class="text-xl font-bold">{{ state.cutCard.rank }}</span>
+                    <span class="text-2xl">{{ getSuitSymbol(state.cutCard.suit) }}</span>
                 </div>
             </div>
 
             <!-- Board / Pegging -->
+            <!-- Board / Pegging -->
             <div
-                class="w-64 h-32 bg-amber-700 rounded-xl shadow-inner border-4 border-amber-900 flex items-center justify-center">
-                <span class="text-amber-200 font-serif">Cribbage Board</span>
+                class="flex-1 flex flex-col items-center justify-center gap-4 bg-amber-800/80 p-4 rounded-xl border-4 border-amber-900 min-h-[200px]">
+                <div class="text-amber-100 font-bold text-lg">Total: {{ state.currentPeggingTotal }}</div>
+
+                <!-- Stack -->
+                <div class="flex flex-wrap justify-center gap-2 items-center min-h-[100px]">
+                    <div *ngFor="let item of state.peggingStack"
+                        class="playing-card w-12 h-16 flex flex-col items-center justify-center bg-white rounded shadow-md border border-gray-300"
+                        [ngClass]="getCardClasses(item.card, -1)">
+                        <span class="text-sm font-bold">{{ item.card.rank }}</span>
+                        <span class="text-lg leading-none">{{ getSuitSymbol(item.card.suit) }}</span>
+                    </div>
+                    <div *ngIf="state.peggingStack.length === 0" class="text-amber-300/50 italic text-sm">
+                        Table Empty
+                    </div>
+                </div>
+
+                <!-- Action: Say Go -->
+                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId === state.players[0].id" class="h-10">
+                    <button *ngIf="!canPlay(state.players[0].cards, state.currentPeggingTotal)"
+                        class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold shadow-lg animate-pulse"
+                        (click)="sayGo(state.players[0].id)">
+                        Say Go!
+                    </button>
+                    <div *ngIf="canPlay(state.players[0].cards, state.currentPeggingTotal)"
+                        class="text-emerald-300 font-bold animate-pulse">
+                        Your Turn
+                    </div>
+                </div>
+                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId !== state.players[0].id"
+                    class="text-white/50 text-xs h-10 flex items-center">
+                    Opponent thinking...
+                </div>
             </div>
 
         </div>
@@ -47,14 +89,30 @@
                 <h3 class="font-bold mb-2">{{ state.players[0].name }} (Score: {{ state.players[0].score }})</h3>
                 <div class="flex gap-2">
                     <!-- Player Cards -->
-                    <!-- Simple rendering for now -->
                     <div *ngFor="let c of state.players[0].cards; let i = index"
-                        (click)="onDiscard(state.players[0].id, i)"
-                        class="w-16 h-24 bg-white text-black border-2 border-gray-300 rounded-lg flex items-center justify-center font-bold cursor-pointer hover:-translate-y-2 transition-transform">
-                        <span [class.text-red-600]="c.suit === 'H' || c.suit === 'D'">
-                            {{ c.rank }}{{ c.suit }}
-                        </span>
+                        (click)="onCardClick(state.players[0].id, i, state.phase)" class="playing-card"
+                        [ngClass]="getCardClasses(c, i)">
+
+                        <!-- Rank -->
+                        <span class="text-xl font-bold">{{ c.rank }}</span>
+                        <!-- Suit -->
+                        <span class="text-2xl">{{ getSuitSymbol(c.suit) }}</span>
+
+                        <!-- Selection Indicator (Checkmark) -->
+                        <div *ngIf="selectedCardIndices.has(i)"
+                            class="absolute -top-3 -right-3 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xs shadow-md animate-fade-in">
+                            ✓
+                        </div>
                     </div>
+                </div>
+
+                <!-- Discard Action -->
+                <div *ngIf="state.phase === 'discarding' && selectedCardIndices.size === 2"
+                    class="mt-4 animate-fade-in">
+                    <button class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded font-bold shadow-lg"
+                        (click)="confirmDiscard(state.players[0].id)">
+                        Confirm Discard
+                    </button>
                 </div>
             </div>
         </div>

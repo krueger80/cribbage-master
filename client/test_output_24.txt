@@ -1,0 +1,1613 @@
+
+> client@0.0.0 test
+> ng test --watch=false --browsers=ChromeHeadless
+
+Node.js version v25.2.1 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+- Generating browser application bundles (phase: setup)...
+Γ£ö Browser application bundle generation complete.
+
+./src/app/services/game.service.ts - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/src/tools/babel/webpack-loader.js):
+SyntaxError: C:\DEV\cribbage-master\client\src\app\services\game.service.ts: Unexpected reserved word 'let'. (10:8)
+
+   8 |     // ... (inside calculatePeggingScore)
+   9 |     // Runs
+> 10 |     for(let, k = stack.length, k) { }
+     |         ^
+  11 | };
+  12 | GameService = __decorate([
+  13 |     Injectable({
+
+Error: src/app/services/game.service.spec.ts:19:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+19             service.initGame();
+                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:20:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+20             const state = service.snapshot;
+                                     ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:32:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+32             service.initGame();
+                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:33:41 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+33             const firstDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                           ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:33:63 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+33             const firstDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                                                 ~
+
+
+Error: src/app/services/game.service.spec.ts:36:21 - error TS2339: Property 'nextRound' does not exist on type 'GameService'.
+
+36             service.nextRound();
+                       ~~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:39:42 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+39             const secondDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                            ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:39:64 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+39             const secondDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                                                  ~
+
+
+Error: src/app/services/game.service.spec.ts:43:21 - error TS2339: Property 'nextRound' does not exist on type 'GameService'.
+
+43             service.nextRound();
+                       ~~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:46:41 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+46             const thirdDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                           ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:46:63 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+46             const thirdDealer = service.snapshot.players.find(p => p.isDealer)?.id;
+                                                                 ~
+
+
+Error: src/app/services/game.service.spec.ts:54:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+54             service.initGame();
+                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:58:32 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+58             const p1 = service.snapshot.players[0];
+                                  ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:62:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+62             service.discard(p1.id, [0, 1]);
+                       ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:64:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+64             const state = service.snapshot;
+                                     ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:70:32 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+70             const p1 = service.snapshot.players[0];
+                                  ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:71:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+71             service.discard(p1.id, [0, 1]);
+                       ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:73:28 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+73             expect(service.snapshot.phase).toBe('discarding');
+                              ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:78:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+78             service.discard('p1', [0, 1]);
+                       ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:81:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+81             service.discard('p2', [0, 1]);
+                       ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:83:28 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+83             expect(service.snapshot.phase).toBe('pegging');
+                              ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:84:28 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+84             expect(service.snapshot.crib.length).toBe(4);
+                              ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:85:28 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+85             expect(service.snapshot.cutCard).not.toBeNull();
+                              ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:94:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+94             service.initGame();
+                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:99:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+99             const state = service.snapshot;
+                                     ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:108:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+108             service.initGame();
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:112:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+112             const state = service.snapshot;
+                                      ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:118:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+118             service.discard('p1', [0, 1]); // This should trigger cutDeck
+                        ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:123:36 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+123             const dealer = service.snapshot.players.find(p => p.isDealer)!;
+                                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:123:58 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+123             const dealer = service.snapshot.players.find(p => p.isDealer)!;
+                                                             ~
+
+
+Error: src/app/services/game.service.spec.ts:125:28 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+125             expect(service.snapshot.cutCard?.rank).toBe('J');
+                               ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:133:21 - error TS2339: Property 'initGame' does not exist on type 'GameService'.
+
+133             service.initGame();
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:135:21 - error TS2339: Property 'discard' does not exist on type 'GameService'.
+
+135             service.discard('p1', [0, 1]); // P1 discards, game transitions to pegging
+                        ~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:140:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+140             const state = service.snapshot;
+                                      ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:162:21 - error TS2339: Property 'playCard' does not exist on type 'GameService'.
+
+162             service.playCard(p2.id, cardIndex);
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:164:42 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+164             const updatedState = service.snapshot;
+                                             ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:186:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+186             const state = service.snapshot;
+                                      ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:195:21 - error TS2339: Property 'playCard' does not exist on type 'GameService'.
+
+195             service.playCard(state.players[0].id, 0); // Play 10. Total 10.
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:199:40 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+199             let currentState = service.snapshot;
+                                           ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:202:21 - error TS2339: Property 'playCard' does not exist on type 'GameService'.
+
+202             service.playCard(currentState.players[1].id, 0); // Play 5. Total 15.
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:205:36 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+205             currentState = service.snapshot;
+                                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:211:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+211             const state = service.snapshot;
+                                      ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:218:21 - error TS2339: Property 'playCard' does not exist on type 'GameService'.
+
+218             service.playCard(state.players[0].id, 0);
+                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:220:42 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+220             const currentState = service.snapshot;
+                                             ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:228:35 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+228             const state = service.snapshot;
+                                      ~~~~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:237:21 - error TS2339: Property 'sayGo' does not exist on type 'GameService'.
+
+237             service.sayGo(state.players[0].id);
+                        ~~~~~
+
+
+Error: src/app/services/game.service.spec.ts:239:42 - error TS2339: Property 'snapshot' does not exist on type 'GameService'.
+
+239             const updatedState = service.snapshot;
+                                             ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:4:57 - error TS2459: Module '"../logic/cards"' declares 'isRun' locally, but it is not exported.
+
+4 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
+                                                          ~~~~~
+
+  src/app/logic/cards.ts:130:10
+    130 function isRun(cards: Card[]): boolean {
+                 ~~~~~
+    'isRun' is declared here.
+
+
+Error: src/app/services/game.service.ts:14:5 - error TS7010: 'for', which lacks return-type annotation, implicitly has an 'any' return type.
+
+14     for(let k = stack.length; k >= 3; k--) {
+       ~~~
+
+
+Error: src/app/services/game.service.ts:14:9 - error TS7006: Parameter 'let' implicitly has an 'any' type.
+
+14     for(let k = stack.length; k >= 3; k--) {
+           ~~~
+
+
+Error: src/app/services/game.service.ts:14:13 - error TS1005: ',' expected.
+
+14     for(let k = stack.length; k >= 3; k--) {
+               ~
+
+
+Error: src/app/services/game.service.ts:14:13 - error TS2300: Duplicate identifier 'k'.
+
+14     for(let k = stack.length; k >= 3; k--) {
+               ~
+
+
+Error: src/app/services/game.service.ts:14:13 - error TS2371: A parameter initializer is only allowed in a function or constructor implementation.
+
+14     for(let k = stack.length; k >= 3; k--) {
+               ~~~~~~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:14:29 - error TS1005: ',' expected.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                               ~
+
+
+Error: src/app/services/game.service.ts:14:31 - error TS2300: Duplicate identifier 'k'.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                                 ~
+
+
+Error: src/app/services/game.service.ts:14:31 - error TS7006: Parameter 'k' implicitly has an 'any' type.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                                 ~
+
+
+Error: src/app/services/game.service.ts:14:33 - error TS1005: ',' expected.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                                   ~
+
+
+Error: src/app/services/game.service.ts:14:39 - error TS2304: Cannot find name 'k'.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                                         ~
+
+
+Error: src/app/services/game.service.ts:14:42 - error TS1005: ';' expected.
+
+14     for(let k = stack.length; k >= 3; k--) {
+                                            ~
+
+
+Error: src/app/services/game.service.ts:15:19 - error TS2304: Cannot find name 'stack'.
+
+15     const lastK = stack.slice(stack.length - k).map(item => item.card);
+                     ~~~~~
+
+
+Error: src/app/services/game.service.ts:15:31 - error TS2304: Cannot find name 'stack'.
+
+15     const lastK = stack.slice(stack.length - k).map(item => item.card);
+                                 ~~~~~
+
+
+Error: src/app/services/game.service.ts:15:46 - error TS2304: Cannot find name 'k'.
+
+15     const lastK = stack.slice(stack.length - k).map(item => item.card);
+                                                ~
+
+
+Error: src/app/services/game.service.ts:15:53 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+15     const lastK = stack.slice(stack.length - k).map(item => item.card);
+                                                       ~~~~
+
+
+Error: src/app/services/game.service.ts:17:9 - error TS2304: Cannot find name 'points'.
+
+17         points += k;
+           ~~~~~~
+
+
+Error: src/app/services/game.service.ts:17:19 - error TS2304: Cannot find name 'k'.
+
+17         points += k;
+                     ~
+
+
+Error: src/app/services/game.service.ts:23:5 - error TS1128: Declaration or statement expected.
+
+23     }
+       ~
+
+
+Error: src/app/services/game.service.ts:24:5 - error TS1128: Declaration or statement expected.
+
+24     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
+       ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:24:13 - error TS2304: Cannot find name '_state'.
+
+24     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
+               ~~~~~~
+
+
+Error: src/app/services/game.service.ts:26:1 - error TS2304: Cannot find name 'constructor'.
+
+26 constructor() { }
+   ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:26:15 - error TS1005: ';' expected.
+
+26 constructor() { }
+                 ~
+
+
+Error: src/app/services/game.service.ts:28:5 - error TS1434: Unexpected keyword or identifier.
+
+28     get state$(): Observable < GameState > {
+       ~~~
+
+
+Error: src/app/services/game.service.ts:28:5 - error TS2304: Cannot find name 'get'.
+
+28     get state$(): Observable < GameState > {
+       ~~~
+
+
+Error: src/app/services/game.service.ts:28:9 - error TS2304: Cannot find name 'state$'.
+
+28     get state$(): Observable < GameState > {
+           ~~~~~~
+
+
+Error: src/app/services/game.service.ts:28:17 - error TS1005: ';' expected.
+
+28     get state$(): Observable < GameState > {
+                   ~
+
+
+Error: src/app/services/game.service.ts:28:19 - error TS2365: Operator '>' cannot be applied to types 'boolean' and '{ return: any; }'.
+
+28     get state$(): Observable < GameState > {
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~
+29     return this._state.asObservable();
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+30 }
+   ~
+
+
+Error: src/app/services/game.service.ts:28:32 - error TS2693: 'GameState' only refers to a type, but is being used as a value here.
+
+28     get state$(): Observable < GameState > {
+                                  ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:29:12 - error TS1005: ':' expected.
+
+29     return this._state.asObservable();
+              ~~~~
+
+
+Error: src/app/services/game.service.ts:29:12 - error TS2532: Object is possibly 'undefined'.
+
+29     return this._state.asObservable();
+              ~~~~
+
+
+Error: src/app/services/game.service.ts:29:38 - error TS1005: ',' expected.
+
+29     return this._state.asObservable();
+                                        ~
+
+
+Error: src/app/services/game.service.ts:32:5 - error TS1434: Unexpected keyword or identifier.
+
+32     get snapshot(): GameState {
+       ~~~
+
+
+Error: src/app/services/game.service.ts:32:5 - error TS2304: Cannot find name 'get'.
+
+32     get snapshot(): GameState {
+       ~~~
+
+
+Error: src/app/services/game.service.ts:32:9 - error TS2304: Cannot find name 'snapshot'.
+
+32     get snapshot(): GameState {
+           ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:32:19 - error TS1005: ';' expected.
+
+32     get snapshot(): GameState {
+                     ~
+
+
+Error: src/app/services/game.service.ts:32:21 - error TS1434: Unexpected keyword or identifier.
+
+32     get snapshot(): GameState {
+                       ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:32:21 - error TS2693: 'GameState' only refers to a type, but is being used as a value here.
+
+32     get snapshot(): GameState {
+                       ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:37:1 - error TS2304: Cannot find name 'initGame'.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+   ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:37:10 - error TS2304: Cannot find name 'playerNames'.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+            ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:37:21 - error TS1005: ',' expected.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+                       ~
+
+
+Error: src/app/services/game.service.ts:37:23 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+                         ~~~~~~
+
+
+Error: src/app/services/game.service.ts:37:30 - error TS1011: An element access expression should take an argument.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+                                
+
+
+Error: src/app/services/game.service.ts:37:55 - error TS1005: ';' expected.
+
+37 initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+                                                         ~
+
+
+Error: src/app/services/game.service.ts:38:31 - error TS2304: Cannot find name 'playerNames'.
+
+38     const players: Player[] = playerNames.map((name, idx) => ({
+                                 ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:38:48 - error TS7006: Parameter 'name' implicitly has an 'any' type.
+
+38     const players: Player[] = playerNames.map((name, idx) => ({
+                                                  ~~~~
+
+
+Error: src/app/services/game.service.ts:38:54 - error TS7006: Parameter 'idx' implicitly has an 'any' type.
+
+38     const players: Player[] = playerNames.map((name, idx) => ({
+                                                        ~~~
+
+
+Error: src/app/services/game.service.ts:48:5 - error TS2532: Object is possibly 'undefined'.
+
+48     this.updateState({
+       ~~~~
+
+
+Error: src/app/services/game.service.ts:54:5 - error TS2532: Object is possibly 'undefined'.
+
+54     this.dealRound();
+       ~~~~
+
+
+Error: src/app/services/game.service.ts:57:5 - error TS1128: Declaration or statement expected.
+
+57     private updateState(newState: Partial<GameState>) {
+       ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:57:13 - error TS2304: Cannot find name 'updateState'.
+
+57     private updateState(newState: Partial<GameState>) {
+               ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:57:25 - error TS2304: Cannot find name 'newState'.
+
+57     private updateState(newState: Partial<GameState>) {
+                           ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:57:33 - error TS1005: ',' expected.
+
+57     private updateState(newState: Partial<GameState>) {
+                                   ~
+
+
+Error: src/app/services/game.service.ts:57:35 - error TS2693: 'Partial' only refers to a type, but is being used as a value here.
+
+57     private updateState(newState: Partial<GameState>) {
+                                     ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:57:55 - error TS1005: ';' expected.
+
+57     private updateState(newState: Partial<GameState>) {
+                                                         ~
+
+
+Error: src/app/services/game.service.ts:58:5 - error TS2532: Object is possibly 'undefined'.
+
+58     this._state.next({ ...this._state.value, ...newState });
+       ~~~~
+
+
+Error: src/app/services/game.service.ts:58:27 - error TS2532: Object is possibly 'undefined'.
+
+58     this._state.next({ ...this._state.value, ...newState });
+                             ~~~~
+
+
+Error: src/app/services/game.service.ts:58:49 - error TS2304: Cannot find name 'newState'.
+
+58     this._state.next({ ...this._state.value, ...newState });
+                                                   ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:61:5 - error TS1128: Declaration or statement expected.
+
+61     private dealRound() {
+       ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:61:13 - error TS2304: Cannot find name 'dealRound'.
+
+61     private dealRound() {
+               ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:61:25 - error TS1005: ';' expected.
+
+61     private dealRound() {
+                           ~
+
+
+Error: src/app/services/game.service.ts:62:18 - error TS2532: Object is possibly 'undefined'.
+
+62     const deck = this.shuffle(getAllCards());
+                    ~~~~
+
+
+Error: src/app/services/game.service.ts:63:21 - error TS2532: Object is possibly 'undefined'.
+
+63     const players = this.snapshot.players;
+                       ~~~~
+
+
+Error: src/app/services/game.service.ts:66:21 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+66     players.forEach(p => {
+                       ~
+
+
+Error: src/app/services/game.service.ts:74:25 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+74         players.forEach(p => {
+                           ~
+
+
+Error: src/app/services/game.service.ts:79:5 - error TS2532: Object is possibly 'undefined'.
+
+79     this.updateState({
+       ~~~~
+
+
+Error: src/app/services/game.service.ts:90:5 - error TS2532: Object is possibly 'undefined'.
+
+90     this.checkAutoPlay();
+       ~~~~
+
+
+Error: src/app/services/game.service.ts:93:1 - error TS2304: Cannot find name 'nextRound'.
+
+93 nextRound() {
+   ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:93:13 - error TS1005: ';' expected.
+
+93 nextRound() {
+               ~
+
+
+Error: src/app/services/game.service.ts:94:19 - error TS2532: Object is possibly 'undefined'.
+
+94     const state = this.snapshot;
+                     ~~~~
+
+
+Error: src/app/services/game.service.ts:95:56 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+95     const currentDealerIndex = state.players.findIndex(p => p.isDealer);
+                                                          ~
+
+
+Error: src/app/services/game.service.ts:98:40 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+98     const players = state.players.map((p, idx) => ({
+                                          ~
+
+
+Error: src/app/services/game.service.ts:98:43 - error TS7006: Parameter 'idx' implicitly has an 'any' type.
+
+98     const players = state.players.map((p, idx) => ({
+                                             ~~~
+
+
+Error: src/app/services/game.service.ts:105:5 - error TS2532: Object is possibly 'undefined'.
+
+105     this.updateState({
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:115:5 - error TS2532: Object is possibly 'undefined'.
+
+115     this.dealRound();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:118:1 - error TS2304: Cannot find name 'discard'.
+
+118 discard(playerId: string, cardIndices: number[]) {
+    ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:118:9 - error TS2304: Cannot find name 'playerId'.
+
+118 discard(playerId: string, cardIndices: number[]) {
+            ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:118:17 - error TS1005: ',' expected.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                    ~
+
+
+Error: src/app/services/game.service.ts:118:19 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                      ~~~~~~
+
+
+Error: src/app/services/game.service.ts:118:27 - error TS2304: Cannot find name 'cardIndices'.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                              ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:118:38 - error TS1005: ',' expected.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                                         ~
+
+
+Error: src/app/services/game.service.ts:118:40 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                                           ~~~~~~
+
+
+Error: src/app/services/game.service.ts:118:47 - error TS1011: An element access expression should take an argument.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                                                  
+
+
+Error: src/app/services/game.service.ts:118:50 - error TS1005: ';' expected.
+
+118 discard(playerId: string, cardIndices: number[]) {
+                                                     ~
+
+
+Error: src/app/services/game.service.ts:119:21 - error TS2532: Object is possibly 'undefined'.
+
+119     const players = this.snapshot.players;
+                        ~~~~
+
+
+Error: src/app/services/game.service.ts:120:33 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+120     const player = players.find(p => p.id === playerId);
+                                    ~
+
+
+Error: src/app/services/game.service.ts:120:47 - error TS2304: Cannot find name 'playerId'.
+
+120     const player = players.find(p => p.id === playerId);
+                                                  ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:127:22 - error TS2304: Cannot find name 'cardIndices'.
+
+127     const discards = cardIndices.map(i => player.cards[i]);
+                         ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:127:38 - error TS7006: Parameter 'i' implicitly has an 'any' type.
+
+127     const discards = cardIndices.map(i => player.cards[i]);
+                                         ~
+
+
+Error: src/app/services/game.service.ts:128:41 - error TS7006: Parameter '_' implicitly has an 'any' type.
+
+128     player.cards = player.cards.filter((_, i) => !cardIndices.includes(i));
+                                            ~
+
+
+Error: src/app/services/game.service.ts:128:44 - error TS7006: Parameter 'i' implicitly has an 'any' type.
+
+128     player.cards = player.cards.filter((_, i) => !cardIndices.includes(i));
+                                               ~
+
+
+Error: src/app/services/game.service.ts:128:51 - error TS2304: Cannot find name 'cardIndices'.
+
+128     player.cards = player.cards.filter((_, i) => !cardIndices.includes(i));
+                                                      ~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:130:25 - error TS2532: Object is possibly 'undefined'.
+
+130     const currentCrib = this.snapshot.crib;
+                            ~~~~
+
+
+Error: src/app/services/game.service.ts:131:5 - error TS2532: Object is possibly 'undefined'.
+
+131     this.updateState({
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:137:36 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+137     const allReady = players.every(p => p.cards.length === 4);
+                                       ~
+
+
+Error: src/app/services/game.service.ts:139:9 - error TS2532: Object is possibly 'undefined'.
+
+139         this.cutDeck();
+            ~~~~
+
+
+Error: src/app/services/game.service.ts:141:9 - error TS2532: Object is possibly 'undefined'.
+
+141         this.checkAutoPlay();
+            ~~~~
+
+
+Error: src/app/services/game.service.ts:145:5 - error TS1128: Declaration or statement expected.
+
+145     private checkAutoPlay() {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:145:13 - error TS2304: Cannot find name 'checkAutoPlay'.
+
+145     private checkAutoPlay() {
+                ~~~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:145:29 - error TS1005: ';' expected.
+
+145     private checkAutoPlay() {
+                                ~
+
+
+Error: src/app/services/game.service.ts:146:19 - error TS2532: Object is possibly 'undefined'.
+
+146     const state = this.snapshot;
+                      ~~~~
+
+
+Error: src/app/services/game.service.ts:148:40 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+148         const cpu = state.players.find(p => !p.isHuman);
+                                           ~
+
+
+Error: src/app/services/game.service.ts:153:27 - error TS2532: Object is possibly 'undefined'.
+
+153                 const s = this.snapshot;
+                              ~~~~
+
+
+Error: src/app/services/game.service.ts:155:42 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+155                 const c = s.players.find(p => p.id === cpu.id);
+                                             ~
+
+
+Error: src/app/services/game.service.ts:157:21 - error TS2532: Object is possibly 'undefined'.
+
+157                     this.discard(c.id, [0, 1]);
+                        ~~~~
+
+
+Error: src/app/services/game.service.ts:162:47 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+162         const turnPlayer = state.players.find(p => p.id === state.turnPlayerId);
+                                                  ~
+
+
+Error: src/app/services/game.service.ts:167:27 - error TS2532: Object is possibly 'undefined'.
+
+167                 const s = this.snapshot;
+                              ~~~~
+
+
+Error: src/app/services/game.service.ts:170:44 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+170                 const cpu = s.players.find(p => p.id === s.turnPlayerId);
+                                               ~
+
+
+Error: src/app/services/game.service.ts:185:21 - error TS2532: Object is possibly 'undefined'.
+
+185                     this.playCard(cpu.id, validCardIndex);
+                        ~~~~
+
+
+Error: src/app/services/game.service.ts:188:21 - error TS2532: Object is possibly 'undefined'.
+
+188                     this.sayGo(cpu.id);
+                        ~~~~
+
+
+Error: src/app/services/game.service.ts:196:5 - error TS1128: Declaration or statement expected.
+
+196     private cutDeck() {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:196:13 - error TS2304: Cannot find name 'cutDeck'.
+
+196     private cutDeck() {
+                ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:196:23 - error TS1005: ';' expected.
+
+196     private cutDeck() {
+                          ~
+
+
+Error: src/app/services/game.service.ts:197:18 - error TS2532: Object is possibly 'undefined'.
+
+197     const deck = this.snapshot.deck;
+                     ~~~~
+
+
+Error: src/app/services/game.service.ts:203:24 - error TS2532: Object is possibly 'undefined'.
+
+203         const dealer = this.snapshot.players.find(p => p.isDealer);
+                           ~~~~
+
+
+Error: src/app/services/game.service.ts:203:51 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+203         const dealer = this.snapshot.players.find(p => p.isDealer);
+                                                      ~
+
+
+Error: src/app/services/game.service.ts:209:5 - error TS2532: Object is possibly 'undefined'.
+
+209     this.updateState({
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:213:23 - error TS2532: Object is possibly 'undefined'.
+
+213         turnPlayerId: this.getNextPlayerId(this.snapshot.players.find(p => p.isDealer)!.id)
+                          ~~~~
+
+
+Error: src/app/services/game.service.ts:213:44 - error TS2532: Object is possibly 'undefined'.
+
+213         turnPlayerId: this.getNextPlayerId(this.snapshot.players.find(p => p.isDealer)!.id)
+                                               ~~~~
+
+
+Error: src/app/services/game.service.ts:213:71 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+213         turnPlayerId: this.getNextPlayerId(this.snapshot.players.find(p => p.isDealer)!.id)
+                                                                          ~
+
+
+Error: src/app/services/game.service.ts:216:5 - error TS2532: Object is possibly 'undefined'.
+
+216     this.checkAutoPlay();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:220:5 - error TS1128: Declaration or statement expected.
+
+220     private shuffle(cards: Card[]): Card[] {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:220:13 - error TS2304: Cannot find name 'shuffle'.
+
+220     private shuffle(cards: Card[]): Card[] {
+                ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:220:21 - error TS2304: Cannot find name 'cards'.
+
+220     private shuffle(cards: Card[]): Card[] {
+                        ~~~~~
+
+
+Error: src/app/services/game.service.ts:220:26 - error TS1005: ',' expected.
+
+220     private shuffle(cards: Card[]): Card[] {
+                             ~
+
+
+Error: src/app/services/game.service.ts:220:28 - error TS2693: 'Card' only refers to a type, but is being used as a value here.
+
+220     private shuffle(cards: Card[]): Card[] {
+                               ~~~~
+
+
+Error: src/app/services/game.service.ts:220:33 - error TS1011: An element access expression should take an argument.
+
+220     private shuffle(cards: Card[]): Card[] {
+                                    
+
+
+Error: src/app/services/game.service.ts:220:35 - error TS1005: ';' expected.
+
+220     private shuffle(cards: Card[]): Card[] {
+                                      ~
+
+
+Error: src/app/services/game.service.ts:220:37 - error TS2693: 'Card' only refers to a type, but is being used as a value here.
+
+220     private shuffle(cards: Card[]): Card[] {
+                                        ~~~~
+
+
+Error: src/app/services/game.service.ts:220:42 - error TS1011: An element access expression should take an argument.
+
+220     private shuffle(cards: Card[]): Card[] {
+                                             
+
+
+Error: src/app/services/game.service.ts:220:44 - error TS1005: ';' expected.
+
+220     private shuffle(cards: Card[]): Card[] {
+                                               ~
+
+
+Error: src/app/services/game.service.ts:221:18 - error TS2304: Cannot find name 'cards'.
+
+221     for (let i = cards.length - 1; i > 0; i--) {
+                     ~~~~~
+
+
+Error: src/app/services/game.service.ts:223:10 - error TS2304: Cannot find name 'cards'.
+
+223         [cards[i], cards[j]] = [cards[j], cards[i]];
+             ~~~~~
+
+
+Error: src/app/services/game.service.ts:223:20 - error TS2304: Cannot find name 'cards'.
+
+223         [cards[i], cards[j]] = [cards[j], cards[i]];
+                       ~~~~~
+
+
+Error: src/app/services/game.service.ts:223:33 - error TS2304: Cannot find name 'cards'.
+
+223         [cards[i], cards[j]] = [cards[j], cards[i]];
+                                    ~~~~~
+
+
+Error: src/app/services/game.service.ts:223:43 - error TS2304: Cannot find name 'cards'.
+
+223         [cards[i], cards[j]] = [cards[j], cards[i]];
+                                              ~~~~~
+
+
+Error: src/app/services/game.service.ts:228:1 - error TS2304: Cannot find name 'playCard'.
+
+228 playCard(playerId: string, cardIndex: number): string {
+    ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:10 - error TS2304: Cannot find name 'playerId'.
+
+228 playCard(playerId: string, cardIndex: number): string {
+             ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:18 - error TS1005: ',' expected.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                     ~
+
+
+Error: src/app/services/game.service.ts:228:20 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                       ~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:28 - error TS2304: Cannot find name 'cardIndex'.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                               ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:37 - error TS1005: ',' expected.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                                        ~
+
+
+Error: src/app/services/game.service.ts:228:39 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                                          ~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:46 - error TS1005: ';' expected.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                                                 ~
+
+
+Error: src/app/services/game.service.ts:228:48 - error TS1434: Unexpected keyword or identifier.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                                                   ~~~~~~
+
+
+Error: src/app/services/game.service.ts:228:48 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+228 playCard(playerId: string, cardIndex: number): string {
+                                                   ~~~~~~
+
+
+Error: src/app/services/game.service.ts:229:19 - error TS2532: Object is possibly 'undefined'.
+
+229     const state = this.snapshot;
+                      ~~~~
+
+
+Error: src/app/services/game.service.ts:231:32 - error TS2304: Cannot find name 'playerId'.
+
+231     if (state.turnPlayerId !== playerId) return 'NOT_YOUR_TURN';
+                                   ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:233:39 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+233     const player = state.players.find(p => p.id === playerId);
+                                          ~
+
+
+Error: src/app/services/game.service.ts:233:53 - error TS2304: Cannot find name 'playerId'.
+
+233     const player = state.players.find(p => p.id === playerId);
+                                                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:236:31 - error TS2304: Cannot find name 'cardIndex'.
+
+236     const card = player.cards[cardIndex];
+                                  ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:246:42 - error TS7006: Parameter '_' implicitly has an 'any' type.
+
+246     const newHand = player.cards.filter((_, i) => i !== cardIndex);
+                                             ~
+
+
+Error: src/app/services/game.service.ts:246:45 - error TS7006: Parameter 'i' implicitly has an 'any' type.
+
+246     const newHand = player.cards.filter((_, i) => i !== cardIndex);
+                                                ~
+
+
+Error: src/app/services/game.service.ts:246:57 - error TS2304: Cannot find name 'cardIndex'.
+
+246     const newHand = player.cards.filter((_, i) => i !== cardIndex);
+                                                            ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:250:39 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+250     state.players = state.players.map(p => p.id === playerId ? { ...p, cards: newHand, playedCards: newPlayedReceived } : p);
+                                          ~
+
+
+Error: src/app/services/game.service.ts:250:53 - error TS2304: Cannot find name 'playerId'.
+
+250     state.players = state.players.map(p => p.id === playerId ? { ...p, cards: newHand, playedCards: newPlayedReceived } : p);
+                                                        ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:253:34 - error TS18004: No value exists in scope for the shorthand property 'playerId'. Either declare one or provide an initializer.
+
+253     const newStackItem = { card, playerId };
+                                     ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:258:20 - error TS2532: Object is possibly 'undefined'.
+
+258     const points = this.calculatePeggingScore(newStack, newTotal);
+                       ~~~~
+
+
+Error: src/app/services/game.service.ts:260:38 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+260         const p = state.players.find(p => p.id === playerId);
+                                         ~
+
+
+Error: src/app/services/game.service.ts:260:52 - error TS2304: Cannot find name 'playerId'.
+
+260         const p = state.players.find(p => p.id === playerId);
+                                                       ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:265:5 - error TS2532: Object is possibly 'undefined'.
+
+265     this.updateState({
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:269:23 - error TS2532: Object is possibly 'undefined'.
+
+269         turnPlayerId: this.getNextPlayerId(playerId)
+                          ~~~~
+
+
+Error: src/app/services/game.service.ts:269:44 - error TS2304: Cannot find name 'playerId'.
+
+269         turnPlayerId: this.getNextPlayerId(playerId)
+                                               ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:272:5 - error TS2532: Object is possibly 'undefined'.
+
+272     this.checkAutoPlay();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:273:5 - error TS2532: Object is possibly 'undefined'.
+
+273     this.checkForPeggingFinished();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:277:5 - error TS1128: Declaration or statement expected.
+
+277     private checkForPeggingFinished() {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:277:13 - error TS2304: Cannot find name 'checkForPeggingFinished'.
+
+277     private checkForPeggingFinished() {
+                ~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:277:39 - error TS1005: ';' expected.
+
+277     private checkForPeggingFinished() {
+                                          ~
+
+
+Error: src/app/services/game.service.ts:278:19 - error TS2532: Object is possibly 'undefined'.
+
+278     const state = this.snapshot;
+                      ~~~~
+
+
+Error: src/app/services/game.service.ts:282:41 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+282     const allDone = state.players.every(p => p.cards.length === 0);
+                                            ~
+
+
+Error: src/app/services/game.service.ts:295:13 - error TS2532: Object is possibly 'undefined'.
+
+295             this.nextRound();
+                ~~~~
+
+
+Error: src/app/services/game.service.ts:300:1 - error TS2304: Cannot find name 'sayGo'.
+
+300 sayGo(playerId: string) {
+    ~~~~~
+
+
+Error: src/app/services/game.service.ts:300:7 - error TS2304: Cannot find name 'playerId'.
+
+300 sayGo(playerId: string) {
+          ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:300:15 - error TS1005: ',' expected.
+
+300 sayGo(playerId: string) {
+                  ~
+
+
+Error: src/app/services/game.service.ts:300:17 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+300 sayGo(playerId: string) {
+                    ~~~~~~
+
+
+Error: src/app/services/game.service.ts:300:25 - error TS1005: ';' expected.
+
+300 sayGo(playerId: string) {
+                            ~
+
+
+Error: src/app/services/game.service.ts:302:19 - error TS2532: Object is possibly 'undefined'.
+
+302     const state = this.snapshot;
+                      ~~~~
+
+
+Error: src/app/services/game.service.ts:303:24 - error TS2532: Object is possibly 'undefined'.
+
+303     const opponentId = this.getNextPlayerId(playerId);
+                           ~~~~
+
+
+Error: src/app/services/game.service.ts:303:45 - error TS2304: Cannot find name 'playerId'.
+
+303     const opponentId = this.getNextPlayerId(playerId);
+                                                ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:304:41 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+304     const opponent = state.players.find(p => p.id === opponentId);
+                                            ~
+
+
+Error: src/app/services/game.service.ts:320:5 - error TS2532: Object is possibly 'undefined'.
+
+320     this.updateState({
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:324:23 - error TS2304: Cannot find name 'playerId'.
+
+324         turnPlayerId: playerId // Player who said Go leads next round
+                          ~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:327:5 - error TS2532: Object is possibly 'undefined'.
+
+327     this.checkAutoPlay();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:328:5 - error TS2532: Object is possibly 'undefined'.
+
+328     this.checkForPeggingFinished();
+        ~~~~
+
+
+Error: src/app/services/game.service.ts:331:5 - error TS1128: Declaration or statement expected.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:331:13 - error TS2304: Cannot find name 'calculatePeggingScore'.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                ~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:331:35 - error TS2304: Cannot find name 'stack'.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                      ~~~~~
+
+
+Error: src/app/services/game.service.ts:331:40 - error TS1005: ',' expected.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                           ~
+
+
+Error: src/app/services/game.service.ts:331:42 - error TS2693: 'any' only refers to a type, but is being used as a value here.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                             ~~~
+
+
+Error: src/app/services/game.service.ts:331:46 - error TS1011: An element access expression should take an argument.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                 
+
+
+Error: src/app/services/game.service.ts:331:49 - error TS2304: Cannot find name 'total'.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                    ~~~~~
+
+
+Error: src/app/services/game.service.ts:331:54 - error TS1005: ',' expected.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                         ~
+
+
+Error: src/app/services/game.service.ts:331:56 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                           ~~~~~~
+
+
+Error: src/app/services/game.service.ts:331:63 - error TS1005: ';' expected.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                                  ~
+
+
+Error: src/app/services/game.service.ts:331:65 - error TS1434: Unexpected keyword or identifier.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                                    ~~~~~~
+
+
+Error: src/app/services/game.service.ts:331:65 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+331     private calculatePeggingScore(stack: any[], total: number): number {
+                                                                    ~~~~~~
+
+
+Error: src/app/services/game.service.ts:333:9 - error TS2304: Cannot find name 'total'.
+
+333     if (total === 15) points += 2;
+            ~~~~~
+
+
+Error: src/app/services/game.service.ts:334:9 - error TS2304: Cannot find name 'total'.
+
+334     if (total === 31) points += 2;
+            ~~~~~
+
+
+Error: src/app/services/game.service.ts:337:9 - error TS2304: Cannot find name 'stack'.
+
+337     if (stack.length > 1) {
+            ~~~~~
+
+
+Error: src/app/services/game.service.ts:339:28 - error TS2304: Cannot find name 'stack'.
+
+339         const targetRank = stack[stack.length - 1].card.rank;
+                               ~~~~~
+
+
+Error: src/app/services/game.service.ts:339:34 - error TS2304: Cannot find name 'stack'.
+
+339         const targetRank = stack[stack.length - 1].card.rank;
+                                     ~~~~~
+
+
+Error: src/app/services/game.service.ts:340:22 - error TS2304: Cannot find name 'stack'.
+
+340         for (let i = stack.length - 2; i >= 0; i--) {
+                         ~~~~~
+
+
+Error: src/app/services/game.service.ts:341:17 - error TS2304: Cannot find name 'stack'.
+
+341             if (stack[i].card.rank === targetRank) {
+                    ~~~~~
+
+
+Error: src/app/services/game.service.ts:357:5 - error TS1128: Declaration or statement expected.
+
+357     private getNextPlayerId(currentId: string): string {
+        ~~~~~~~
+
+
+Error: src/app/services/game.service.ts:357:13 - error TS2304: Cannot find name 'getNextPlayerId'.
+
+357     private getNextPlayerId(currentId: string): string {
+                ~~~~~~~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:357:29 - error TS2304: Cannot find name 'currentId'.
+
+357     private getNextPlayerId(currentId: string): string {
+                                ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:357:38 - error TS1005: ',' expected.
+
+357     private getNextPlayerId(currentId: string): string {
+                                         ~
+
+
+Error: src/app/services/game.service.ts:357:40 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+357     private getNextPlayerId(currentId: string): string {
+                                           ~~~~~~
+
+
+Error: src/app/services/game.service.ts:357:47 - error TS1005: ';' expected.
+
+357     private getNextPlayerId(currentId: string): string {
+                                                  ~
+
+
+Error: src/app/services/game.service.ts:357:49 - error TS1434: Unexpected keyword or identifier.
+
+357     private getNextPlayerId(currentId: string): string {
+                                                    ~~~~~~
+
+
+Error: src/app/services/game.service.ts:357:49 - error TS2693: 'string' only refers to a type, but is being used as a value here.
+
+357     private getNextPlayerId(currentId: string): string {
+                                                    ~~~~~~
+
+
+Error: src/app/services/game.service.ts:358:21 - error TS2532: Object is possibly 'undefined'.
+
+358     const players = this.snapshot.players;
+                        ~~~~
+
+
+Error: src/app/services/game.service.ts:359:35 - error TS7006: Parameter 'p' implicitly has an 'any' type.
+
+359     const idx = players.findIndex(p => p.id === currentId);
+                                      ~
+
+
+Error: src/app/services/game.service.ts:359:49 - error TS2304: Cannot find name 'currentId'.
+
+359     const idx = players.findIndex(p => p.id === currentId);
+                                                    ~~~~~~~~~
+
+
+Error: src/app/services/game.service.ts:362:1 - error TS1128: Declaration or statement expected.
+
+362 }
+    ~
+
+
+
+[32m14 01 2026 18:23:57.581:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m14 01 2026 18:23:57.583:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[91m14 01 2026 18:23:57.584:ERROR [karma-server]: [39mError: Found 1 load error
+    at Server.<anonymous> (C:\DEV\cribbage-master\client\node_modules\karma\lib\server.js:243:26)
+    at Object.onceWrapper (node:events:622:28)
+    at Server.emit (node:events:520:35)
+    at Server.emit (node:domain:489:12)
+    at emitListeningNT (node:net:1983:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:88:21)
+Γ£ö Browser application bundle generation complete.
+Γ£ö Browser application bundle generation complete.
