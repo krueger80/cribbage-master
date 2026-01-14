@@ -1,0 +1,63 @@
+<div *ngIf="state$ | async as state" class="p-4 bg-green-900 min-h-screen text-white">
+    <!-- Debug Info -->
+    <div class="mb-4 p-2 bg-black/50 text-xs font-mono">
+        Phase: {{ state.phase }} | Dealer: {{ state.players[0].isDealer ? state.players[0].name : state.players[1].name
+        }}
+    </div>
+
+    <div class="flex flex-col h-full gap-8">
+
+        <!-- Opponent Area -->
+        <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
+            <div class="text-center">
+                <h3 class="font-bold mb-2">{{ state.players[1].name }} (Score: {{ state.players[1].score }})</h3>
+                <div class="flex gap-2">
+                    <!-- Back of cards -->
+                    <div *ngFor="let c of state.players[1].cards"
+                        class="w-16 h-24 bg-blue-800 border-2 border-white rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Board -->
+        <div class="flex-1 flex items-center justify-center gap-8">
+
+            <!-- Deck / Cut Card -->
+            <div class="flex gap-4">
+                <div class="w-16 h-24 bg-blue-800 border-2 border-white rounded-lg relative">
+                    <span class="absolute inset-0 flex items-center justify-center text-xs">Deck</span>
+                </div>
+                <div *ngIf="state.cutCard"
+                    class="w-16 h-24 bg-white text-black border-2 border-gray-300 rounded-lg flex items-center justify-center font-bold">
+                    {{ state.cutCard.rank }}{{ state.cutCard.suit }}
+                </div>
+            </div>
+
+            <!-- Board / Pegging -->
+            <div
+                class="w-64 h-32 bg-amber-700 rounded-xl shadow-inner border-4 border-amber-900 flex items-center justify-center">
+                <span class="text-amber-200 font-serif">Cribbage Board</span>
+            </div>
+
+        </div>
+
+        <!-- Player Area -->
+        <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
+            <div class="text-center">
+                <h3 class="font-bold mb-2">{{ state.players[0].name }} (Score: {{ state.players[0].score }})</h3>
+                <div class="flex gap-2">
+                    <!-- Player Cards -->
+                    <!-- Simple rendering for now -->
+                    <div *ngFor="let c of state.players[0].cards; let i = index"
+                        (click)="onDiscard(state.players[0].id, i)"
+                        class="w-16 h-24 bg-white text-black border-2 border-gray-300 rounded-lg flex items-center justify-center font-bold cursor-pointer hover:-translate-y-2 transition-transform">
+                        <span [class.text-red-600]="c.suit === 'H' || c.suit === 'D'">
+                            {{ c.rank }}{{ c.suit }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -11,6 +11,7 @@ import { HamburgerMenuComponent } from './components/hamburger-menu/hamburger-me
 import { ApiService, AnalysisResult } from './services/api.service';
 import { SupabaseService, HandHistory } from './services/supabase.service';
 import { ToastService } from './services/toast.service';
+import { GameTableComponent } from './components/game-table/game-table.component';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,9 @@ import { ToastService } from './services/toast.service';
     AnalysisViewComponent,
     HistoryViewComponent,
     ToastComponent,
-    HamburgerMenuComponent
+    ToastComponent,
+    HamburgerMenuComponent,
+    GameTableComponent
   ],
   template: `
     <div class="relative min-h-screen pb-12 transition-colors duration-200">
@@ -56,7 +59,7 @@ import { ToastService } from './services/toast.service';
         </header>
   
         <!-- CONTENT -->
-        <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-6" *ngIf="viewMode !== 'game'">
           
           <!-- SETUP SECTION (Only in Analyze Mode) -->
           <div *ngIf="viewMode === 'analyze'" class="card p-6 animate-fade-in border-gray-200 dark:border-slate-700/50 shadow-xl bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm transition-colors duration-200">
@@ -177,9 +180,15 @@ import { ToastService } from './services/toast.service';
                       </div>
                   </ng-template>
                </ng-container>
-          </div>
+           </div>
 
         </div>
+
+        <!-- GAME VIEW -->
+        <div *ngIf="viewMode === 'game'" class="animate-fade-in w-full h-full">
+            <app-game-table />
+        </div>
+
       </div>
       <app-toast />
     </div>
@@ -187,7 +196,7 @@ import { ToastService } from './services/toast.service';
   styles: ['#results-anchor { scroll-margin-top: 150px; }']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  viewMode: 'analyze' | 'history' = 'analyze';
+  viewMode: 'analyze' | 'history' | 'game' = 'analyze';
   numPlayers = 2;
   isDealer = false;
   cards: string[] = [];
@@ -239,7 +248,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.translate.use(lang);
   }
 
-  setView(mode: 'analyze' | 'history') {
+  setView(mode: 'analyze' | 'history' | 'game') {
     this.viewMode = mode;
   }
 
