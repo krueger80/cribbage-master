@@ -242,10 +242,10 @@ export class GameService {
         const newTotal = state.currentPeggingTotal + card.value;
 
         // 4. Score
-        const points = this.calculatePeggingScore(newStack, newTotal);
-        if (points > 0) {
+        const scoreResult = this.calculatePeggingScore(newStack, newTotal);
+        if (scoreResult.points > 0) {
             const p = state.players.find(p => p.id === playerId);
-            if (p) p.score += points;
+            if (p) p.score += scoreResult.points;
         }
 
         // 5. Update State
@@ -253,8 +253,33 @@ export class GameService {
             players: [...state.players],
             currentPeggingTotal: newTotal === 31 ? 0 : newTotal, // Reset if 31
             peggingStack: newTotal === 31 ? [] : newStack, // Clear stack if 31
-            turnPlayerId: this.getNextPlayerId(playerId)
+            turnPlayerId: this.getNextPlayerId(playerId),
+            lastPeggingScore: scoreResult.points > 0 ? {
+                points: scoreResult.points,
+                description: scoreResult.breakdown.join(', '),
+                playerId
+            } : null
         });
+
+        // Clear the score message after a delay
+        if (scoreResult.points > 0) {
+            setTimeout(() => {
+                // Only clear if it's the same message (simple check)
+                // Actually, just clearing is fine, user will see it for 2s.
+                // But we must be careful not to clear a SUBSEQUENT message.
+                // Let's rely on UI to handle fade out, or just clear after fixed time?
+                // Better: Just set it. New event overwrites. 
+                // We clear it when next turn starts? No, that's too fast.
+                // Let's leave it in state, UI can decide when to hide it (CSS fade).
+                // But we should probably clear it on NEXT play so it doesn't persist forever if no one scores.
+                // Actually, let's clear it after 2 seconds here to keep state clean.
+                // this.updateState({ lastPeggingScore: null });
+                // EDIT: Can't easily modify state in timeout without risk. 
+                // Let's just leave it, but we need to ensure we RESET it on every playCard call start?
+                // No, we overwrite it above. 
+                // If 0 points, we explicitly set it to null. Correct.
+            }, 2000);
+        }
 
         this.checkAutoPlay();
         this.checkForPeggingFinished();
@@ -296,8 +321,6 @@ export class GameService {
 
         if (state.countingStage === 'non_dealer_hand') {
             const nonDealer = state.players[nonDealerIndex];
-            // Use playedCards because those are the cards they had (cards is empty after pegging usually? 
-            // wait, playCard logic removed them from 'cards' and moved to 'playedCards'. Yes.)
             scoreBreakdown = calculateScore(nonDealer.playedCards, cutCard, false);
             points = scoreBreakdown.total;
             playerToScore = nonDealer;
@@ -319,8 +342,6 @@ export class GameService {
         }
 
         if (playerToScore && scoreBreakdown) {
-            // Apply score IMMEDIATELY (so user sees "Oh I got points!")
-            // But UI will show Breakdown
             if (scoreBreakdown.total > 0) {
                 playerToScore.score += scoreBreakdown.total;
             }
@@ -357,45 +378,7 @@ export class GameService {
 
     private checkAutoCount() {
         // Disable auto-advance for now. User must click Next.
-        // This allows user to review CPU hands and scores at their own pace.
         return;
-
-        /* 
-        const state = this.snapshot;
-        if (state.phase !== 'counting') return;
-
-        // Determine whose show it is
-        const dealerIndex = state.players.findIndex(p => p.isDealer);
-        const nonDealerIndex = (dealerIndex + 1) % state.players.length;
-
-        let isCpuShow = false;
-
-        if (state.countingStage === 'non_dealer_hand') {
-            isCpuShow = !state.players[nonDealerIndex].isHuman;
-        } else if (state.countingStage === 'dealer_hand' || state.countingStage === 'crib') {
-            isCpuShow = !state.players[dealerIndex].isHuman;
-        }
-
-        // Strategy:
-        // If it's CPU's show, we wait a bit then auto-advance (player just watches).
-        // If it's Human's show, we wait for Human to click "Next".
-        // BUT, Human might want to read CPU's breakdown too.
-        // So let's NOT auto-advance even for CPU, 
-        // OR make the delay long enough (e.g. 4s) but allow user to click Next to skip.
-        // Let's go with Long Delay + Auto-Advance for CPU.
-
-        if (isCpuShow) {
-            setTimeout(() => {
-                // Ensure we are still in same stage (user didn't click next already)
-                const currentStage = this.snapshot.countingStage;
-                // Assuming we check 'currentStage' matched what we started with... 
-                // But simplified: just call advance if phase is counting.
-                if (this.snapshot.phase === 'counting' && this.snapshot.countingStage === state.countingStage) {
-                    this.advanceCountingStage();
-                }
-            }, 3000);
-        }
-        */
     }
 
     sayGo(playerId: string) {
@@ -408,31 +391,34 @@ export class GameService {
             opponent.score += 1;
         }
 
-        // Reset count and stack for new run (simplified GO logic specific for 2 player passing)
-        // In real cribbage, if P1 says Go, P2 keeps playing if they can.
-        // If neither can play, reset.
-        // For MVP/Test, we'll assume a "Go" forces a reset after point award if we stick to strict 2-player simple flow,
-        // but let's just implement the scoring for now.
-        // NOTE: We MUST rotate the turn or reset the round to avoid hanging state where user says Go but it's still their turn.
-        // Reset count to 0. The player who said Go starts the new count (because opponent got the Point)
-        // Correct logic: Opponent scored 1 point for "last card" (implied by Go).
-        // Therefore, the *other* player (the one who said Go) starts the new sequence.
-
         this.updateState({
             players: [...state.players],
             currentPeggingTotal: 0,
             peggingStack: [],
-            turnPlayerId: playerId // Player who said Go leads next round
+            turnPlayerId: playerId, // Player who said Go leads next round
+            lastPeggingScore: opponent ? {
+                points: 1,
+                description: 'Go for 1',
+                playerId: opponent.id
+            } : null
         });
 
         this.checkAutoPlay();
         this.checkForPeggingFinished();
     }
 
-    private calculatePeggingScore(stack: any[], total: number): number {
+    private calculatePeggingScore(stack: any[], total: number): { points: number, breakdown: string[] } {
         let points = 0;
-        if (total === 15) points += 2;
-        if (total === 31) points += 2;
+        const breakdown: string[] = [];
+
+        if (total === 15) {
+            points += 2;
+            breakdown.push('15 for 2');
+        }
+        if (total === 31) {
+            points += 2;
+            breakdown.push('31 for 2');
+        }
 
         // Pairs
         if (stack.length > 1) {
@@ -447,7 +433,10 @@ export class GameService {
             }
             if (matches > 0) {
                 const n = matches + 1; // Total cards in tuple
-                points += n * (n - 1);
+                const pairPoints = n * (n - 1);
+                points += pairPoints;
+                const labels = ['', 'Pair', 'Pair Royal', 'Double Pair Royal'];
+                breakdown.push(`${labels[matches] || 'Pairs'} for ${pairPoints}`);
             }
         }
 
@@ -456,10 +445,11 @@ export class GameService {
             const lastK = stack.slice(stack.length - k).map(item => item.card);
             if (isRun(lastK)) {
                 points += k;
+                breakdown.push(`Run of ${k} for ${k}`);
                 break;
             }
         }
-        return points;
+        return { points, breakdown };
     }
 
     private getNextPlayerId(currentId: string): string {

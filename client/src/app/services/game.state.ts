@@ -45,6 +45,9 @@ export interface GameState {
     countingStage: CountingStage;
     countingScoreBreakdown: ScoreBreakdown | null;
 
+    // Transient UI State
+    lastPeggingScore: { points: number; description: string; playerId: string } | null;
+
     turnPlayerId: string;
     deck: Card[]; // Hidden state, but present for local engine
     winnerId: string | null;
@@ -60,6 +63,7 @@ export const INITIAL_GAME_STATE: GameState = {
     currentPeggingTotal: 0,
     countingStage: 'none',
     countingScoreBreakdown: null,
+    lastPeggingScore: null,
     turnPlayerId: '',
     deck: [],
     winnerId: null

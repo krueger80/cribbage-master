@@ -96,6 +96,19 @@
             <!-- Board / Pegging -->
             <div
                 class="flex-1 flex flex-col items-center justify-center gap-4 bg-amber-800/80 p-4 rounded-xl border-4 border-amber-900 min-h-[200px]">
+                <!-- Score Notification Overlay -->
+                <div *ngIf="state.lastPeggingScore as score"
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-bounce">
+                    <div
+                        class="bg-black/80 px-6 py-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] text-center">
+                        <div class="text-4xl font-bold text-yellow-400 mb-1">+{{ score.points }}</div>
+                        <div class="text-white font-medium whitespace-nowrap">{{ score.description }}</div>
+                        <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">
+                            {{ score.playerId === state.players[0].id ? 'You' : 'Opponent' }}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-amber-100 font-bold text-lg">Total: {{ state.currentPeggingTotal }}</div>
 
                 <!-- Stack -->

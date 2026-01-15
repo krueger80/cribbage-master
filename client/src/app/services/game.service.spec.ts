@@ -200,7 +200,7 @@ describe('GameService', () => {
             const scoreBefore = currentState.players[1].score;
 
             service.playCard(currentState.players[1].id, 0); // Play 5. Total 15.
-            tick(1000); // Flush checkAutoPlay
+            tick(3000); // Flush checkAutoPlay and score highlight
 
             currentState = service.snapshot;
             expect(currentState.players[1].score).toBe(scoreBefore + 2);
@@ -233,6 +233,7 @@ describe('GameService', () => {
             const updatedState = service.snapshot;
             expect(updatedState.peggingStack.length).toBe(3);
             expect(updatedState.players[0].score).toBe(scoreBefore + 3);
+            tick(3000); // Flush timeout for score highlight
 
             // Continue: Play 6. Stack: 3, 5, 4, 6. Run of 4.
             // But check turn rotation first. P0 played, so P1 turn.
@@ -242,10 +243,11 @@ describe('GameService', () => {
             updatedState.turnPlayerId = updatedState.players[0].id; // Force P0 to play 6
             const scoreBefore2 = updatedState.players[0].score;
             service.playCard(updatedState.players[0].id, 0); // Play 6
-            tick(1000);
+            tick(3000); // Flush timeout for score highlight
 
             const finalState = service.snapshot;
             expect(finalState.players[0].score).toBe(scoreBefore2 + 4);
+            tick(3000);
         }));
 
         it('should score 31 correctly and reset stack', fakeAsync(() => {
@@ -267,7 +269,7 @@ describe('GameService', () => {
             expect(currentState.currentPeggingTotal).toBe(0); // Should reset
             expect(currentState.peggingStack.length).toBe(0); // Should clear
             expect(currentState.players[0].score).toBe(scoreBefore + 2); // 2 pts for 31
-            tick(1000); // Flush checkAutoPlay
+            tick(3000); // Flush checkAutoPlay (1s) and score highlight (2s)
         }));
     });
 
