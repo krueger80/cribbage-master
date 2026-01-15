@@ -274,37 +274,128 @@ export class GameService {
     }
 
     private countHands() {
-        this.updateState({ phase: 'counting' });
+        this.updateState({
+            phase: 'counting',
+            countingStage: 'non_dealer_hand'
+        });
+
+        // Start with Non-Dealer Hand
+        this.processCurrentCountingStage();
+    }
+
+    private processCurrentCountingStage() {
         const state = this.snapshot;
         const dealerIndex = state.players.findIndex(p => p.isDealer);
         const nonDealerIndex = (dealerIndex + 1) % state.players.length;
         const cutCard = state.cutCard;
 
-        // 1. Non-Dealer Hand
-        const nonDealer = state.players[nonDealerIndex];
-        const score1 = calculateScore(nonDealer.playedCards, cutCard, false);
-        nonDealer.score += score1.total;
-        console.log(`${nonDealer.name} Hand Score: ${score1.total}`);
+        let scoreBreakdown = null;
+        let points = 0;
+        let playerToScore: Player | null = null;
+        let nextStage: 'dealer_hand' | 'crib' | 'none' = 'none';
 
-        // 2. Dealer Hand
-        const dealer = state.players[dealerIndex];
-        const score2 = calculateScore(dealer.playedCards, cutCard, false);
-        dealer.score += score2.total;
-        console.log(`${dealer.name} Hand Score: ${score2.total}`);
+        if (state.countingStage === 'non_dealer_hand') {
+            const nonDealer = state.players[nonDealerIndex];
+            // Use playedCards because those are the cards they had (cards is empty after pegging usually? 
+            // wait, playCard logic removed them from 'cards' and moved to 'playedCards'. Yes.)
+            scoreBreakdown = calculateScore(nonDealer.playedCards, cutCard, false);
+            points = scoreBreakdown.total;
+            playerToScore = nonDealer;
+            console.log(`${nonDealer.name} Hand Score: ${points}`);
 
-        // 3. Crib (Dealer's)
-        const score3 = calculateScore(state.crib, cutCard, true);
-        dealer.score += score3.total;
-        console.log(`${dealer.name} Crib Score: ${score3.total}`);
+        } else if (state.countingStage === 'dealer_hand') {
+            const dealer = state.players[dealerIndex];
+            scoreBreakdown = calculateScore(dealer.playedCards, cutCard, false);
+            points = scoreBreakdown.total;
+            playerToScore = dealer;
+            console.log(`${dealer.name} Hand Score: ${points}`);
 
-        // Update state with new scores
-        this.updateState({ players: [...state.players] });
+        } else if (state.countingStage === 'crib') {
+            const dealer = state.players[dealerIndex];
+            scoreBreakdown = calculateScore(state.crib, cutCard, true);
+            points = scoreBreakdown.total;
+            playerToScore = dealer;
+            console.log(`${dealer.name} Crib Score: ${points}`);
+        }
 
-        // Wait a bit to show scores then next round
-        // TODO: Interactive UI for this
-        setTimeout(() => {
+        if (playerToScore && scoreBreakdown) {
+            // Apply score IMMEDIATELY (so user sees "Oh I got points!")
+            // But UI will show Breakdown
+            if (scoreBreakdown.total > 0) {
+                playerToScore.score += scoreBreakdown.total;
+            }
+
+            this.updateState({
+                countingScoreBreakdown: scoreBreakdown,
+                players: [...state.players]
+            });
+        }
+
+        this.checkAutoCount();
+    }
+
+    advanceCountingStage() {
+        const state = this.snapshot;
+        let nextStage: any = 'none';
+
+        if (state.countingStage === 'non_dealer_hand') {
+            nextStage = 'dealer_hand';
+        } else if (state.countingStage === 'dealer_hand') {
+            nextStage = 'crib';
+        } else if (state.countingStage === 'crib') {
+            // End of round
             this.nextRound();
-        }, 3000);
+            return;
+        }
+
+        this.updateState({
+            countingStage: nextStage,
+            countingScoreBreakdown: null
+        });
+        this.processCurrentCountingStage();
+    }
+
+    private checkAutoCount() {
+        // Disable auto-advance for now. User must click Next.
+        // This allows user to review CPU hands and scores at their own pace.
+        return;
+
+        /* 
+        const state = this.snapshot;
+        if (state.phase !== 'counting') return;
+
+        // Determine whose show it is
+        const dealerIndex = state.players.findIndex(p => p.isDealer);
+        const nonDealerIndex = (dealerIndex + 1) % state.players.length;
+
+        let isCpuShow = false;
+
+        if (state.countingStage === 'non_dealer_hand') {
+            isCpuShow = !state.players[nonDealerIndex].isHuman;
+        } else if (state.countingStage === 'dealer_hand' || state.countingStage === 'crib') {
+            isCpuShow = !state.players[dealerIndex].isHuman;
+        }
+
+        // Strategy:
+        // If it's CPU's show, we wait a bit then auto-advance (player just watches).
+        // If it's Human's show, we wait for Human to click "Next".
+        // BUT, Human might want to read CPU's breakdown too.
+        // So let's NOT auto-advance even for CPU, 
+        // OR make the delay long enough (e.g. 4s) but allow user to click Next to skip.
+        // Let's go with Long Delay + Auto-Advance for CPU.
+
+        if (isCpuShow) {
+            setTimeout(() => {
+                // Ensure we are still in same stage (user didn't click next already)
+                const currentStage = this.snapshot.countingStage;
+                // Assuming we check 'currentStage' matched what we started with... 
+                // But simplified: just call advance if phase is counting.
+                if (this.snapshot.phase === 'counting' && this.snapshot.countingStage === state.countingStage) {
+                    this.advanceCountingStage();
+                }
+            }, 3000);
+        }
+        */
     }
 
     sayGo(playerId: string) {

@@ -102,7 +102,7 @@ export function calculateScore(hand: Card[], cutCard: Card | null = null, isCrib
     // Crib: Must be 5 cards (hand + cut) of same suit -> 5 points.
     let flushPoints = 0;
     const handSuits = hand.map(c => c.suit);
-    const allSameSuit = handSuits.every(s => s === handSuits[0]);
+    const allSameSuit = hand.length >= 4 && handSuits.every(s => s === handSuits[0]);
 
     if (!isCrib && allSameSuit) {
         flushPoints = 4;

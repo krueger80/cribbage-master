@@ -5,13 +5,61 @@
         }} | Selected: {{ selectedCardIndices.size }}
     </div>
 
-    <!-- Counting Overlay -->
+    <!-- Interactive Counting Board -->
     <div *ngIf="state.phase === 'counting'"
-        class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 pointer-events-none">
-        <div class="text-4xl text-amber-400 font-bold animate-pulse text-center">
-            Counting Points...<br>
-            <span class="text-sm text-white font-normal">Please wait for next round</span>
+        class="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-50">
+        <!-- Header -->
+        <h2 class="text-3xl text-amber-400 font-bold mb-8 animate-fade-in">{{ getCountingTitle(state) }}</h2>
+
+        <!-- Cards Container -->
+        <div class="flex gap-8 mb-8 items-center animate-fade-in">
+            <!-- The Hand -->
+            <div class="flex gap-2">
+                <div *ngFor="let c of getCountingCards(state)" class="playing-card" [ngClass]="getCardClasses(c, -1)">
+                    <span class="text-xl font-bold">{{ c.rank }}</span>
+                    <span class="text-2xl">{{ getSuitSymbol(c.suit) }}</span>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="text-slate-500 font-bold text-2xl">+</div>
+
+            <!-- Cut Card -->
+            <div class="playing-card border-amber-400 border-4" *ngIf="state.cutCard"
+                [ngClass]="getCardClasses(state.cutCard, -1)">
+                <span class="text-xl font-bold">{{ state.cutCard.rank }}</span>
+                <span class="text-2xl">{{ getSuitSymbol(state.cutCard.suit) }}</span>
+            </div>
         </div>
+
+        <!-- Score Breakdown -->
+        <div class="flex flex-col gap-2 mb-8 text-center text-white min-w-[200px] animate-fade-in"
+            *ngIf="state.countingScoreBreakdown as bd">
+            <!-- Details -->
+            <div class="bg-white/10 p-4 rounded-lg">
+                <div *ngIf="bd.fifteens > 0" class="flex justify-between text-lg"><span>15s</span> <span
+                        class="text-amber-400 font-bold">+{{ bd.fifteens }}</span></div>
+                <div *ngIf="bd.pairs > 0" class="flex justify-between text-lg"><span>Pairs</span> <span
+                        class="text-amber-400 font-bold">+{{ bd.pairs }}</span></div>
+                <div *ngIf="bd.runs > 0" class="flex justify-between text-lg"><span>Runs</span> <span
+                        class="text-amber-400 font-bold">+{{ bd.runs }}</span></div>
+                <div *ngIf="bd.flush > 0" class="flex justify-between text-lg"><span>Flush</span> <span
+                        class="text-amber-400 font-bold">+{{ bd.flush }}</span></div>
+                <div *ngIf="bd.nobs > 0" class="flex justify-between text-lg"><span>Nobs</span> <span
+                        class="text-amber-400 font-bold">+{{ bd.nobs }}</span></div>
+                <div *ngIf="bd.total === 0" class="text-slate-400 italic">No Points</div>
+            </div>
+
+            <div class="text-4xl font-bold mt-4 pt-2 flex justify-between items-center border-t border-slate-600">
+                <span>Total:</span> <span class="text-green-400">{{ bd.total }}</span>
+            </div>
+        </div>
+
+        <!-- Next Button -->
+        <button (click)="advanceCounting()"
+            class="px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all transform hover:scale-105 active:scale-95">
+            Next >
+        </button>
     </div>
 
     <div class="flex flex-col h-full gap-8">

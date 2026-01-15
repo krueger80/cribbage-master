@@ -1,0 +1,30 @@
+
+> client@0.0.0 test
+> ng test --watch=false --browsers=ChromeHeadless
+
+Node.js version v25.2.1 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+- Generating browser application bundles (phase: setup)...
+Γ£ö Browser application bundle generation complete.
+[32m14 01 2026 19:18:22.021:INFO [karma-server]: [39mKarma v6.4.4 server started at http://localhost:9876/
+[32m14 01 2026 19:18:22.023:INFO [launcher]: [39mLaunching browsers ChromeHeadless with concurrency unlimited
+[32m14 01 2026 19:18:22.029:INFO [launcher]: [39mStarting browser ChromeHeadless
+[32m14 01 2026 19:18:23.786:INFO [Chrome Headless 143.0.0.0 (Windows 10)]: [39mConnected on socket FjH9ERc6YrkVPPj1AAAB with id 11272654
+Chrome Headless 143.0.0.0 (Windows 10): Executed 0 of 13[32m SUCCESS[39m (0 secs / 0 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 1 of 13[32m SUCCESS[39m (0 secs / 0.016 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 2 of 13[32m SUCCESS[39m (0 secs / 0.02 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 3 of 13[32m SUCCESS[39m (0 secs / 0.023 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 4 of 13[32m SUCCESS[39m (0 secs / 0.026 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 5 of 13[32m SUCCESS[39m (0 secs / 0.029 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 6 of 13[32m SUCCESS[39m (0 secs / 0.032 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 7 of 13[32m SUCCESS[39m (0 secs / 0.034 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 8 of 13[32m SUCCESS[39m (0 secs / 0.036 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 9 of 13[32m SUCCESS[39m (0 secs / 0.039 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 10 of 13[32m SUCCESS[39m (0 secs / 0.042 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 11 of 13[32m SUCCESS[39m (0 secs / 0.045 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 12 of 13[32m SUCCESS[39m (0 secs / 0.046 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 13 of 13[32m SUCCESS[39m (0 secs / 0.048 secs)
+[1A[2KChrome Headless 143.0.0.0 (Windows 10): Executed 13 of 13[32m SUCCESS[39m (0.064 secs / 0.048 secs)
+[32mTOTAL: 13 SUCCESS[39m
+Γ£ö Browser application bundle generation complete.
+Γ£ö Browser application bundle generation complete.

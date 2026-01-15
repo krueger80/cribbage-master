@@ -269,25 +269,112 @@ describe('GameService', () => {
             expect(currentState.players[0].score).toBe(scoreBefore + 2); // 2 pts for 31
             tick(1000); // Flush checkAutoPlay
         }));
+    });
 
-        it('should handle "Go" correctly', fakeAsync(() => {
+    describe('Counting Phase', () => {
+        beforeEach(() => {
+            service.initGame();
             const state = service.snapshot;
-            state.currentPeggingTotal = 30;
-            // P0 has a 5 (cannot play).
-            state.players[0].cards = [{ rank: '5', suit: 'C', value: 5, order: 5 } as any];
-            state.turnPlayerId = state.players[0].id;
+            // Setup for counting: Cut card J, P1 Dealer
+            state.cutCard = { rank: 'J', suit: 'H', value: 10, order: 11 } as any;
+            state.players[0].isDealer = true;
+            state.players[1].isDealer = false;
 
-            // P1 is the one who will get the point because P0 says Go
-            const scoreBefore = state.players[1].score;
+            // P1 Hand (Dealer): 5, 5, 5, K (15-2 x 3? No, 5+5+5=15. 5+K=15. Pairs.)
+            // Let's use simple: 5, 10, K, Q. 
+            // 5+10(+J)=20. 5+K(+J)=20. 5+Q(+J)=20. No 15s.
+            // Let's use 5H, 5D, 5S, 5C. + Cut J. -> 29? No, J is cut. so 5,5,5,5 + J.
+            // 5s = 12 (pairs) + 8 (15s if J=10? 5+J=15 x 4 = 8). 12+8+1(nobs? No J is cut). = 20? 
+            // Actually, let's keep it simple.
+            // P2 (Non-Dealer): A, 2, 3, 4. + J cut. 
+            // run of 4? No, A,2,3,4 is run of 4 (4 pts). 
+            // 15s: 1+4+10=15 (2), 2+3+10=15 (2), 1+2+3+4+???
+            // Let's manually set playedCards.
 
-            service.sayGo(state.players[0].id);
+            const jack = { rank: 'J', suit: 'H', value: 10, order: 11 } as any;
+            // 4 Fives of diff suits
+            const fiveD = { rank: '5', suit: 'D', value: 5, order: 5 } as any;
+            const fiveH = { rank: '5', suit: 'H', value: 5, order: 5 } as any;
+            const fiveS = { rank: '5', suit: 'S', value: 5, order: 5 } as any;
+            const fiveC = { rank: '5', suit: 'C', value: 5, order: 5 } as any;
 
-            const updatedState = service.snapshot;
-            expect(updatedState.players[1].score).toBe(scoreBefore + 1);
-            expect(updatedState.currentPeggingTotal).toBe(0); // Should reset
-            // User said Go (conceding point to P1), so User should lead new round
-            expect(updatedState.turnPlayerId).toBe(state.players[0].id);
-            tick(1000); // Flush checkAutoPlay
+            // Non-Dealer (P2)
+            state.players[1].playedCards = [fiveD, fiveH, fiveS, fiveC];
+            // 15s: 5+10(J) = 15. 4 combinations. 8 pts.
+            // 5+5+5 = 15. 4 combinations. 8 pts.
+            // Pairs: 4C2 = 6. 12 pts.
+            // Total: 28 pts. (Double Pairs Royal + 15s)
+
+            // Dealer (P1)
+            state.players[0].playedCards = [{ rank: 'A', suit: 'S', value: 1, order: 1 } as any]; // Just Ace
+            // Score: 1+10(J) = 11. No points.
+
+            // Crib
+            state.crib = [{ rank: '5', suit: 'S', value: 5, order: 5 } as any]; // Just 5
+            // Score: 5+10 = 15 (2 pts).
+
+            // Force phase transition
+            state.phase = 'pegging';
+            state.players.forEach(p => p.cards = []); // Empty hands
+            service['checkForPeggingFinished'](); // Trigger transition
+        });
+
+        it('should step through counting stages correctly', fakeAsync(() => {
+            let state = service.snapshot;
+            expect(state.phase).toBe('counting');
+            expect(state.countingStage).toBe('non_dealer_hand');
+
+            // Verify Non-Dealer (P2) Score
+            // 4 Fives + Jack Cut.
+            // Pairs 6 (12). 15s (16). Total 28.
+            expect(state.players[1].score).toBe(28);
+            expect(state.players[0].score).toBe(0); // Dealer 0 yet.
+
+            // Advance to Dealer
+            service.advanceCountingStage();
+            state = service.snapshot;
+            expect(state.countingStage).toBe('dealer_hand');
+
+            // Verify Dealer (P1) Score. Ace + J. 0.
+            expect(state.players[0].score).toBe(0);
+
+            // Advance to Crib
+            service.advanceCountingStage();
+            state = service.snapshot;
+            expect(state.countingStage).toBe('crib');
+
+            // Verify Crib Score. 5 + J = 15 (2).
+            // Dealer gets crib points.
+            expect(state.players[0].score).toBe(2);
+
+            // Advance to Finish
+            service.advanceCountingStage();
+            state = service.snapshot;
+            // nextRound calls dealRound immediately, which sets phase to discarding
+            expect(state.phase).toBe('discarding');
+            tick(4000); // Flush timers
         }));
     });
+
+
+    it('should handle "Go" correctly', fakeAsync(() => {
+        service.initGame(); // Initialize game state 
+        const state = service.snapshot;
+        state.currentPeggingTotal = 30;
+        // P0 has a 5 (cannot play).
+        state.players[0].cards = [{ rank: '5', suit: 'C', value: 5, order: 5 } as any];
+        state.turnPlayerId = state.players[0].id;
+
+        // P1 is the one who will get the point because P0 says Go
+        const scoreBefore = state.players[1].score;
+
+        service.sayGo(state.players[0].id);
+
+        const updatedState = service.snapshot;
+        expect(updatedState.players[1].score).toBe(scoreBefore + 1);
+        expect(updatedState.currentPeggingTotal).toBe(0); // Should reset
+        // User said Go (conceding point to P1), so User should lead new round
+        expect(updatedState.turnPlayerId).toBe(state.players[0].id);
+        tick(1000); // Flush checkAutoPlay
+    }));
 });

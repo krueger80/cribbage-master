@@ -76,4 +76,36 @@ export class GameTableComponent implements OnInit {
     const map: any = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
     return map[suit] || '?';
   }
+
+  // Counting Phase Helpers
+  getCountingCards(state: GameState): any[] {
+    if (state.countingStage === 'non_dealer_hand') {
+      const dealerIndex = state.players.findIndex(p => p.isDealer);
+      const nonDealerIndex = (dealerIndex + 1) % state.players.length;
+      return state.players[nonDealerIndex].playedCards;
+    } else if (state.countingStage === 'dealer_hand') {
+      const dealer = state.players.find(p => p.isDealer);
+      return dealer ? dealer.playedCards : [];
+    } else if (state.countingStage === 'crib') {
+      return state.crib;
+    }
+    return [];
+  }
+
+  getCountingTitle(state: GameState): string {
+    if (state.countingStage === 'non_dealer_hand') {
+      const dealerIndex = state.players.findIndex(p => p.isDealer);
+      const nonDealerIndex = (dealerIndex + 1) % state.players.length;
+      return `${state.players[nonDealerIndex].name}'s Hand`;
+    } else if (state.countingStage === 'dealer_hand') {
+      return "Dealer's Hand";
+    } else if (state.countingStage === 'crib') {
+      return "Dealer's Crib";
+    }
+    return '';
+  }
+
+  advanceCounting() {
+    this.gameService.advanceCountingStage();
+  }
 }

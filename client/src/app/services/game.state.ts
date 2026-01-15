@@ -1,6 +1,7 @@
-import { Card } from '../logic/cards';
+import { Card, ScoreBreakdown } from '../logic/cards';
 
 export type GamePhase = 'setup' | 'dealing' | 'discarding' | 'cutting' | 'pegging' | 'counting' | 'gameover';
+export type CountingStage = 'none' | 'non_dealer_hand' | 'dealer_hand' | 'crib';
 
 export interface Player {
     id: string;
@@ -40,6 +41,10 @@ export interface GameState {
     peggingHistory: PeggingEntry[][]; // Previous 31 sequences in this hand (for display)
     currentPeggingTotal: number;
 
+    // Counting State
+    countingStage: CountingStage;
+    countingScoreBreakdown: ScoreBreakdown | null;
+
     turnPlayerId: string;
     deck: Card[]; // Hidden state, but present for local engine
     winnerId: string | null;
@@ -53,6 +58,8 @@ export const INITIAL_GAME_STATE: GameState = {
     peggingStack: [],
     peggingHistory: [],
     currentPeggingTotal: 0,
+    countingStage: 'none',
+    countingScoreBreakdown: null,
     turnPlayerId: '',
     deck: [],
     winnerId: null
