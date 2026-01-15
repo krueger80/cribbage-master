@@ -181,6 +181,8 @@ export class GameService {
 
 
     private cutDeck() {
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
         const deck = this.snapshot.deck;
         const cutCard = deck.pop()!; // Simply take top for now
 
@@ -189,9 +191,12 @@ export class GameService {
         if (cutCard.rank === 'J') {
             const dealer = this.snapshot.players.find(p => p.isDealer);
             if (dealer) {
-                dealer.score += 2;
+                this.addPoints(dealer.id, 2);
             }
         }
+
+        // Check again if game over after His Heels
+        if ((this.snapshot.phase as any) === 'gameover') return;
 
         this.updateState({
             cutCard,
@@ -214,6 +219,7 @@ export class GameService {
 
     playCard(playerId: string, cardIndex: number): string {
         const state = this.snapshot;
+        if ((state.phase as any) === 'gameover') return 'GAME_OVER';
         if (state.phase !== 'pegging') return 'INVALID_PHASE';
         if (state.turnPlayerId !== playerId) return 'NOT_YOUR_TURN';
 
@@ -244,13 +250,15 @@ export class GameService {
         // 4. Score
         const scoreResult = this.calculatePeggingScore(newStack, newTotal);
         if (scoreResult.points > 0) {
-            const p = state.players.find(p => p.id === playerId);
-            if (p) p.score += scoreResult.points;
+            this.addPoints(playerId, scoreResult.points);
         }
 
         // 5. Update State
+        // If game over, stop here (addPoints handles phase change)
+        if ((this.snapshot.phase as any) === 'gameover') return 'GAME_OVER';
+
         this.updateState({
-            players: [...state.players],
+            players: [...state.players], // addPoints mutates object, we just emit new array reference
             currentPeggingTotal: newTotal === 31 ? 0 : newTotal, // Reset if 31
             peggingStack: newTotal === 31 ? [] : newStack, // Clear stack if 31
             turnPlayerId: this.getNextPlayerId(playerId),
@@ -264,20 +272,7 @@ export class GameService {
         // Clear the score message after a delay
         if (scoreResult.points > 0) {
             setTimeout(() => {
-                // Only clear if it's the same message (simple check)
-                // Actually, just clearing is fine, user will see it for 2s.
-                // But we must be careful not to clear a SUBSEQUENT message.
-                // Let's rely on UI to handle fade out, or just clear after fixed time?
-                // Better: Just set it. New event overwrites. 
-                // We clear it when next turn starts? No, that's too fast.
-                // Let's leave it in state, UI can decide when to hide it (CSS fade).
-                // But we should probably clear it on NEXT play so it doesn't persist forever if no one scores.
-                // Actually, let's clear it after 2 seconds here to keep state clean.
-                // this.updateState({ lastPeggingScore: null });
-                // EDIT: Can't easily modify state in timeout without risk. 
-                // Let's just leave it, but we need to ensure we RESET it on every playCard call start?
-                // No, we overwrite it above. 
-                // If 0 points, we explicitly set it to null. Correct.
+                // ... (existing logic)
             }, 2000);
         }
 
@@ -299,6 +294,7 @@ export class GameService {
     }
 
     private countHands() {
+        if ((this.snapshot.phase as any) === 'gameover') return;
         this.updateState({
             phase: 'counting',
             countingStage: 'non_dealer_hand'
@@ -309,6 +305,9 @@ export class GameService {
     }
 
     private processCurrentCountingStage() {
+        // If game is over, do nothing
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
         const state = this.snapshot;
         const dealerIndex = state.players.findIndex(p => p.isDealer);
         const nonDealerIndex = (dealerIndex + 1) % state.players.length;
@@ -343,8 +342,11 @@ export class GameService {
 
         if (playerToScore && scoreBreakdown) {
             if (scoreBreakdown.total > 0) {
-                playerToScore.score += scoreBreakdown.total;
+                this.addPoints(playerToScore.id, scoreBreakdown.total);
             }
+
+            // Check win condition again before updating UI to show breakdown
+            if ((this.snapshot.phase as any) === 'gameover') return;
 
             this.updateState({
                 countingScoreBreakdown: scoreBreakdown,
@@ -356,6 +358,8 @@ export class GameService {
     }
 
     advanceCountingStage() {
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
         const state = this.snapshot;
         let nextStage: any = 'none';
 
@@ -382,14 +386,18 @@ export class GameService {
     }
 
     sayGo(playerId: string) {
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
         // Opponent gets 1 point
         const state = this.snapshot;
         const opponentId = this.getNextPlayerId(playerId);
         const opponent = state.players.find(p => p.id === opponentId);
 
         if (opponent) {
-            opponent.score += 1;
+            this.addPoints(opponent.id, 1);
         }
+
+        if ((this.snapshot.phase as any) === 'gameover') return;
 
         this.updateState({
             players: [...state.players],
@@ -450,6 +458,38 @@ export class GameService {
             }
         }
         return { points, breakdown };
+    }
+
+    private addPoints(playerId: string, points: number) {
+        if (points <= 0) return;
+
+        const state = this.snapshot;
+        // Do not add points if game is already over
+        if (state.phase === 'gameover') return;
+
+        const player = state.players.find(p => p.id === playerId);
+        if (!player) return;
+
+        player.score += points;
+
+        // Win Condition
+        if (player.score >= 121) {
+            this.updateState({
+                phase: 'gameover',
+                winnerId: playerId,
+                players: [...state.players] // Trigger update
+            });
+        }
+
+        // Note: We don't call updateState here for just score unless we want to trigger discrete partial updates,
+        // but usually the caller calls updateState. However, since 'players' is an array of objects, mutating 'player.score'
+        // mutates the object inside the array. 
+        // We should ensure callers call updateState to emit the new state.
+        // Or we can call it here. Let's rely on callers for now to bundle updates, except for gameover.
+    }
+
+    restartGame() {
+        this.initGame(['Player 1', 'CPU']);
     }
 
     private getNextPlayerId(currentId: string): string {

@@ -378,5 +378,33 @@ describe('GameService', () => {
         // User said Go (conceding point to P1), so User should lead new round
         expect(updatedState.turnPlayerId).toBe(state.players[0].id);
         tick(1000); // Flush checkAutoPlay
+        expect(updatedState.turnPlayerId).toBe(state.players[0].id);
+        tick(1000); // Flush checkAutoPlay
     }));
+
+    describe('Game Over Logic', () => {
+        it('should trigger Game Over when player reaches 121 points', () => {
+            service.initGame();
+            const state = service.snapshot;
+            state.phase = 'pegging'; // Force phase
+
+            // Set Player 1 score to 120
+            state.players[0].score = 120;
+            state.players[0].cards = [{ rank: 'A', suit: 'S', value: 1, order: 1 } as any];
+            state.turnPlayerId = state.players[0].id;
+
+            // Play A (1 point? No, just plays card. Need to score.)
+            // Let's create a scenario where they score.
+            // Stack has 30. Play A. Total 31 (2 points). 
+            state.currentPeggingTotal = 30;
+            state.peggingStack = [{ card: { rank: 'K', suit: 'H', value: 10, order: 13 } as any, playerId: 'p2' }]; // Dummy stack
+
+            service.playCard(state.players[0].id, 0);
+
+            const finalState = service.snapshot;
+            expect(finalState.players[0].score).toBe(122); // 120 + 2
+            expect(finalState.phase).toBe('gameover');
+            expect(finalState.winnerId).toBe(state.players[0].id);
+        });
+    });
 });

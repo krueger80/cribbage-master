@@ -108,4 +108,8 @@ export class GameTableComponent implements OnInit {
   advanceCounting() {
     this.gameService.advanceCountingStage();
   }
+
+  restartGame() {
+    this.gameService.restartGame();
+  }
 }
