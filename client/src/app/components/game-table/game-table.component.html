@@ -1,4 +1,5 @@
-<div *ngIf="state$ | async as state" class="p-4 bg-green-900 min-h-screen text-white font-sans relative">
+<div *ngIf="state$ | async as state"
+    class="p-4 bg-green-900 min-h-screen text-white font-sans relative overflow-x-hidden">
 
     <!-- Victory Screen -->
     <div *ngIf="state.phase === 'gameover'"
@@ -243,7 +244,7 @@
                 <h3 class="font-bold mb-2">{{ getPlayerNameKey(bottomPlayer.name) | translate }} ({{ 'GAME.SCORE' |
                     translate }}: {{
                     bottomPlayer.score }})</h3>
-                <div class="flex gap-2">
+                <div class="flex -space-x-4 md:space-x-2">
                     <!-- Player Cards -->
                     <div *ngFor="let c of bottomPlayer.cards; let i = index" (click)="onCardClick(i)"
                         class="playing-card" [ngClass]="getCardClasses(c, i)">
