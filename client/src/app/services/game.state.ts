@@ -30,6 +30,12 @@ export interface PeggingEntry {
     playerId: string;
 }
 
+export interface AllCountingResults {
+    nonDealer: ScoreBreakdown;
+    dealer: ScoreBreakdown;
+    crib: ScoreBreakdown;
+}
+
 export interface GameState {
     phase: GamePhase;
     players: Player[];
@@ -42,8 +48,9 @@ export interface GameState {
     currentPeggingTotal: number;
 
     // Counting State
-    countingStage: CountingStage;
-    countingScoreBreakdown: ScoreBreakdown | null;
+    // countingStage: CountingStage; // DEPRECATED - Logic handled by Local Component + AllResults
+    // countingScoreBreakdown: ScoreBreakdown | null; // DEPRECATED
+    countingResults?: AllCountingResults;
     countingReady?: { [playerId: string]: boolean };
 
     // Transient UI State
@@ -67,8 +74,10 @@ export const INITIAL_GAME_STATE: GameState = {
     peggingStack: [],
     peggingHistory: [],
     currentPeggingTotal: 0,
-    countingStage: 'none',
-    countingScoreBreakdown: null,
+    // countingStage: 'none',
+    // countingScoreBreakdown: null,
+    countingResults: undefined,
+    countingReady: {},
     lastPeggingScore: null,
     turnPlayerId: '',
     deck: [],

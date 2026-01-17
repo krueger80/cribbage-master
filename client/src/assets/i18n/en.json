@@ -56,7 +56,10 @@
         "LOADING": "Loading history...",
         "NO_HISTORY": "No history available yet.",
         "ORIGINAL_HAND": "Original Hand",
-        "DISCARDED": "Discarded",
+        "DISCONNECTED": "Disconnected",
+        "WAITING_HOST": "Waiting for Host..."
+    },
+    "ANALYSIS": {
         "REANALYZE": "Re-analyze"
     },
     "LOBBY": {

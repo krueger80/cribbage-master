@@ -56,7 +56,10 @@
         "LOADING": "Chargement de l'historique...",
         "NO_HISTORY": "Aucun historique disponible.",
         "ORIGINAL_HAND": "Main originale",
-        "DISCARDED": "Défaussé",
+        "DISCONNECTED": "Déconnecté",
+        "WAITING_HOST": "En attente de l'hôte..."
+    },
+    "ANALYSIS": {
         "REANALYZE": "Ré-analyser"
     },
     "LOBBY": {
