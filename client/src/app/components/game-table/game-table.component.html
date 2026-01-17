@@ -182,14 +182,16 @@
                 class="w-full md:flex-1 flex flex-col items-center justify-center gap-4 bg-amber-800/90 p-4 rounded-xl border-4 border-amber-900 shadow-inner min-h-[240px] relative">
 
                 <!-- Score Notification Overlay -->
+                <!-- Fixed position to ensure visibility and prevent layout shifting -->
                 <div *ngIf="state.lastPeggingScore as score"
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-bounce w-full flex justify-center">
+                    class="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none">
                     <div
-                        class="bg-black/80 px-6 py-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] text-center backdrop-blur-md">
-                        <div class="text-4xl font-bold text-yellow-400 mb-1">+{{ score.points }}</div>
-                        <div class="text-white font-medium whitespace-nowrap">{{ score.description }}</div>
-                        <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">
-                            {{ score.playerId === bottomPlayer.id ? 'You' : 'Opponent' }}
+                        class="animate-bounce bg-black/90 px-8 py-6 rounded-2xl border-4 border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)] text-center backdrop-blur-md transform scale-110">
+                        <div class="text-5xl font-black text-yellow-400 mb-2 drop-shadow-md">+{{ score.points }}</div>
+                        <div class="text-white font-bold text-xl whitespace-nowrap">{{ score.description }}</div>
+                        <div class="text-xs text-yellow-200/60 mt-2 uppercase tracking-widest font-bold">
+                            {{ score.playerId === bottomPlayer.id ? ('GAME.YOU' | translate) : ('GAME.OPPONENT' |
+                            translate) }}
                         </div>
                     </div>
                 </div>
