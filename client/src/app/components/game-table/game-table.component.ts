@@ -4,10 +4,12 @@ import { GameService } from '../../services/game.service';
 import { GameState } from '../../services/game.state';
 import { Observable } from 'rxjs';
 
+import { TranslateModule } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-game-table',
   standalone: true,
-  imports: [CommonModule], // Add CommonModule
+  imports: [CommonModule, TranslateModule],
   templateUrl: './game-table.component.html',
   styleUrl: './game-table.component.css'
 })
@@ -48,7 +50,13 @@ export class GameTableComponent implements OnInit {
   }
 
   onCardClick(playerId: string, cardIndex: number, phase: string) {
+    // Safety check: ensure we are clicking our own cards
+    if (playerId !== this.bottomPlayer.id) return;
+
     if (phase === 'discarding') {
+      // If we already discarded (have 4 cards), stop selection
+      if (this.bottomPlayer.cards.length <= 4) return;
+
       this.toggleSelection(cardIndex);
     } else if (phase === 'pegging') {
       const state = this.gameService.snapshot;

@@ -29,7 +29,8 @@
         "EMAIL": "Courriel",
         "PASSWORD": "Mot de passe",
         "SIGN_IN_GOOGLE": "Se connecter avec Google",
-        "OR": "OU"
+        "OR": "OU",
+        "GAME": "Jeu"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Sélectionnez votre main",
@@ -56,5 +57,33 @@
         "ORIGINAL_HAND": "Main originale",
         "DISCARDED": "Défaussé",
         "REANALYZE": "Ré-analyser"
+    },
+    "LOBBY": {
+        "TITLE": "Lobby Multijoueur",
+        "CREATE_GAME": "Créer une partie",
+        "CREATING": "Création...",
+        "LOGGING_IN": "Connexion...",
+        "REFRESH": "Actualiser",
+        "WAITING_GAMES": "Parties en attente",
+        "NO_GAMES": "Aucune partie. Créez-en une !",
+        "HOST": "Hôte",
+        "JOIN": "Rejoindre",
+        "ID": "ID"
+    },
+    "GAME": {
+        "TOTAL": "Total",
+        "NEXT": "Suivant >",
+        "WAITING_OPPONENT": "En attente de l'adversaire...",
+        "OPPONENT_THINKING": "L'adversaire réfléchit...",
+        "VICTORY": "VICTOIRE !",
+        "DEFEAT": "DÉFAITE",
+        "VICTORY_MSG": "Vous avez atteint 121 points !",
+        "DEFEAT_MSG": "L'adversaire a atteint 121 points.",
+        "PLAY_AGAIN": "Rejouer",
+        "DECK": "Pioche",
+        "TABLE_EMPTY": "Table vide",
+        "CONFIRM_DISCARD": "Confirmer l'écart",
+        "SAY_GO": "Dire Go !",
+        "YOUR_TURN": "À vous de jouer"
     }
 }

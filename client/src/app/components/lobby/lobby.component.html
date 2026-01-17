@@ -1,33 +1,34 @@
 <div class="lobby-container">
     <div class="header">
-        <h1>Multiplayer Lobby</h1>
+        <h1>{{ 'LOBBY.TITLE' | translate }}</h1>
         <div class="user-info" *ngIf="userId">
-            <small>ID: {{ userId.slice(0, 8) }}...</small>
+            <small>{{ 'LOBBY.ID' | translate }}: {{ userId.slice(0, 8) }}...</small>
         </div>
     </div>
 
     <div class="actions">
         <button class="btn-create" (click)="createGame()" [disabled]="loading || !userId">
-            {{ loading ? 'Creating...' : (!userId ? 'Logging in...' : 'Create New Game') }}
+            {{ loading ? ('LOBBY.CREATING' | translate) : (!userId ? ('LOBBY.LOGGING_IN' | translate) :
+            ('LOBBY.CREATE_GAME' | translate)) }}
         </button>
         <button class="btn-refresh" (click)="refreshGames()" [disabled]="loading">
-            Refresh List
+            {{ 'LOBBY.REFRESH' | translate }}
         </button>
     </div>
 
     <div class="games-list">
-        <h2>Waiting Games</h2>
+        <h2>{{ 'LOBBY.WAITING_GAMES' | translate }}</h2>
 
         <div class="empty-state" *ngIf="waitingGames.length === 0 && !loading">
-            No games waiting. Create one!
+            {{ 'LOBBY.NO_GAMES' | translate }}
         </div>
 
         <div class="game-card" *ngFor="let game of waitingGames">
             <div class="game-info">
-                <span class="host-name">Host: {{ game.host_id.slice(0,8) }}...</span>
+                <span class="host-name">{{ 'LOBBY.HOST' | translate }}: {{ game.host_id.slice(0,8) }}...</span>
                 <span class="date">{{ game.created_at | date:'shortTime' }}</span>
             </div>
-            <button class="btn-join" (click)="joinGame(game.id)">Join</button>
+            <button class="btn-join" (click)="joinGame(game.id)">{{ 'LOBBY.JOIN' | translate }}</button>
         </div>
     </div>
 

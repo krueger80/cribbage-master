@@ -29,7 +29,8 @@
         "EMAIL": "Email",
         "PASSWORD": "Password",
         "SIGN_IN_GOOGLE": "Sign in with Google",
-        "OR": "OR"
+        "OR": "OR",
+        "GAME": "Game"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Select Your Hand",
@@ -56,5 +57,33 @@
         "ORIGINAL_HAND": "Original Hand",
         "DISCARDED": "Discarded",
         "REANALYZE": "Re-analyze"
+    },
+    "LOBBY": {
+        "TITLE": "Multiplayer Lobby",
+        "CREATE_GAME": "Create New Game",
+        "CREATING": "Creating...",
+        "LOGGING_IN": "Logging in...",
+        "REFRESH": "Refresh List",
+        "WAITING_GAMES": "Waiting Games",
+        "NO_GAMES": "No games waiting. Create one!",
+        "HOST": "Host",
+        "JOIN": "Join",
+        "ID": "ID"
+    },
+    "GAME": {
+        "TOTAL": "Total",
+        "NEXT": "Next >",
+        "WAITING_OPPONENT": "Waiting for Opponent...",
+        "OPPONENT_THINKING": "Opponent thinking...",
+        "VICTORY": "VICTORY!",
+        "DEFEAT": "DEFEAT",
+        "VICTORY_MSG": "You reached 121 points first!",
+        "DEFEAT_MSG": "The Opponent reached 121 points first.",
+        "PLAY_AGAIN": "Play Again",
+        "DECK": "Deck",
+        "TABLE_EMPTY": "Table Empty",
+        "CONFIRM_DISCARD": "Confirm Discard",
+        "SAY_GO": "Say Go!",
+        "YOUR_TURN": "Your Turn"
     }
 }

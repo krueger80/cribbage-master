@@ -4,12 +4,13 @@ import { SupabaseService } from '../../services/supabase.service';
 
 import { GameService } from '../../services/game.service';
 import { ToastService } from '../../services/toast.service';
+import { TranslateModule } from '@ngx-translate/core';
 import { Subscription, take } from 'rxjs';
 
 @Component({
     selector: 'app-lobby',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslateModule],
     templateUrl: './lobby.component.html',
     styleUrls: ['./lobby.component.css']
 })
