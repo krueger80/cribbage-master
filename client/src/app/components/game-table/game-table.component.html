@@ -24,7 +24,8 @@
                 [class.shadow-[0_0_30px_rgba(250,204,21,0.2)]]="p.id === state.winnerId">
                 <div class="text-4xl font-bold mb-2" [class.text-yellow-400]="p.id === state.winnerId">{{ p.score }}
                 </div>
-                <div class="text-sm uppercase tracking-wider text-slate-400">{{ p.name }}</div>
+                <div class="text-sm uppercase tracking-wider text-slate-400">{{ getPlayerNameKey(p.name) | translate }}
+                </div>
             </div>
         </div>
 
@@ -36,15 +37,21 @@
 
     <!-- Debug Info -->
     <div class="mb-4 p-2 bg-black/50 text-xs font-mono">
-        Phase: {{ state.phase }} | Dealer: {{ bottomPlayer.isDealer ? bottomPlayer.name : topPlayer.name }}
-        | Turn: {{ state.turnPlayerId }} | My ID: {{ bottomPlayer.id }}
+        {{ 'GAME.PHASE' | translate }}: {{ ('GAME.PHASE_' + state.phase.toUpperCase()) | translate }} | {{ 'APP.DEALER'
+        | translate }}: {{ getPlayerNameKey(bottomPlayer.isDealer ? bottomPlayer.name : topPlayer.name) | translate }}
+        | {{ 'GAME.TURN' | translate }}: {{ state.turnPlayerId }} | {{ 'GAME.MY_ID' | translate }}: {{ bottomPlayer.id
+        }}
     </div>
 
     <!-- Interactive Counting Board -->
     <div *ngIf="state.phase === 'counting'"
         class="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-50">
         <!-- Header -->
-        <h2 class="text-3xl text-amber-400 font-bold mb-8 animate-fade-in">{{ getCountingTitle(state) }}</h2>
+        <h2 class="text-3xl text-amber-400 font-bold mb-8 animate-fade-in">
+            <ng-container *ngIf="getCountingTitle(state) as title">
+                {{ title.key | translate:title.params }}
+            </ng-container>
+        </h2>
 
         <!-- Cards Container -->
         <div class="flex gap-8 mb-8 items-center animate-fade-in">
@@ -72,17 +79,17 @@
             *ngIf="state.countingScoreBreakdown as bd">
             <!-- Details -->
             <div class="bg-white/10 p-4 rounded-lg">
-                <div *ngIf="bd.fifteens > 0" class="flex justify-between text-lg"><span>15s</span> <span
-                        class="text-amber-400 font-bold">+{{ bd.fifteens }}</span></div>
-                <div *ngIf="bd.pairs > 0" class="flex justify-between text-lg"><span>Pairs</span> <span
-                        class="text-amber-400 font-bold">+{{ bd.pairs }}</span></div>
-                <div *ngIf="bd.runs > 0" class="flex justify-between text-lg"><span>Runs</span> <span
-                        class="text-amber-400 font-bold">+{{ bd.runs }}</span></div>
-                <div *ngIf="bd.flush > 0" class="flex justify-between text-lg"><span>Flush</span> <span
-                        class="text-amber-400 font-bold">+{{ bd.flush }}</span></div>
-                <div *ngIf="bd.nobs > 0" class="flex justify-between text-lg"><span>Nobs</span> <span
-                        class="text-amber-400 font-bold">+{{ bd.nobs }}</span></div>
-                <div *ngIf="bd.total === 0" class="text-slate-400 italic">No Points</div>
+                <div *ngIf="bd.fifteens > 0" class="flex justify-between text-lg"><span>{{ 'ANALYSIS_VIEW.FIFTEENS' |
+                        translate }}</span> <span class="text-amber-400 font-bold">+{{ bd.fifteens }}</span></div>
+                <div *ngIf="bd.pairs > 0" class="flex justify-between text-lg"><span>{{ 'ANALYSIS_VIEW.PAIRS' |
+                        translate }}</span> <span class="text-amber-400 font-bold">+{{ bd.pairs }}</span></div>
+                <div *ngIf="bd.runs > 0" class="flex justify-between text-lg"><span>{{ 'ANALYSIS_VIEW.RUNS' | translate
+                        }}</span> <span class="text-amber-400 font-bold">+{{ bd.runs }}</span></div>
+                <div *ngIf="bd.flush > 0" class="flex justify-between text-lg"><span>{{ 'ANALYSIS_VIEW.FLUSH' |
+                        translate }}</span> <span class="text-amber-400 font-bold">+{{ bd.flush }}</span></div>
+                <div *ngIf="bd.nobs > 0" class="flex justify-between text-lg"><span>{{ 'ANALYSIS_VIEW.NOBS' | translate
+                        }}</span> <span class="text-amber-400 font-bold">+{{ bd.nobs }}</span></div>
+                <div *ngIf="bd.total === 0" class="text-slate-400 italic">{{ 'GAME.NO_POINTS' | translate }}</div>
             </div>
 
             <div class="text-4xl font-bold mt-4 pt-2 flex justify-between items-center border-t border-slate-600">
@@ -109,7 +116,8 @@
         <!-- Opponent Area -->
         <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
             <div class="text-center">
-                <h3 class="font-bold mb-2">{{ topPlayer.name }} (Score: {{ topPlayer.score }})</h3>
+                <h3 class="font-bold mb-2">{{ getPlayerNameKey(topPlayer.name) | translate }} ({{ 'GAME.SCORE' |
+                    translate }}: {{ topPlayer.score }})</h3>
                 <div class="flex gap-2">
                     <!-- Back of cards -->
                     <div *ngFor="let c of topPlayer.cards"
@@ -195,7 +203,9 @@
         <!-- Player Area -->
         <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
             <div class="text-center">
-                <h3 class="font-bold mb-2">{{ bottomPlayer.name }} (Score: {{ bottomPlayer.score }})</h3>
+                <h3 class="font-bold mb-2">{{ getPlayerNameKey(bottomPlayer.name) | translate }} ({{ 'GAME.SCORE' |
+                    translate }}: {{
+                    bottomPlayer.score }})</h3>
                 <div class="flex gap-2">
                     <!-- Player Cards -->
                     <div *ngFor="let c of bottomPlayer.cards; let i = index"

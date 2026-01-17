@@ -84,6 +84,21 @@
         "TABLE_EMPTY": "Table vide",
         "CONFIRM_DISCARD": "Confirmer l'écart",
         "SAY_GO": "Dire Go !",
-        "YOUR_TURN": "À vous de jouer"
+        "YOUR_TURN": "À vous de jouer",
+        "DEALER_HAND": "Main du Donneur",
+        "DEALER_CRIB": "Crible du Donneur",
+        "PLAYER_HAND": "Main de {{name}}",
+        "NO_POINTS": "Aucun point",
+        "SCORE": "Pointage",
+        "PHASE": "Phase",
+        "PHASE_DISCARDING": "Écart",
+        "PHASE_PEGGING": "Jeu (Pegging)",
+        "PHASE_COUNTING": "Comptage",
+        "PHASE_GAMEOVER": "Fin de partie",
+        "PHASE_DEALING": "Distribution",
+        "TURN": "Tour",
+        "MY_ID": "Mon ID",
+        "HOST": "Hôte",
+        "GUEST": "Invité"
     }
 }

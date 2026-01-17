@@ -84,6 +84,21 @@
         "TABLE_EMPTY": "Table Empty",
         "CONFIRM_DISCARD": "Confirm Discard",
         "SAY_GO": "Say Go!",
-        "YOUR_TURN": "Your Turn"
+        "YOUR_TURN": "Your Turn",
+        "DEALER_HAND": "Dealer's Hand",
+        "DEALER_CRIB": "Dealer's Crib",
+        "PLAYER_HAND": "{{name}}'s Hand",
+        "NO_POINTS": "No points",
+        "SCORE": "Score",
+        "PHASE": "Phase",
+        "PHASE_DISCARDING": "Discarding",
+        "PHASE_PEGGING": "Pegging",
+        "PHASE_COUNTING": "Counting",
+        "PHASE_GAMEOVER": "Game Over",
+        "PHASE_DEALING": "Dealing",
+        "TURN": "Turn",
+        "MY_ID": "My ID",
+        "HOST": "Host",
+        "GUEST": "Guest"
     }
 }

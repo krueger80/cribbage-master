@@ -4,7 +4,7 @@ import { GameService } from '../../services/game.service';
 import { GameState } from '../../services/game.state';
 import { Observable } from 'rxjs';
 
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-game-table',
@@ -18,7 +18,8 @@ export class GameTableComponent implements OnInit {
 
   selectedCardIndices: Set<number> = new Set();
 
-  constructor(private gameService: GameService) {
+
+  constructor(private gameService: GameService, private translate: TranslateService) {
     this.state$ = this.gameService.state$;
   }
 
@@ -143,17 +144,27 @@ export class GameTableComponent implements OnInit {
     return [];
   }
 
-  getCountingTitle(state: GameState): string {
+  getPlayerNameKey(name: string): string {
+    if (name === 'Host') return 'GAME.HOST';
+    if (name === 'Guest') return 'GAME.GUEST';
+    return name;
+  }
+
+  getCountingTitle(state: GameState): { key: string, params?: any } {
     if (state.countingStage === 'non_dealer_hand') {
       const dealerIndex = state.players.findIndex(p => p.isDealer);
       const nonDealerIndex = (dealerIndex + 1) % state.players.length;
-      return `${state.players[nonDealerIndex].name}'s Hand`;
+      const pName = state.players[nonDealerIndex].name;
+      const nameKey = this.getPlayerNameKey(pName);
+      const translatedName = this.translate.instant(nameKey);
+
+      return { key: 'GAME.PLAYER_HAND', params: { name: translatedName } };
     } else if (state.countingStage === 'dealer_hand') {
-      return "Dealer's Hand";
+      return { key: 'GAME.DEALER_HAND' };
     } else if (state.countingStage === 'crib') {
-      return "Dealer's Crib";
+      return { key: 'GAME.DEALER_CRIB' };
     }
-    return '';
+    return { key: '' };
   }
 
   advanceCounting() {
