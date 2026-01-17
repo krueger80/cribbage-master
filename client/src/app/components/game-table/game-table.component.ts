@@ -23,6 +23,8 @@ export class GameTableComponent implements OnInit {
     this.state$ = this.gameService.state$;
   }
 
+  localCountingStage: 'non_dealer_hand' | 'dealer_hand' | 'crib' | 'finished' = 'non_dealer_hand';
+
   ngOnInit() {
     // Game initialization is handled by Lobby/GameService now.
     // If not multiplayer, we could init default.
@@ -30,6 +32,17 @@ export class GameTableComponent implements OnInit {
     if (!state.isMultiplayer && state.players.length === 0) {
       this.gameService.initGame();
     }
+
+    // Subscribe to state to reset local counting stage on new round
+    this.gameService.state$.subscribe(s => {
+      // console.log('[GameTable] State update. Phase:', s.phase, 'LocalStage:', this.localCountingStage);
+      if (s.phase !== 'counting') {
+        if (this.localCountingStage !== 'non_dealer_hand') {
+          console.log('[GameTable] Resetting local counting stage to non_dealer_hand');
+          this.localCountingStage = 'non_dealer_hand';
+        }
+      }
+    });
   }
 
   // Helper to get the correct player object for "MY" hand (bottom screen)
@@ -38,7 +51,9 @@ export class GameTableComponent implements OnInit {
     if (!state.isMultiplayer) return state.players[0]; // Single player: P1 is human
 
     // Multiplayer: match localPlayerId
-    return state.players.find(p => p.id === state.localPlayerId) || state.players[0];
+    const p = state.players.find(p => p.id === state.localPlayerId) || state.players[0];
+    if (!p) console.warn('[GameTable] bottomPlayer not found!', state.localPlayerId, state.players);
+    return p;
   }
 
   // Helper to get opponent (top screen)
@@ -47,24 +62,24 @@ export class GameTableComponent implements OnInit {
     if (!state.isMultiplayer) return state.players[1]; // Single player: P2 is CPU
 
     // Multiplayer: whoever is NOT me
-    return state.players.find(p => p.id !== state.localPlayerId) || state.players[1];
+    const p = state.players.find(p => p.id !== state.localPlayerId) || state.players[1];
+    if (!p) console.warn('[GameTable] topPlayer not found!', state.localPlayerId, state.players);
+    return p;
   }
 
-  onCardClick(playerId: string, cardIndex: number, phase: string) {
-    // Safety check: ensure we are clicking our own cards
-    if (playerId !== this.bottomPlayer.id) return;
-
-    if (phase === 'discarding') {
-      // If we already discarded (have 4 cards), stop selection
-      if (this.bottomPlayer.cards.length <= 4) return;
-
-      this.toggleSelection(cardIndex);
-    } else if (phase === 'pegging') {
-      const state = this.gameService.snapshot;
-      // Only allow play if it's player's turn (simplified check, service has robust check)
-      if (state.turnPlayerId === playerId) {
-        this.gameService.playCard(playerId, cardIndex);
+  // Actions
+  onCardClick(index: number) {
+    if (this.gameService.snapshot.phase === 'discarding') {
+      const id = this.bottomPlayer.id;
+      if (this.selectedCardIndices.has(index)) {
+        this.selectedCardIndices.delete(index);
+      } else {
+        if (this.selectedCardIndices.size < 2) {
+          this.selectedCardIndices.add(index);
+        }
       }
+    } else if (this.gameService.snapshot.phase === 'pegging') {
+      this.gameService.playCard(this.bottomPlayer.id, index);
     }
   }
 
@@ -92,25 +107,9 @@ export class GameTableComponent implements OnInit {
     return !this.canPlay(player.cards, state.currentPeggingTotal);
   }
 
-  toggleSelection(index: number) {
-    const newSet = new Set(this.selectedCardIndices);
-    if (newSet.has(index)) {
-      newSet.delete(index);
-    } else {
-      if (newSet.size < 2) {
-        newSet.add(index);
-      }
-    }
-    this.selectedCardIndices = newSet;
-  }
-
-  confirmDiscard(playerId: string) {
-    // Double check we are confirming for ourself
-    const me = this.bottomPlayer;
-    if (playerId !== me.id) return;
-
+  discard() {
     if (this.selectedCardIndices.size === 2) {
-      this.gameService.discard(playerId, Array.from(this.selectedCardIndices));
+      this.gameService.discard(this.bottomPlayer.id, Array.from(this.selectedCardIndices));
       this.selectedCardIndices.clear();
     }
   }
@@ -130,18 +129,38 @@ export class GameTableComponent implements OnInit {
   }
 
   // Counting Phase Helpers
+  // Counting Phase Helpers
   getCountingCards(state: GameState): any[] {
-    if (state.countingStage === 'non_dealer_hand') {
+    // If not multiplayer, just show everything?
+    // But we want the slide-show effect.
+    // Use localCountingStage.
+
+    if (this.localCountingStage === 'non_dealer_hand') {
+      // Show Non-Dealer Hand
+      // Find Non-Dealer
       const dealerIndex = state.players.findIndex(p => p.isDealer);
       const nonDealerIndex = (dealerIndex + 1) % state.players.length;
-      return state.players[nonDealerIndex].playedCards;
-    } else if (state.countingStage === 'dealer_hand') {
+      return state.players[nonDealerIndex].playedCards; // These are the cards they pegged with (their hand)
+    } else if (this.localCountingStage === 'dealer_hand') {
       const dealer = state.players.find(p => p.isDealer);
       return dealer ? dealer.playedCards : [];
-    } else if (state.countingStage === 'crib') {
+    } else if (this.localCountingStage === 'crib') {
       return state.crib;
     }
     return [];
+  }
+
+  getCountingScore(state: GameState): any {
+    if (!state.countingResults) return null;
+
+    if (this.localCountingStage === 'non_dealer_hand') {
+      return state.countingResults.nonDealer;
+    } else if (this.localCountingStage === 'dealer_hand') {
+      return state.countingResults.dealer;
+    } else if (this.localCountingStage === 'crib') {
+      return state.countingResults.crib;
+    }
+    return null;
   }
 
   getPlayerNameKey(name: string): string {
@@ -151,7 +170,7 @@ export class GameTableComponent implements OnInit {
   }
 
   getCountingTitle(state: GameState): { key: string, params?: any } {
-    if (state.countingStage === 'non_dealer_hand') {
+    if (this.localCountingStage === 'non_dealer_hand') {
       const dealerIndex = state.players.findIndex(p => p.isDealer);
       const nonDealerIndex = (dealerIndex + 1) % state.players.length;
       const pName = state.players[nonDealerIndex].name;
@@ -159,16 +178,31 @@ export class GameTableComponent implements OnInit {
       const translatedName = this.translate.instant(nameKey);
 
       return { key: 'GAME.PLAYER_HAND', params: { name: translatedName } };
-    } else if (state.countingStage === 'dealer_hand') {
+    } else if (this.localCountingStage === 'dealer_hand') {
       return { key: 'GAME.DEALER_HAND' };
-    } else if (state.countingStage === 'crib') {
+    } else if (this.localCountingStage === 'crib') {
       return { key: 'GAME.DEALER_CRIB' };
     }
     return { key: '' };
   }
 
   advanceCounting() {
-    this.gameService.advanceCountingStage();
+    console.log('[GameTable] advanceCounting clicked. Current:', this.localCountingStage);
+    if (this.localCountingStage === 'non_dealer_hand') {
+      this.localCountingStage = 'dealer_hand';
+    } else if (this.localCountingStage === 'dealer_hand') {
+      this.localCountingStage = 'crib';
+    } else if (this.localCountingStage === 'crib') {
+      this.localCountingStage = 'finished';
+      console.log('[GameTable] Finishing counting. Calling playerFinishedCounting.');
+      this.finishCounting();
+    }
+    console.log('[GameTable] New Stage:', this.localCountingStage);
+  }
+
+  finishCounting() {
+    // Notify server we are done
+    this.gameService.playerFinishedCounting(this.bottomPlayer.id);
   }
 
   restartGame() {

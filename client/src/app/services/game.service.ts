@@ -109,17 +109,22 @@ export class GameService {
         }
     }
 
-    // Called when remote state arrives
-    private setRemoteState(state: GameState) {
-        const localId = this.snapshot.localPlayerId;
+    // Receive state from Supabase
+    setRemoteState(remoteState: GameState) {
+        const localId = this._state.value.localPlayerId; // Keep our ID
+        const newState = { ...remoteState, localPlayerId: localId };
 
-        // Merge strategy:
-        // Generally trust remote state, but preserve local ID.
+        // Reset local counting finish flag if we are no longer in counting phase
+        // This ensures that for the NEXT round, we don't auto-ready ourselves
+        if (newState.phase !== 'counting') {
+            this._localCountingFinished = false;
+        }
+
+        // Handle specific actions if needed
+        // ... previous logic
         // If I am Host, and I receive a state where Guest discarded (remote state), 
         // I need to check if we should proceed.
 
-        // Simple merge:
-        const newState = { ...state, localPlayerId: localId };
 
         // Check triggers for Host
         if (localId === 'p1') {
@@ -135,17 +140,42 @@ export class GameService {
             }
         }
 
+        // CONFLICT RES: If I am finished counting locally, ensure I stay finished in the state
+        if (localId && newState.phase === 'counting' && this._localCountingFinished) {
+            // If remote state says I'm false/undefined, fix it.
+            if (!newState.countingReady || !newState.countingReady[localId]) {
+                console.log('[Game] Remote state overwrote my ready flag. Re-applying.', newState.countingReady);
+                newState.countingReady = { ...(newState.countingReady || {}), [localId]: true };
+
+                // CRITICAL: We changed state locally based on private knowledge.
+                // We should broadcast this fix back to the server so P1 sees it.
+                // But be careful of infinite loops. We only send if we changed it.
+                // This `updateState` below updates local subject.
+                // We might want to trigger `supabase.sendGameUpdate` specifically.
+                setTimeout(() => {
+                    // Async to avoid blocking this update
+                    this.updateState({ countingReady: newState.countingReady });
+                }, 0);
+            }
+        }
+
+        // Apply state
         this._state.next(newState);
+
+        // Host checks for Counting Ready ON EVERY UPDATE
+        if (localId === 'p1' && newState.phase === 'counting') {
+            this.checkIfAllReady(newState.countingReady || {});
+        }
 
         // After applying state, Host checks for Pegging Finish
         if (localId === 'p1' && newState.phase === 'pegging') {
             this.checkForPeggingFinished();
         }
 
-        // Host checks for Counting Ready
-        if (localId === 'p1' && newState.phase === 'counting') {
-            this.checkCountingReady(newState.countingReady || {});
-        }
+        // Host checks for Counting Ready - REMOVED (Automatic flow now)
+        // if (localId === 'p1' && newState.phase === 'counting') {
+        //    this.checkCountingReady(newState.countingReady || {});
+        // }
     }
 
     private updateState(newState: Partial<GameState>, syncRemote = true) {
@@ -547,123 +577,97 @@ export class GameService {
         }
     }
 
+    private _localCountingFinished = false; // Track local readiness to survive remote overwrites
+
     private countHands() {
         if ((this.snapshot.phase as any) === 'gameover') return;
-        this.updateState({
-            phase: 'counting',
-            countingStage: 'non_dealer_hand'
-        });
 
-        this.processCurrentCountingStage();
-    }
-
-    private processCurrentCountingStage(stageOverride?: any) {
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        // Reset local finish flag for new round
+        this._localCountingFinished = false;
 
         const state = this.snapshot;
-        const currentStage = stageOverride || state.countingStage; // Use override logic
-
         const dealerIndex = state.players.findIndex(p => p.isDealer);
         const nonDealerIndex = (dealerIndex + 1) % state.players.length;
         const cutCard = state.cutCard;
+        const nonDealer = state.players[nonDealerIndex];
+        const dealer = state.players[dealerIndex];
 
-        let scoreBreakdown = null;
-        let points = 0;
-        let playerToScore: Player | null = null;
+        // Calculate ALL scores
+        const nonDealerScore = calculateScore(nonDealer.playedCards, cutCard, false);
+        const dealerScore = calculateScore(dealer.playedCards, cutCard, false);
+        const cribScore = calculateScore(state.crib, cutCard, true);
 
-        if (currentStage === 'non_dealer_hand') {
-            const nonDealer = state.players[nonDealerIndex];
-            scoreBreakdown = calculateScore(nonDealer.playedCards, cutCard, false);
-            points = scoreBreakdown.total;
-            playerToScore = nonDealer;
-            console.log(`${nonDealer.name} Hand Score: ${points}`);
-
-        } else if (currentStage === 'dealer_hand') {
-            const dealer = state.players[dealerIndex];
-            scoreBreakdown = calculateScore(dealer.playedCards, cutCard, false);
-            points = scoreBreakdown.total;
-            playerToScore = dealer;
-            console.log(`${dealer.name} Hand Score: ${points}`);
-
-        } else if (currentStage === 'crib') {
-            const dealer = state.players[dealerIndex];
-            scoreBreakdown = calculateScore(state.crib, cutCard, true);
-            points = scoreBreakdown.total;
-            playerToScore = dealer;
-            console.log(`${dealer.name} Crib Score: ${points}`);
-        }
-
-        if (playerToScore && scoreBreakdown) {
-            if (scoreBreakdown.total > 0) {
-                this.addPoints(playerToScore.id, scoreBreakdown.total);
-            }
-
-            if ((this.snapshot.phase as any) === 'gameover') return;
-
-            this.updateState({
-                countingStage: currentStage, // Update stage here
-                countingScoreBreakdown: scoreBreakdown,
-                players: [...state.players]
-            });
-        }
-
-        this.checkAutoCount();
-    }
-
-    advanceCountingStage() {
+        // Apply Points Immediately ( Simplest for synchronization )
+        if (nonDealerScore.total > 0) this.addPoints(nonDealer.id, nonDealerScore.total);
+        // Check game over
         if ((this.snapshot.phase as any) === 'gameover') return;
 
+        if (dealerScore.total > 0) this.addPoints(dealer.id, dealerScore.total);
+        // Check game over
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
+        if (cribScore.total > 0) this.addPoints(dealer.id, cribScore.total);
+        // Check game over
+        if ((this.snapshot.phase as any) === 'gameover') return;
+
+        this.updateState({
+            phase: 'counting',
+            countingResults: {
+                nonDealer: nonDealerScore,
+                dealer: dealerScore,
+                crib: cribScore
+            },
+            countingReady: {}, // Reset ready flags
+            players: [...this.snapshot.players]
+        });
+    }
+
+    // Called by UI when user clicks "Next" on the last slide (Crib)
+    playerFinishedCounting(playerId: string) {
+        this._localCountingFinished = true;
+
         const state = this.snapshot;
-
-        if (!state.isMultiplayer) {
-            this.performAdvanceCountingLogic();
-            return;
-        }
-
-        // Multiplayer logic: Set 'Ready' flag
-        const localId = state.localPlayerId!;
         const currentReady = state.countingReady || {};
-        const newReady = { ...currentReady, [localId]: true };
+        const newReady = { ...currentReady, [playerId]: true };
 
+        console.log(`[Game] playerFinishedCounting: ${playerId}. New Ready State:`, newReady);
+
+        // Update local state (and sync)
         this.updateState({ countingReady: newReady });
 
-        // If Host, check if everyone is ready
-        if (localId === 'p1') {
-            this.checkCountingReady(newReady);
-        }
+        // Host checks immediately (for single player or instant sync)
+        this.checkIfAllReady(newReady);
     }
 
-    private checkCountingReady(readyMap: { [key: string]: boolean }) {
+    private checkIfAllReady(readyMap: { [id: string]: boolean }) {
         const state = this.snapshot;
-        const allReady = state.players.every(p => readyMap[p.id]);
+        if (state.isMultiplayer) {
+            if (state.localPlayerId === 'p1') {
+                const pendingPlayers = state.players.filter(p => !readyMap[p.id]);
+                const allReady = pendingPlayers.length === 0;
 
-        if (allReady) {
-            // Reset ready flags for next stage - local update only first to avoid flicker? 
-            // Actually performAdvanceCountingLogic updates state. We can bundle clearing ready there or before.
-            // We'll update it here but sync=false to let the Logic update carry the final state? 
-            // Or just trust the Logic update to overwrite it if it sends partial?
-            // updateState({countingReady: {}})
+                console.log(`[Game] Host checking completion. AllReady: ${allReady}.`,
+                    {
+                        totalPlayers: state.players.length,
+                        readyMap,
+                        pending: pendingPlayers.map(p => p.id)
+                    }
+                );
 
-            this.updateState({ countingReady: {} }, false);
-            this.performAdvanceCountingLogic();
-        }
-    }
-
-    private performAdvanceCountingLogic() {
-        const state = this.snapshot;
-        let nextStage: any = 'none';
-
-        if (state.countingStage === 'non_dealer_hand') {
-            nextStage = 'dealer_hand';
-        } else if (state.countingStage === 'dealer_hand') {
-            nextStage = 'crib';
-        } else if (state.countingStage === 'crib') {
+                if (allReady && state.phase === 'counting') {
+                    console.log('[Game] All players ready. Advancing to next round.');
+                    this.nextRound();
+                } else {
+                    console.log('[Game] Waiting for:', pendingPlayers.map(p => p.name));
+                }
+            }
+        } else {
             this.nextRound();
-            return;
         }
-
-        this.processCurrentCountingStage(nextStage);
     }
+
+    // Old methods removed
+
 
     private checkAutoCount() {
         return;
