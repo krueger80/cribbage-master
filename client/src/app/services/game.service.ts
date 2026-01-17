@@ -225,12 +225,15 @@ export class GameService {
         const currentDealerIndex = state.players.findIndex(p => p.isDealer);
         const nextDealerIndex = (currentDealerIndex + 1) % state.players.length;
 
-        const players = state.players.map((p, idx) => ({
-            ...p,
-            isDealer: idx === nextDealerIndex,
-            cards: [],
-            playedCards: []
-        }));
+        const players = state.players.map((p, idx) => {
+            console.log(`[Game] nextRound processing ${p.id}. Current Score: ${p.score}`);
+            return {
+                ...p,
+                isDealer: idx === nextDealerIndex,
+                cards: [],
+                playedCards: []
+            };
+        });
 
         this.updateState({
             players,
@@ -544,9 +547,9 @@ export class GameService {
 
                         // Reset Stack
                         // Turn passes to Next Player (Rule: Left of last player starts new round)
-                        const resetPlayers = state.players.map(p => ({ ...p, hasSaidGo: false }));
-
                         setTimeout(() => {
+                            const currentSnapshot = this.snapshot;
+                            const resetPlayers = currentSnapshot.players.map(p => ({ ...p, hasSaidGo: false }));
                             const nextId = nextPlayerId;
                             const actualNextId = this.getNextPlayablePlayerId(nextId, resetPlayers);
 
@@ -653,28 +656,41 @@ export class GameService {
         const dealerScore = calculateScore(dealer.playedCards, cutCard, false);
         const cribScore = calculateScore(state.crib, cutCard, true);
 
-        // Apply Points Immediately ( Simplest for synchronization )
-        if (nonDealerScore.total > 0) this.addPoints(nonDealer.id, nonDealerScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        console.log('[Game] countHands results:', { nonDealerScore, dealerScore, cribScore });
 
-        if (dealerScore.total > 0) this.addPoints(dealer.id, dealerScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        // Explicitly update players to ensure state immutability triggers updates
+        let winnerId: string | null = null;
+        let nextPhase: GamePhase = 'counting';
 
-        if (cribScore.total > 0) this.addPoints(dealer.id, cribScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        const newPlayers = state.players.map(p => {
+            let additional = 0;
+            if (p.id === nonDealer.id) additional += nonDealerScore.total;
+            if (p.id === dealer.id) {
+                additional += dealerScore.total;
+                additional += cribScore.total;
+            }
+
+            if (additional > 0) {
+                const newScore = p.score + additional;
+                if (newScore >= 121 && !winnerId) {
+                    winnerId = p.id;
+                    nextPhase = 'gameover';
+                }
+                return { ...p, score: newScore };
+            }
+            return p;
+        });
 
         this.updateState({
-            phase: 'counting',
+            phase: nextPhase,
+            winnerId,
             countingResults: {
                 nonDealer: nonDealerScore,
                 dealer: dealerScore,
                 crib: cribScore
             },
             countingReady: {}, // Reset ready flags
-            players: [...this.snapshot.players]
+            players: newPlayers
         });
     }
 

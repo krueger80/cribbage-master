@@ -61,9 +61,24 @@ testBestCard(['6C', '9C'], ['6D'], 6, '6C');
 // Pair is definitely better.
 testBestCard(['10H', 'AC'], ['10C'], 10, '10H');
 
-// Scenario 5: Avoid 5
-// Hand: 5H, 8C. Stack: Empty.
-// Leading 5 is risky (-2). Leading 8 is neutral.
-testBestCard(['5H', '8C'], [], 0, '8C');
+// Scenario 5: Avoid 5 (Setup for 15)
+// Hand: 2H, 8C. Stack: 3D (Total 3).
+// Play 2H -> Total 5. Heuristic -= 2.
+// Play 8C -> Total 11. Heuristic = 0.
+// Should play 8C.
+testBestCard(['2H', '8C'], ['3D'], 3, '8C');
+
+// Scenario 6: Avoid 21 (Setup for 31)
+// Hand: 10H, 9C. Stack: J (10), A (1) -> Total 11.
+// Play 10H -> Total 21. Opponent drops 10 -> 31 (2pts). Bad.
+// Play 9C -> Total 20. Safer.
+testBestCard(['10H', '9C'], ['JD', 'AC'], 11, '9C');
+
+// Scenario 7: Lead Pair Candidate
+// Hand: 7H, 7D, 8C. Stack: Empty.
+// Playing 7 is better than 8 because if opponent pairs 7, I can pair royal.
+// 8 is single.
+testBestCard(['7H', '7D', '8C'], [], 0, '7H'); // Or 7D
+
 
 console.log("=== Tests Completed ===");

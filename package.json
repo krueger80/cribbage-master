@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "scripts": {
         "start": "npm run start:client",
-        "start:client": "cd client && npm start"
+        "start:client": "cd client && npm start",
+        "test:pegging": "npx ts-node test_pegging.ts"
     },
     "dependencies": {
         "@types/node": "^25.0.6",
