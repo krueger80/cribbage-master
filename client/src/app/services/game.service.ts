@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
 import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,7 @@ export class GameService {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
 
-    constructor(private supabase: SupabaseService) { }
+    constructor(private supabase: SupabaseService, private api: ApiService) { }
 
     get state$(): Observable<GameState> {
         return this._state.asObservable();
@@ -224,12 +225,15 @@ export class GameService {
         const currentDealerIndex = state.players.findIndex(p => p.isDealer);
         const nextDealerIndex = (currentDealerIndex + 1) % state.players.length;
 
-        const players = state.players.map((p, idx) => ({
-            ...p,
-            isDealer: idx === nextDealerIndex,
-            cards: [],
-            playedCards: []
-        }));
+        const players = state.players.map((p, idx) => {
+            console.log(`[Game] nextRound processing ${p.id}. Current Score: ${p.score}`);
+            return {
+                ...p,
+                isDealer: idx === nextDealerIndex,
+                cards: [],
+                playedCards: []
+            };
+        });
 
         this.updateState({
             players,
@@ -311,7 +315,39 @@ export class GameService {
                     const s = this.snapshot;
                     const c = s.players.find(p => p.id === cpu.id);
                     if (s.phase === 'discarding' && c && c.cards.length > 4) {
-                        this.discard(c.id, [0, 1]);
+                        // Use API for analysis
+                        const handStrings = c.cards.map(card => card.rank + card.suit);
+                        this.api.analyze(handStrings, c.isDealer, s.players.length).subscribe({
+                            next: (res) => {
+                                if (res.results && res.results.length > 0) {
+                                    const best = res.results[0];
+                                    const discardIndices: number[] = [];
+
+                                    // Match discarded cards to hand indices
+                                    best.discarded.forEach(d => {
+                                        const idx = c.cards.findIndex(h => h.rank === d.rank && h.suit === d.suit);
+                                        if (idx !== -1 && !discardIndices.includes(idx)) {
+                                            discardIndices.push(idx);
+                                        }
+                                    });
+
+                                    // Fallback if matching failed (shouldn't happen with valid deck)
+                                    const numToDiscard = s.players.length === 2 ? 2 : 1;
+                                    if (discardIndices.length === numToDiscard) {
+                                        this.discard(c.id, discardIndices);
+                                    } else {
+                                        console.warn('CPU Analysis returned mismatching cards. Fallback to [0,1]');
+                                        this.discard(c.id, [0, 1]);
+                                    }
+                                } else {
+                                    this.discard(c.id, [0, 1]);
+                                }
+                            },
+                            error: (err) => {
+                                console.error('CPU Discard API Error', err);
+                                this.discard(c.id, [0, 1]);
+                            }
+                        });
                     }
                 }, 1000);
             }
@@ -325,19 +361,42 @@ export class GameService {
                     const cpu = s.players.find(p => p.id === s.turnPlayerId);
                     if (!cpu || cpu.isHuman) return;
 
-                    let validCardIndex = -1;
-                    for (let i = 0; i < cpu.cards.length; i++) {
-                        if (s.currentPeggingTotal + cpu.cards[i].value <= 31) {
-                            validCardIndex = i;
-                            break;
-                        }
-                    }
+                    // API Call for Pegging
+                    const handStrs = cpu.cards.map(c => c.rank + c.suit);
+                    const stackStrs = s.peggingStack.map(item => item.card.rank + item.card.suit);
 
-                    if (validCardIndex !== -1) {
-                        this.playCard(cpu.id, validCardIndex);
-                    } else {
-                        this.sayGo(cpu.id);
-                    }
+                    this.api.getPeggingCard(handStrs, stackStrs, s.currentPeggingTotal).subscribe({
+                        next: (res) => {
+                            if (res.card) {
+                                const idx = cpu.cards.findIndex(c => c.rank === res.card!.rank && c.suit === res.card!.suit);
+                                if (idx !== -1) {
+                                    this.playCard(cpu.id, idx);
+                                } else {
+                                    this.sayGo(cpu.id);
+                                }
+                            } else {
+                                // API says no card (or null), which implies Go
+                                this.sayGo(cpu.id);
+                            }
+                        },
+                        error: (err) => {
+                            console.error('CPU Pegging API Error', err);
+                            // Fallback logic
+                            let validCardIndex = -1;
+                            for (let i = 0; i < cpu.cards.length; i++) {
+                                if (s.currentPeggingTotal + cpu.cards[i].value <= 31) {
+                                    validCardIndex = i;
+                                    break;
+                                }
+                            }
+
+                            if (validCardIndex !== -1) {
+                                this.playCard(cpu.id, validCardIndex);
+                            } else {
+                                this.sayGo(cpu.id);
+                            }
+                        }
+                    });
                 }, 1000);
             }
         }
@@ -488,9 +547,9 @@ export class GameService {
 
                         // Reset Stack
                         // Turn passes to Next Player (Rule: Left of last player starts new round)
-                        const resetPlayers = state.players.map(p => ({ ...p, hasSaidGo: false }));
-
                         setTimeout(() => {
+                            const currentSnapshot = this.snapshot;
+                            const resetPlayers = currentSnapshot.players.map(p => ({ ...p, hasSaidGo: false }));
                             const nextId = nextPlayerId;
                             const actualNextId = this.getNextPlayablePlayerId(nextId, resetPlayers);
 
@@ -597,28 +656,41 @@ export class GameService {
         const dealerScore = calculateScore(dealer.playedCards, cutCard, false);
         const cribScore = calculateScore(state.crib, cutCard, true);
 
-        // Apply Points Immediately ( Simplest for synchronization )
-        if (nonDealerScore.total > 0) this.addPoints(nonDealer.id, nonDealerScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        console.log('[Game] countHands results:', { nonDealerScore, dealerScore, cribScore });
 
-        if (dealerScore.total > 0) this.addPoints(dealer.id, dealerScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        // Explicitly update players to ensure state immutability triggers updates
+        let winnerId: string | null = null;
+        let nextPhase: GamePhase = 'counting';
 
-        if (cribScore.total > 0) this.addPoints(dealer.id, cribScore.total);
-        // Check game over
-        if ((this.snapshot.phase as any) === 'gameover') return;
+        const newPlayers = state.players.map(p => {
+            let additional = 0;
+            if (p.id === nonDealer.id) additional += nonDealerScore.total;
+            if (p.id === dealer.id) {
+                additional += dealerScore.total;
+                additional += cribScore.total;
+            }
+
+            if (additional > 0) {
+                const newScore = p.score + additional;
+                if (newScore >= 121 && !winnerId) {
+                    winnerId = p.id;
+                    nextPhase = 'gameover';
+                }
+                return { ...p, score: newScore };
+            }
+            return p;
+        });
 
         this.updateState({
-            phase: 'counting',
+            phase: nextPhase,
+            winnerId,
             countingResults: {
                 nonDealer: nonDealerScore,
                 dealer: dealerScore,
                 crib: cribScore
             },
             countingReady: {}, // Reset ready flags
-            players: [...this.snapshot.players]
+            players: newPlayers
         });
     }
 
