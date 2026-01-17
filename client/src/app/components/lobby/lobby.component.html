@@ -1,0 +1,37 @@
+<div class="lobby-container">
+    <div class="header">
+        <h1>Multiplayer Lobby</h1>
+        <div class="user-info" *ngIf="userId">
+            <small>ID: {{ userId.slice(0, 8) }}...</small>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-create" (click)="createGame()" [disabled]="loading || !userId">
+            {{ loading ? 'Creating...' : (!userId ? 'Logging in...' : 'Create New Game') }}
+        </button>
+        <button class="btn-refresh" (click)="refreshGames()" [disabled]="loading">
+            Refresh List
+        </button>
+    </div>
+
+    <div class="games-list">
+        <h2>Waiting Games</h2>
+
+        <div class="empty-state" *ngIf="waitingGames.length === 0 && !loading">
+            No games waiting. Create one!
+        </div>
+
+        <div class="game-card" *ngFor="let game of waitingGames">
+            <div class="game-info">
+                <span class="host-name">Host: {{ game.host_id.slice(0,8) }}...</span>
+                <span class="date">{{ game.created_at | date:'shortTime' }}</span>
+            </div>
+            <button class="btn-join" (click)="joinGame(game.id)">Join</button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
+</div>

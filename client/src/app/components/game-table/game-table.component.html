@@ -11,7 +11,7 @@
                 {{ state.winnerId === state.players[0].id ? 'VICTORY!' : 'DEFEAT' }}
             </h1>
             <p class="text-2xl text-amber-100/80 tracking-widest uppercase">
-                {{ state.winnerId === state.players[0].id ? 'You reached 121 points first!' : 'The CPU reached 121
+                {{ state.winnerId === bottomPlayer.id ? 'You reached 121 points first!' : 'The Opponent reached 121
                 points first.' }}
             </p>
         </div>
@@ -35,8 +35,8 @@
 
     <!-- Debug Info -->
     <div class="mb-4 p-2 bg-black/50 text-xs font-mono">
-        Phase: {{ state.phase }} | Dealer: {{ state.players[0].isDealer ? state.players[0].name : state.players[1].name
-        }} | Selected: {{ selectedCardIndices.size }}
+        Phase: {{ state.phase }} | Dealer: {{ bottomPlayer.isDealer ? bottomPlayer.name : topPlayer.name }}
+        | Turn: {{ state.turnPlayerId }} | My ID: {{ bottomPlayer.id }}
     </div>
 
     <!-- Interactive Counting Board -->
@@ -90,10 +90,17 @@
         </div>
 
         <!-- Next Button -->
-        <button (click)="advanceCounting()"
-            class="px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all transform hover:scale-105 active:scale-95">
-            Next >
-        </button>
+        <ng-container *ngIf="!state.countingReady?.[bottomPlayer.id]; else waitingMsg">
+            <button (click)="advanceCounting()"
+                class="px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all transform hover:scale-105 active:scale-95">
+                Next >
+            </button>
+        </ng-container>
+        <ng-template #waitingMsg>
+            <div class="text-amber-200 text-xl font-bold animate-pulse tracking-widest">
+                WAITING FOR OPPONENT...
+            </div>
+        </ng-template>
     </div>
 
     <div class="flex flex-col h-full gap-8">
@@ -101,10 +108,10 @@
         <!-- Opponent Area -->
         <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
             <div class="text-center">
-                <h3 class="font-bold mb-2">{{ state.players[1].name }} (Score: {{ state.players[1].score }})</h3>
+                <h3 class="font-bold mb-2">{{ topPlayer.name }} (Score: {{ topPlayer.score }})</h3>
                 <div class="flex gap-2">
                     <!-- Back of cards -->
-                    <div *ngFor="let c of state.players[1].cards"
+                    <div *ngFor="let c of topPlayer.cards"
                         class="w-16 h-24 bg-blue-800 border-2 border-white rounded-lg"></div>
                 </div>
             </div>
@@ -138,7 +145,7 @@
                         <div class="text-4xl font-bold text-yellow-400 mb-1">+{{ score.points }}</div>
                         <div class="text-white font-medium whitespace-nowrap">{{ score.description }}</div>
                         <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">
-                            {{ score.playerId === state.players[0].id ? 'You' : 'Opponent' }}
+                            {{ score.playerId === bottomPlayer.id ? 'You' : 'Opponent' }}
                         </div>
                     </div>
                 </div>
@@ -159,18 +166,21 @@
                 </div>
 
                 <!-- Action: Say Go -->
-                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId === state.players[0].id" class="h-10">
-                    <button *ngIf="!canPlay(state.players[0].cards, state.currentPeggingTotal)"
-                        class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold shadow-lg animate-pulse"
-                        (click)="sayGo(state.players[0].id)">
-                        Say Go!
-                    </button>
-                    <div *ngIf="canPlay(state.players[0].cards, state.currentPeggingTotal)"
-                        class="text-emerald-300 font-bold animate-pulse">
-                        Your Turn
+                <!-- Use *ngIf="isMyTurn" to scope updates -->
+                <ng-container *ngIf="isMyTurn">
+                    <div class="h-10 flex items-center justify-center">
+                        <button *ngIf="showSayGo"
+                            class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold shadow-lg animate-pulse transition-all transform hover:scale-105 active:scale-95"
+                            (click)="sayGo(bottomPlayer.id)">
+                            Say Go!
+                        </button>
+                        <div *ngIf="!showSayGo"
+                            class="text-emerald-300 font-bold animate-pulse text-lg tracking-wide drop-shadow-md">
+                            Your Turn
+                        </div>
                     </div>
-                </div>
-                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId !== state.players[0].id"
+                </ng-container>
+                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId !== bottomPlayer.id"
                     class="text-white/50 text-xs h-10 flex items-center">
                     Opponent thinking...
                 </div>
@@ -181,11 +191,11 @@
         <!-- Player Area -->
         <div class="flex justify-center p-4 bg-green-800/50 rounded-lg">
             <div class="text-center">
-                <h3 class="font-bold mb-2">{{ state.players[0].name }} (Score: {{ state.players[0].score }})</h3>
+                <h3 class="font-bold mb-2">{{ bottomPlayer.name }} (Score: {{ bottomPlayer.score }})</h3>
                 <div class="flex gap-2">
                     <!-- Player Cards -->
-                    <div *ngFor="let c of state.players[0].cards; let i = index"
-                        (click)="onCardClick(state.players[0].id, i, state.phase)" class="playing-card"
+                    <div *ngFor="let c of bottomPlayer.cards; let i = index"
+                        (click)="onCardClick(bottomPlayer.id, i, state.phase)" class="playing-card"
                         [ngClass]="getCardClasses(c, i)">
 
                         <!-- Rank -->
@@ -205,7 +215,7 @@
                 <div *ngIf="state.phase === 'discarding' && selectedCardIndices.size === 2"
                     class="mt-4 animate-fade-in">
                     <button class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded font-bold shadow-lg"
-                        (click)="confirmDiscard(state.players[0].id)">
+                        (click)="confirmDiscard(bottomPlayer.id)">
                         Confirm Discard
                     </button>
                 </div>

@@ -130,6 +130,23 @@ import { ToastService } from '../../services/toast.service';
                         (click)="setView('game')">
                     <span class="text-xl">🎮</span> {{ 'APP.GAME' | translate }}
                 </button>
+
+                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
+                        [class.bg-emerald-100]="viewMode === 'lobby'" 
+                        [class.dark:bg-slate-800]="viewMode === 'lobby'" 
+                        [class.text-emerald-800]="viewMode === 'lobby'" 
+                        [class.dark:text-white]="viewMode === 'lobby'" 
+                        [class.border-emerald-200]="viewMode === 'lobby'"
+                        [class.dark:border-slate-700]="viewMode === 'lobby'"
+                        [class.border-transparent]="viewMode !== 'lobby'"
+                        [class.bg-transparent]="viewMode !== 'lobby'"
+                        [class.text-slate-600]="viewMode !== 'lobby'"
+                        [class.dark:text-slate-400]="viewMode !== 'lobby'"
+                        [class.hover:bg-gray-100]="viewMode !== 'lobby'"
+                        [class.dark:hover:bg-slate-800]="viewMode !== 'lobby'"
+                        (click)="setView('lobby')">
+                    <span class="text-xl">👥</span> Multiplayer Lobby
+                </button>
             </div>
         </div>
 
@@ -227,12 +244,12 @@ import { ToastService } from '../../services/toast.service';
 })
 export class HamburgerMenuComponent {
     @Input() isOpen = false;
-    @Input() viewMode: 'analyze' | 'history' | 'game' = 'analyze';
+    @Input() viewMode: 'analyze' | 'history' | 'game' | 'lobby' = 'analyze';
     @Input() currentLang = 'en';
     @Input() theme: 'light' | 'dark' | 'auto' = 'auto';
 
     @Output() closeMenu = new EventEmitter<void>();
-    @Output() viewModeChange = new EventEmitter<'analyze' | 'history' | 'game'>();
+    @Output() viewModeChange = new EventEmitter<'analyze' | 'history' | 'game' | 'lobby'>();
     @Output() langChange = new EventEmitter<string>();
     @Output() themeChange = new EventEmitter<'light' | 'dark' | 'auto'>();
 
@@ -255,7 +272,7 @@ export class HamburgerMenuComponent {
         this.closeMenu.emit();
     }
 
-    setView(mode: 'analyze' | 'history' | 'game') {
+    setView(mode: 'analyze' | 'history' | 'game' | 'lobby') {
         this.viewModeChange.emit(mode);
         this.close();
     }

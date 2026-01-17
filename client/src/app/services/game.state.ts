@@ -21,7 +21,7 @@ export interface Player {
     // Let's use:
     cards: Card[]; // The 4 cards held for the round
     playedCards: Card[]; // Cards that have been placed on the board this round
-
+    hasSaidGo?: boolean;
     isDealer: boolean;
 }
 
@@ -44,6 +44,7 @@ export interface GameState {
     // Counting State
     countingStage: CountingStage;
     countingScoreBreakdown: ScoreBreakdown | null;
+    countingReady?: { [playerId: string]: boolean };
 
     // Transient UI State
     lastPeggingScore: { points: number; description: string; playerId: string } | null;
@@ -51,6 +52,11 @@ export interface GameState {
     turnPlayerId: string;
     deck: Card[]; // Hidden state, but present for local engine
     winnerId: string | null;
+
+    // Multiplayer State
+    isMultiplayer: boolean;
+    gameId?: string;
+    localPlayerId?: string; // 'p1' or 'p2' (or auth ID?) -> For logic mapping
 }
 
 export const INITIAL_GAME_STATE: GameState = {
@@ -66,5 +72,6 @@ export const INITIAL_GAME_STATE: GameState = {
     lastPeggingScore: null,
     turnPlayerId: '',
     deck: [],
-    winnerId: null
+    winnerId: null,
+    isMultiplayer: false
 };

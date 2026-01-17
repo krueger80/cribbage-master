@@ -21,7 +21,30 @@ export class GameTableComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.gameService.initGame();
+    // Game initialization is handled by Lobby/GameService now.
+    // If not multiplayer, we could init default.
+    const state = this.gameService.snapshot;
+    if (!state.isMultiplayer && state.players.length === 0) {
+      this.gameService.initGame();
+    }
+  }
+
+  // Helper to get the correct player object for "MY" hand (bottom screen)
+  get bottomPlayer() {
+    const state = this.gameService.snapshot;
+    if (!state.isMultiplayer) return state.players[0]; // Single player: P1 is human
+
+    // Multiplayer: match localPlayerId
+    return state.players.find(p => p.id === state.localPlayerId) || state.players[0];
+  }
+
+  // Helper to get opponent (top screen)
+  get topPlayer() {
+    const state = this.gameService.snapshot;
+    if (!state.isMultiplayer) return state.players[1]; // Single player: P2 is CPU
+
+    // Multiplayer: whoever is NOT me
+    return state.players.find(p => p.id !== state.localPlayerId) || state.players[1];
   }
 
   onCardClick(playerId: string, cardIndex: number, phase: string) {
@@ -41,7 +64,23 @@ export class GameTableComponent implements OnInit {
   }
 
   canPlay(hand: any[], currentTotal: number): boolean {
+    if (!hand || !Array.isArray(hand)) return false;
     return hand.some(c => currentTotal + c.value <= 31);
+  }
+
+  get isMyTurn(): boolean {
+    const state = this.gameService.snapshot;
+    return state.phase === 'pegging' && state.turnPlayerId === this.bottomPlayer.id;
+  }
+
+  get showSayGo(): boolean {
+    if (!this.isMyTurn) return false;
+    const state = this.gameService.snapshot;
+    const player = this.bottomPlayer;
+    // You can't "Say Go" if you have no cards (you're just out)
+    if (!player.cards || player.cards.length === 0) return false;
+
+    return !this.canPlay(player.cards, state.currentPeggingTotal);
   }
 
   toggleSelection(index: number) {
@@ -57,6 +96,10 @@ export class GameTableComponent implements OnInit {
   }
 
   confirmDiscard(playerId: string) {
+    // Double check we are confirming for ourself
+    const me = this.bottomPlayer;
+    if (playerId !== me.id) return;
+
     if (this.selectedCardIndices.size === 2) {
       this.gameService.discard(playerId, Array.from(this.selectedCardIndices));
       this.selectedCardIndices.clear();

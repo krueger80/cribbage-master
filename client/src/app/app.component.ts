@@ -12,6 +12,7 @@ import { ApiService, AnalysisResult } from './services/api.service';
 import { SupabaseService, HandHistory } from './services/supabase.service';
 import { ToastService } from './services/toast.service';
 import { GameTableComponent } from './components/game-table/game-table.component';
+import { LobbyComponent } from './components/lobby/lobby.component';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,9 @@ import { GameTableComponent } from './components/game-table/game-table.component
     ToastComponent,
     ToastComponent,
     HamburgerMenuComponent,
-    GameTableComponent
+    HamburgerMenuComponent,
+    GameTableComponent,
+    LobbyComponent
   ],
   template: `
     <div class="relative min-h-screen pb-12 transition-colors duration-200">
@@ -184,6 +187,11 @@ import { GameTableComponent } from './components/game-table/game-table.component
 
         </div>
 
+        <!-- LOBBY VIEW -->
+        <div *ngIf="viewMode === 'lobby'" class="animate-fade-in w-full">
+            <app-lobby (gameJoined)="setView('game')" />
+        </div>
+
         <!-- GAME VIEW -->
         <div *ngIf="viewMode === 'game'" class="animate-fade-in w-full h-full">
             <app-game-table />
@@ -196,7 +204,7 @@ import { GameTableComponent } from './components/game-table/game-table.component
   styles: ['#results-anchor { scroll-margin-top: 150px; }']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  viewMode: 'analyze' | 'history' | 'game' = 'analyze';
+  viewMode: 'analyze' | 'history' | 'game' | 'lobby' = 'analyze';
   numPlayers = 2;
   isDealer = false;
   cards: string[] = [];
@@ -248,7 +256,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.translate.use(lang);
   }
 
-  setView(mode: 'analyze' | 'history' | 'game') {
+  setView(mode: 'analyze' | 'history' | 'game' | 'lobby') {
     this.viewMode = mode;
   }
 
