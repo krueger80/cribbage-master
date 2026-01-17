@@ -49,6 +49,10 @@ export class ApiService {
     return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers });
   }
 
+  getPeggingCard(hand: string[], stack: string[], total: number): Observable<{ card: Card | null, score: number, debug?: string }> {
+    return this.http.post<{ card: Card | null, score: number, debug?: string }>(`${this.apiUrl}/pegging`, { hand, stack, total });
+  }
+
   saveHistory(data: any): Observable<any> {
     // Delegate to Supabase
     return from(this.supabase.saveHistory(data));

@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
 import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,7 @@ export class GameService {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
 
-    constructor(private supabase: SupabaseService) { }
+    constructor(private supabase: SupabaseService, private api: ApiService) { }
 
     get state$(): Observable<GameState> {
         return this._state.asObservable();
@@ -311,7 +312,39 @@ export class GameService {
                     const s = this.snapshot;
                     const c = s.players.find(p => p.id === cpu.id);
                     if (s.phase === 'discarding' && c && c.cards.length > 4) {
-                        this.discard(c.id, [0, 1]);
+                        // Use API for analysis
+                        const handStrings = c.cards.map(card => card.rank + card.suit);
+                        this.api.analyze(handStrings, c.isDealer, s.players.length).subscribe({
+                            next: (res) => {
+                                if (res.results && res.results.length > 0) {
+                                    const best = res.results[0];
+                                    const discardIndices: number[] = [];
+
+                                    // Match discarded cards to hand indices
+                                    best.discarded.forEach(d => {
+                                        const idx = c.cards.findIndex(h => h.rank === d.rank && h.suit === d.suit);
+                                        if (idx !== -1 && !discardIndices.includes(idx)) {
+                                            discardIndices.push(idx);
+                                        }
+                                    });
+
+                                    // Fallback if matching failed (shouldn't happen with valid deck)
+                                    const numToDiscard = s.players.length === 2 ? 2 : 1;
+                                    if (discardIndices.length === numToDiscard) {
+                                        this.discard(c.id, discardIndices);
+                                    } else {
+                                        console.warn('CPU Analysis returned mismatching cards. Fallback to [0,1]');
+                                        this.discard(c.id, [0, 1]);
+                                    }
+                                } else {
+                                    this.discard(c.id, [0, 1]);
+                                }
+                            },
+                            error: (err) => {
+                                console.error('CPU Discard API Error', err);
+                                this.discard(c.id, [0, 1]);
+                            }
+                        });
                     }
                 }, 1000);
             }
@@ -325,19 +358,42 @@ export class GameService {
                     const cpu = s.players.find(p => p.id === s.turnPlayerId);
                     if (!cpu || cpu.isHuman) return;
 
-                    let validCardIndex = -1;
-                    for (let i = 0; i < cpu.cards.length; i++) {
-                        if (s.currentPeggingTotal + cpu.cards[i].value <= 31) {
-                            validCardIndex = i;
-                            break;
-                        }
-                    }
+                    // API Call for Pegging
+                    const handStrs = cpu.cards.map(c => c.rank + c.suit);
+                    const stackStrs = s.peggingStack.map(item => item.card.rank + item.card.suit);
 
-                    if (validCardIndex !== -1) {
-                        this.playCard(cpu.id, validCardIndex);
-                    } else {
-                        this.sayGo(cpu.id);
-                    }
+                    this.api.getPeggingCard(handStrs, stackStrs, s.currentPeggingTotal).subscribe({
+                        next: (res) => {
+                            if (res.card) {
+                                const idx = cpu.cards.findIndex(c => c.rank === res.card!.rank && c.suit === res.card!.suit);
+                                if (idx !== -1) {
+                                    this.playCard(cpu.id, idx);
+                                } else {
+                                    this.sayGo(cpu.id);
+                                }
+                            } else {
+                                // API says no card (or null), which implies Go
+                                this.sayGo(cpu.id);
+                            }
+                        },
+                        error: (err) => {
+                            console.error('CPU Pegging API Error', err);
+                            // Fallback logic
+                            let validCardIndex = -1;
+                            for (let i = 0; i < cpu.cards.length; i++) {
+                                if (s.currentPeggingTotal + cpu.cards[i].value <= 31) {
+                                    validCardIndex = i;
+                                    break;
+                                }
+                            }
+
+                            if (validCardIndex !== -1) {
+                                this.playCard(cpu.id, validCardIndex);
+                            } else {
+                                this.sayGo(cpu.id);
+                            }
+                        }
+                    });
                 }, 1000);
             }
         }
