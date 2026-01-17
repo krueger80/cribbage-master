@@ -36,12 +36,16 @@
     </div>
 
     <!-- Debug Info -->
+    <!-- Debug Info -->
+    <!-- HIDDEN -->
+    <!--
     <div class="mb-4 p-2 bg-black/50 text-xs font-mono">
         {{ 'GAME.PHASE' | translate }}: {{ ('GAME.PHASE_' + state.phase.toUpperCase()) | translate }} | {{ 'APP.DEALER'
         | translate }}: {{ getPlayerNameKey(bottomPlayer.isDealer ? bottomPlayer.name : topPlayer.name) | translate }}
         | {{ 'GAME.TURN' | translate }}: {{ state.turnPlayerId }} | {{ 'GAME.MY_ID' | translate }}: {{ bottomPlayer.id
         }}
     </div>
+    -->
 
     <!-- Interactive Counting Board -->
     <div *ngIf="state.phase === 'counting'"
@@ -127,32 +131,51 @@
         </div>
 
         <!-- Center Board -->
-        <div class="flex-1 flex items-center justify-center gap-8">
+        <div class="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 w-full">
 
             <!-- Deck / Cut Card -->
-            <div class="flex gap-4">
-                <div class="w-16 h-24 bg-blue-800 border-2 border-white rounded-lg relative">
-                    <span class="absolute inset-0 flex items-center justify-center text-xs">{{ 'GAME.DECK' | translate
-                        }}</span>
+            <!-- 
+                Logic for Deck Position:
+                MOBILE:
+                  - If Opponent is Dealer: Near Opponent (Top of Board area) -> order-first mb-4
+                  - If Me is Dealer: Near Me (Bottom of Board area) -> order-last mt-4
+                
+                DESKTOP:
+                  - Always on Left -> md:order-first md:mr-8
+                  - If Opponent is Dealer: Near Opponent (Top) -> md:self-start
+                  - If Me is Dealer: Near Me (Bottom) -> md:self-end
+                  - Note: Parent has items-center, so self-start/end overrides vertical alignment.
+            -->
+            <div class="flex gap-4 items-center justify-center transition-all duration-500 ease-in-out" [ngClass]="{
+                    'order-first mb-4 md:order-first md:self-start md:mb-0 md:mr-8': topPlayer.isDealer,
+                    'order-last mt-4 md:order-first md:self-end md:mt-0 md:mr-8': bottomPlayer.isDealer
+                 }">
+                <div class="w-16 h-24 bg-blue-800 border-2 border-white rounded-lg relative shadow-md">
+                    <span
+                        class="absolute inset-0 flex items-center justify-center text-xs text-white/50 text-center leading-none p-1">{{
+                        'GAME.DECK' | translate }}</span>
                 </div>
+                <!-- Cut Card -->
                 <div *ngIf="state.cutCard"
-                    class="playing-card w-16 h-24 flex flex-col items-center justify-center bg-white rounded-lg shadow-md border-2 border-gray-300"
+                    class="playing-card w-16 h-24 flex flex-col items-center justify-center bg-white rounded-lg shadow-md border-2 border-gray-300 animate-fade-in"
                     [ngClass]="getCardClasses(state.cutCard, -1)">
                     <span class="text-xl font-bold">{{ state.cutCard.rank }}</span>
                     <span class="text-2xl">{{ getSuitSymbol(state.cutCard.suit) }}</span>
                 </div>
+                <!-- Placeholder for Cut Card if not yet cut (keeps layout stable) -->
+                <div *ngIf="!state.cutCard" class="w-16 h-24 border-2 border-white/10 rounded-lg"></div>
             </div>
 
             <!-- Board / Pegging -->
-            <!-- Board / Pegging -->
+            <!-- Mobile: Order 1 (Top), Desktop: Order 2 (Right) -->
             <div
-                class="flex-1 flex flex-col items-center justify-center gap-4 bg-amber-800/80 p-4 rounded-xl border-4 border-amber-900 min-h-[200px]">
+                class="w-full md:flex-1 flex flex-col items-center justify-center gap-4 bg-amber-800/90 p-4 rounded-xl border-4 border-amber-900 shadow-inner min-h-[240px] relative">
+
                 <!-- Score Notification Overlay -->
-                <!-- ... (score notification logic same) ... -->
                 <div *ngIf="state.lastPeggingScore as score"
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-bounce">
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-bounce w-full flex justify-center">
                     <div
-                        class="bg-black/80 px-6 py-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] text-center">
+                        class="bg-black/80 px-6 py-4 rounded-xl border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] text-center backdrop-blur-md">
                         <div class="text-4xl font-bold text-yellow-400 mb-1">+{{ score.points }}</div>
                         <div class="text-white font-medium whitespace-nowrap">{{ score.description }}</div>
                         <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">
@@ -161,40 +184,45 @@
                     </div>
                 </div>
 
-                <div class="text-amber-100 font-bold text-lg">{{ 'GAME.TOTAL' | translate }}: {{
-                    state.currentPeggingTotal }}</div>
+                <div
+                    class="text-amber-100/80 font-bold text-lg tracking-widest border-b border-amber-100/20 pb-2 w-full text-center">
+                    {{ 'GAME.TOTAL' | translate }}: <span class="text-white text-2xl ml-2">{{ state.currentPeggingTotal
+                        }}</span>
+                </div>
 
                 <!-- Stack -->
-                <div class="flex flex-wrap justify-center gap-2 items-center min-h-[100px]">
-                    <div *ngFor="let item of state.peggingStack"
-                        class="playing-card w-12 h-16 flex flex-col items-center justify-center bg-white rounded shadow-md border border-gray-300"
-                        [ngClass]="getCardClasses(item.card, -1)">
-                        <span class="text-sm font-bold">{{ item.card.rank }}</span>
-                        <span class="text-lg leading-none">{{ getSuitSymbol(item.card.suit) }}</span>
+                <!-- Improved wrapping and spacing for cards -->
+                <div class="flex flex-wrap justify-center content-center gap-2 items-center min-h-[120px] w-full px-2">
+                    <div *ngFor="let item of state.peggingStack; let i = index"
+                        class="playing-card w-14 h-20 md:w-16 md:h-24 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg border border-gray-300 transition-transform hover:scale-110 hover:z-10 relative"
+                        [ngClass]="getCardClasses(item.card, -1)"
+                        [style.transform]="'rotate(' + (i % 2 === 0 ? '-2deg' : '2deg') + ')'">
+                        <span class="text-lg md:text-xl font-bold">{{ item.card.rank }}</span>
+                        <span class="text-xl md:text-2xl leading-none">{{ getSuitSymbol(item.card.suit) }}</span>
                     </div>
-                    <div *ngIf="state.peggingStack.length === 0" class="text-amber-300/50 italic text-sm">
+                    <div *ngIf="state.peggingStack.length === 0"
+                        class="text-amber-200/40 italic text-sm font-medium border-2 border-dashed border-amber-900/30 rounded-lg p-4">
                         {{ 'GAME.TABLE_EMPTY' | translate }}
                     </div>
                 </div>
 
                 <!-- Action: Say Go -->
-                <!-- Use *ngIf="isMyTurn" to scope updates -->
-                <ng-container *ngIf="isMyTurn">
-                    <div class="h-10 flex items-center justify-center">
+                <div class="h-12 flex items-center justify-center w-full mt-auto">
+                    <ng-container *ngIf="isMyTurn">
                         <button *ngIf="showSayGo"
-                            class="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold shadow-lg animate-pulse transition-all transform hover:scale-105 active:scale-95"
+                            class="px-8 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold shadow-lg shadow-red-600/30 animate-pulse transition-all transform hover:scale-105 active:scale-95"
                             (click)="sayGo(bottomPlayer.id)">
                             {{ 'GAME.SAY_GO' | translate }}
                         </button>
                         <div *ngIf="!showSayGo"
-                            class="text-emerald-300 font-bold animate-pulse text-lg tracking-wide drop-shadow-md">
+                            class="text-emerald-300 font-bold animate-pulse text-lg tracking-wide drop-shadow-md bg-emerald-900/30 px-4 py-1 rounded-full">
                             {{ 'GAME.YOUR_TURN' | translate }}
                         </div>
+                    </ng-container>
+                    <div *ngIf="state.phase === 'pegging' && state.turnPlayerId !== bottomPlayer.id"
+                        class="text-white/50 text-xs flex items-center gap-2 bg-black/20 px-3 py-1 rounded-full">
+                        <span class="animate-spin text-sm">↻</span> {{ 'GAME.OPPONENT_THINKING' | translate }}
                     </div>
-                </ng-container>
-                <div *ngIf="state.phase === 'pegging' && state.turnPlayerId !== bottomPlayer.id"
-                    class="text-white/50 text-xs h-10 flex items-center">
-                    {{ 'GAME.OPPONENT_THINKING' | translate }}
                 </div>
             </div>
 

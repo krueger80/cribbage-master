@@ -30,7 +30,8 @@
         "PASSWORD": "Password",
         "SIGN_IN_GOOGLE": "Sign in with Google",
         "OR": "OR",
-        "GAME": "Game"
+        "GAME": "Game",
+        "LOBBY": "Multiplayer Lobby"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Select Your Hand",

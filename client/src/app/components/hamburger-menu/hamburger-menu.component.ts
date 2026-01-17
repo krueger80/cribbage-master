@@ -18,7 +18,7 @@ import { ToastService } from '../../services/toast.service';
         
         <!-- Header -->
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-600 dark:from-emerald-400 dark:to-cyan-500">{{ 'APP.MENU' | translate }}</h2>
+            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-cyan-600 dark:from-emerald-400 dark:to-cyan-500">{{ 'APP.TITLE' | translate }}</h2>
             <button (click)="close()" class="btn btn-sm btn-ghost text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-white rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-slate-800 transition-colors">✕</button>
         </div>
 
@@ -82,7 +82,7 @@ import { ToastService } from '../../services/toast.service';
                 <span>🧭</span> {{ 'APP.NAVIGATION' | translate }}
             </h3>
             <div class="flex flex-col gap-2">
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
+                <button class="flex items-center justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-100]="viewMode === 'analyze'" 
                         [class.dark:bg-slate-800]="viewMode === 'analyze'" 
                         [class.text-emerald-800]="viewMode === 'analyze'" 
@@ -98,7 +98,7 @@ import { ToastService } from '../../services/toast.service';
                         (click)="setView('analyze')">
                     <span class="text-xl">🃏</span> {{ 'APP.ANALYZER' | translate }}
                 </button>
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
+                <button class="flex items-center justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-100]="viewMode === 'history'" 
                         [class.dark:bg-slate-800]="viewMode === 'history'" 
                         [class.text-emerald-800]="viewMode === 'history'" 
@@ -114,7 +114,7 @@ import { ToastService } from '../../services/toast.service';
                         (click)="setView('history')">
                     <span class="text-xl">📜</span> {{ 'APP.HISTORY' | translate }}
                 </button>
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
+                <button class="flex items-center justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-100]="viewMode === 'game'" 
                         [class.dark:bg-slate-800]="viewMode === 'game'" 
                         [class.text-emerald-800]="viewMode === 'game'" 
@@ -131,7 +131,7 @@ import { ToastService } from '../../services/toast.service';
                     <span class="text-xl">🎮</span> {{ 'APP.GAME' | translate }}
                 </button>
 
-                <button class="btn justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
+                <button class="flex items-center justify-start w-full text-left pl-4 gap-3 h-12 text-sm font-medium transition-all rounded-lg select-none" 
                         [class.bg-emerald-100]="viewMode === 'lobby'" 
                         [class.dark:bg-slate-800]="viewMode === 'lobby'" 
                         [class.text-emerald-800]="viewMode === 'lobby'" 
@@ -145,7 +145,7 @@ import { ToastService } from '../../services/toast.service';
                         [class.hover:bg-gray-100]="viewMode !== 'lobby'"
                         [class.dark:hover:bg-slate-800]="viewMode !== 'lobby'"
                         (click)="setView('lobby')">
-                    <span class="text-xl">👥</span> Multiplayer Lobby
+                    <span class="text-xl">👥</span> {{ 'APP.LOBBY' | translate }}
                 </button>
             </div>
         </div>

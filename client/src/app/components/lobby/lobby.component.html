@@ -1,38 +1,69 @@
-<div class="lobby-container">
-    <div class="header">
-        <h1>{{ 'LOBBY.TITLE' | translate }}</h1>
-        <div class="user-info" *ngIf="userId">
-            <small>{{ 'LOBBY.ID' | translate }}: {{ userId.slice(0, 8) }}...</small>
-        </div>
-    </div>
-
-    <div class="actions">
-        <button class="btn-create" (click)="createGame()" [disabled]="loading || !userId">
-            {{ loading ? ('LOBBY.CREATING' | translate) : (!userId ? ('LOBBY.LOGGING_IN' | translate) :
-            ('LOBBY.CREATE_GAME' | translate)) }}
-        </button>
-        <button class="btn-refresh" (click)="refreshGames()" [disabled]="loading">
-            {{ 'LOBBY.REFRESH' | translate }}
-        </button>
-    </div>
-
-    <div class="games-list">
-        <h2>{{ 'LOBBY.WAITING_GAMES' | translate }}</h2>
-
-        <div class="empty-state" *ngIf="waitingGames.length === 0 && !loading">
-            {{ 'LOBBY.NO_GAMES' | translate }}
-        </div>
-
-        <div class="game-card" *ngFor="let game of waitingGames">
-            <div class="game-info">
-                <span class="host-name">{{ 'LOBBY.HOST' | translate }}: {{ game.host_id.slice(0,8) }}...</span>
-                <span class="date">{{ game.created_at | date:'shortTime' }}</span>
+<div
+    class="max-w-4xl mx-auto p-4 md:p-8 bg-white dark:bg-slate-800 rounded-xl shadow-xl transition-colors duration-200">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
+        <div class="w-full md:w-auto">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2">{{ 'LOBBY.TITLE' | translate
+                }}</h1>
+            <div class="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-mono flex items-center flex-wrap gap-2"
+                *ngIf="userId">
+                <span class="opacity-70 whitespace-nowrap">{{ 'LOBBY.ID' | translate }}:</span>
+                <span
+                    class="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded select-all truncate max-w-[200px] md:max-w-none">{{
+                    userId }}</span>
             </div>
-            <button class="btn-join" (click)="joinGame(game.id)">{{ 'LOBBY.JOIN' | translate }}</button>
+        </div>
+
+        <div class="flex gap-3 w-full md:w-auto">
+            <button
+                class="btn btn-primary flex-1 md:flex-none py-3 md:py-2.5 px-6 font-bold shadow-lg shadow-blue-500/20 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all text-sm md:text-base whitespace-nowrap"
+                (click)="createGame()" [disabled]="loading || !userId">
+                {{ loading ? ('LOBBY.CREATING' | translate) : (!userId ? ('LOBBY.LOGGING_IN' | translate) :
+                ('LOBBY.CREATE_GAME' | translate)) }}
+            </button>
+            <button
+                class="flex-none py-3 md:py-2.5 px-4 font-semibold text-slate-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-all"
+                (click)="refreshGames()" [disabled]="loading">
+                <span class="text-lg">↻</span>
+            </button>
         </div>
     </div>
 
-    <div class="loading-overlay" *ngIf="loading">
-        <div class="spinner"></div>
+    <div class="bg-gray-50 dark:bg-slate-900/50 rounded-xl p-4 md:p-6 border border-gray-100 dark:border-slate-700/50">
+        <h2
+            class="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span>🎮</span> {{ 'LOBBY.WAITING_GAMES' | translate }}
+        </h2>
+
+        <div class="text-center py-12 text-slate-400 dark:text-slate-500" *ngIf="waitingGames.length === 0 && !loading">
+            <div class="text-4xl mb-3 opacity-50">📭</div>
+            <p>{{ 'LOBBY.NO_GAMES' | translate }}</p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all gap-4 ring-1 ring-transparent hover:ring-blue-500/20"
+                *ngFor="let game of waitingGames">
+                <div class="flex flex-col">
+                    <span class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
+                        <span>👤</span> {{ 'LOBBY.HOST' | translate }}:
+                        <span
+                            class="font-mono text-slate-500 dark:text-slate-400 text-xs md:text-sm bg-slate-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">{{
+                            game.host_id.slice(0,8) }}...</span>
+                    </span>
+                    <span class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                        <span>🕒</span> {{ game.created_at | date:'shortTime' }}
+                    </span>
+                </div>
+                <button
+                    class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 md:py-2 px-6 rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform active:scale-[0.98]"
+                    (click)="joinGame(game.id)">
+                    {{ 'LOBBY.JOIN' | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm"
+        *ngIf="loading">
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
 </div>

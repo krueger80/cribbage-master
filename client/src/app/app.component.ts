@@ -54,12 +54,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
       <div class="container animate-fade-in pt-8 max-w-7xl mx-auto px-4">
         
         <!-- HEADER -->
-        <header class="mb-8 text-center pt-8 md:pt-0">
-            <h1 class="text-4xl md:text-5xl mb-2 pb-2 font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-600 dark:from-emerald-400 dark:to-cyan-500">
-                {{ 'APP.TITLE' | translate }}
-            </h1>
-            <p class="text-slate-500 dark:text-slate-400">{{ 'APP.SUBTITLE' | translate }}</p>
-        </header>
+
   
         <!-- CONTENT -->
         <div class="flex flex-col gap-6" *ngIf="viewMode !== 'game'">

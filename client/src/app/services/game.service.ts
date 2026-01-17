@@ -557,10 +557,12 @@ export class GameService {
         this.processCurrentCountingStage();
     }
 
-    private processCurrentCountingStage() {
+    private processCurrentCountingStage(stageOverride?: any) {
         if ((this.snapshot.phase as any) === 'gameover') return;
 
         const state = this.snapshot;
+        const currentStage = stageOverride || state.countingStage; // Use override logic
+
         const dealerIndex = state.players.findIndex(p => p.isDealer);
         const nonDealerIndex = (dealerIndex + 1) % state.players.length;
         const cutCard = state.cutCard;
@@ -569,21 +571,21 @@ export class GameService {
         let points = 0;
         let playerToScore: Player | null = null;
 
-        if (state.countingStage === 'non_dealer_hand') {
+        if (currentStage === 'non_dealer_hand') {
             const nonDealer = state.players[nonDealerIndex];
             scoreBreakdown = calculateScore(nonDealer.playedCards, cutCard, false);
             points = scoreBreakdown.total;
             playerToScore = nonDealer;
             console.log(`${nonDealer.name} Hand Score: ${points}`);
 
-        } else if (state.countingStage === 'dealer_hand') {
+        } else if (currentStage === 'dealer_hand') {
             const dealer = state.players[dealerIndex];
             scoreBreakdown = calculateScore(dealer.playedCards, cutCard, false);
             points = scoreBreakdown.total;
             playerToScore = dealer;
             console.log(`${dealer.name} Hand Score: ${points}`);
 
-        } else if (state.countingStage === 'crib') {
+        } else if (currentStage === 'crib') {
             const dealer = state.players[dealerIndex];
             scoreBreakdown = calculateScore(state.crib, cutCard, true);
             points = scoreBreakdown.total;
@@ -599,6 +601,7 @@ export class GameService {
             if ((this.snapshot.phase as any) === 'gameover') return;
 
             this.updateState({
+                countingStage: currentStage, // Update stage here
                 countingScoreBreakdown: scoreBreakdown,
                 players: [...state.players]
             });
@@ -659,11 +662,7 @@ export class GameService {
             return;
         }
 
-        this.updateState({
-            countingStage: nextStage,
-            countingScoreBreakdown: null
-        });
-        this.processCurrentCountingStage();
+        this.processCurrentCountingStage(nextStage);
     }
 
     private checkAutoCount() {

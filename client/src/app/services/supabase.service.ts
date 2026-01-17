@@ -237,7 +237,7 @@ export class SupabaseService {
         if (!userId) throw new Error('User not logged in');
 
         const { error } = await this.supabase
-            .from('history')
+            .from('hand_history')
             .insert({ ...entry, user_id: userId });
 
         if (error) throw error;
@@ -246,7 +246,7 @@ export class SupabaseService {
     getHistory(): Observable<HandHistory[]> {
         return from(
             this.supabase
-                .from('history')
+                .from('hand_history')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .then(({ data, error }) => {
