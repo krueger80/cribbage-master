@@ -103,6 +103,12 @@
         "TURN": "Tour",
         "MY_ID": "Mon ID",
         "HOST": "Hôte",
-        "GUEST": "Invité"
+        "GUEST": "Invité",
+        "CUT": "Coupe",
+        "POINTS": "Points",
+        "NEXT_ROUND": "Prochaine main",
+        "CRIB": "Le Crible",
+        "YOU": "Vous",
+        "OPPONENT": "Adversaire"
     }
 }

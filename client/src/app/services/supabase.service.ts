@@ -49,6 +49,10 @@ export class SupabaseService {
         return this._currentUser.asObservable();
     }
 
+    get currentUserSnapshot() {
+        return this._currentUser.value;
+    }
+
     get currentUserId() {
         return this._currentUser.value?.id;
     }

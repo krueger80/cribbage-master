@@ -24,15 +24,29 @@ export class GameService {
 
     // Actions
     initGame(playerNames: string[] = ['Player 1', 'CPU']) {
-        const players: Player[] = playerNames.map((name, idx) => ({
-            id: `p${idx + 1}`,
-            name,
-            isHuman: idx === 0, // Assumption for now
-            score: 0,
-            cards: [],
-            playedCards: [],
-            isDealer: idx === 0
-        }));
+        const user = this.supabase.currentUserSnapshot;
+        const p1Name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || playerNames[0];
+
+        const players: Player[] = [
+            {
+                id: 'p1',
+                name: p1Name,
+                isHuman: true,
+                score: 0,
+                cards: [],
+                playedCards: [],
+                isDealer: true
+            },
+            {
+                id: 'p2',
+                name: playerNames[1], // CPU
+                isHuman: false,
+                score: 0,
+                cards: [],
+                playedCards: [],
+                isDealer: false
+            }
+        ];
 
         this.updateState({
             ...INITIAL_GAME_STATE,
@@ -581,11 +595,11 @@ export class GameService {
                 currentPeggingTotal: newTotal,
                 peggingStack: newStack,
                 turnPlayerId: nextTurnId,
-                lastPeggingScore: (this.snapshot.lastPeggingScore) ? this.snapshot.lastPeggingScore : (scoreResult.points > 0 ? {
+                lastPeggingScore: scoreResult.points > 0 ? {
                     points: scoreResult.points,
                     description: scoreResult.breakdown.join(', '),
                     playerId
-                } : null)
+                } : null
             });
         }
 

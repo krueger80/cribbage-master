@@ -41,19 +41,26 @@ class MockSupabaseService {
     }
 }
 
+class MockApiService {
+    analyze() { return of({ results: [] }); }
+    getPeggingCard() { return of({ card: null }); }
+}
+
 describe('Multiplayer Flow Integration', () => {
     let hostService: GameService;
     let guestService: GameService;
     let mockSupabase: MockSupabaseService;
+    let mockApi: MockApiService;
 
     beforeEach(() => {
         mockSupabase = new MockSupabaseService();
+        mockApi = new MockApiService();
 
         // Host Service Instance
-        hostService = new GameService(mockSupabase as any);
+        hostService = new GameService(mockSupabase as any, mockApi as any);
 
         // Guest Service Instance
-        guestService = new GameService(mockSupabase as any);
+        guestService = new GameService(mockSupabase as any, mockApi as any);
     });
 
     it('should sync state between host and guest', async () => {

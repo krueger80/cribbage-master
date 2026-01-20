@@ -321,40 +321,39 @@ describe('GameService', () => {
             service['checkForPeggingFinished'](); // Trigger transition
         });
 
-        it('should step through counting stages correctly', fakeAsync(() => {
+        it('should calculate all scores correctly in counting phase', fakeAsync(() => {
             let state = service.snapshot;
             expect(state.phase).toBe('counting');
-            expect(state.countingStage).toBe('non_dealer_hand');
+
+            // assert countingResults exists
+            expect(state.countingResults).toBeDefined();
 
             // Verify Non-Dealer (P2) Score
             // 4 Fives + Jack Cut.
             // Pairs 6 (12). 15s (16). Total 28.
-            expect(state.players[1].score).toBe(28);
-            expect(state.players[0].score).toBe(0); // Dealer 0 yet.
-
-            // Advance to Dealer
-            service.advanceCountingStage();
-            state = service.snapshot;
-            expect(state.countingStage).toBe('dealer_hand');
+            expect(state.countingResults?.nonDealer.total).toBe(28);
+            expect(state.players[1].score).toBe(28); // Points applied immediately? 
+            // In countHands:
+            // if (p.id === nonDealer.id) additional += nonDealerScore.total;
+            // ... return { ...p, score: newScore };
+            // Yes, points are applied immediately.
 
             // Verify Dealer (P1) Score. Ace + J. 0.
-            expect(state.players[0].score).toBe(0);
-
-            // Advance to Crib
-            service.advanceCountingStage();
-            state = service.snapshot;
-            expect(state.countingStage).toBe('crib');
+            expect(state.countingResults?.dealer.total).toBe(0);
 
             // Verify Crib Score. 5 + J = 15 (2).
-            // Dealer gets crib points.
+            expect(state.countingResults?.crib.total).toBe(2);
+
+            // Dealer gets hand (0) + crib (2) = 2
             expect(state.players[0].score).toBe(2);
 
-            // Advance to Finish
-            service.advanceCountingStage();
+            // Simulate User finishing viewing results
+            service.playerFinishedCounting(state.players[0].id);
+            tick(1000);
+
+            // In single player, one acknowledgement advances the game
             state = service.snapshot;
-            // nextRound calls dealRound immediately, which sets phase to discarding
             expect(state.phase).toBe('discarding');
-            tick(4000); // Flush timers
         }));
     });
 
