@@ -141,6 +141,10 @@ export class GameTableComponent implements OnInit {
     return hand.some(c => currentTotal + c.value <= 31);
   }
 
+  trackPeggingItem(index: number, item: any) {
+    return index;
+  }
+
   get isMyTurn(): boolean {
     const state = this.gameService.snapshot;
     return state.phase === 'pegging' && state.turnPlayerId === this.bottomPlayer.id;
