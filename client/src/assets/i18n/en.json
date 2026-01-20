@@ -103,6 +103,12 @@
         "TURN": "Turn",
         "MY_ID": "My ID",
         "HOST": "Host",
-        "GUEST": "Guest"
+        "GUEST": "Guest",
+        "CUT": "Cut",
+        "POINTS": "Points",
+        "NEXT_ROUND": "Next Hand",
+        "CRIB": "Crib",
+        "YOU": "You",
+        "OPPONENT": "Opponent"
     }
 }

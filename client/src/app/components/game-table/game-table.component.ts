@@ -2,16 +2,58 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { GameService } from '../../services/game.service';
 import { GameState } from '../../services/game.state';
+import { ScorePopupComponent } from '../score-popup/score-popup.component'; // Import Popup
+import { formatScoreBreakdown, ScoreBreakdown } from '../../logic/cards'; // Import Helper
 import { Observable } from 'rxjs';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-game-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, ScorePopupComponent],
   templateUrl: './game-table.component.html',
-  styleUrl: './game-table.component.css'
+  styleUrl: './game-table.component.css',
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-out', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ opacity: 0 }))
+      ])
+    ]),
+    trigger('cardPlay', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(100px) scale(0.8)' }),
+        animate('400ms cubic-bezier(0.175, 0.885, 0.32, 1.275)', style({ opacity: 1, transform: 'translateY(0) scale(1)' }))
+      ])
+    ]),
+    trigger('cardDeal', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(-100px)' }),
+          stagger('100ms', [
+            animate('500ms cubic-bezier(0.35, 0, 0.25, 1)', style({ opacity: 1, transform: 'none' }))
+          ])
+        ], { optional: true })
+      ])
+    ]),
+    trigger('bounceIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.3)' }),
+        animate('600ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1)' }))
+      ])
+    ]),
+    trigger('slideUp', [
+      transition(':enter', [
+        style({ transform: 'translateY(20px)', opacity: 0 }),
+        animate('500ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ transform: 'translateY(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class GameTableComponent implements OnInit {
   state$: Observable<GameState>;
@@ -76,6 +118,13 @@ export class GameTableComponent implements OnInit {
       } else {
         if (this.selectedCardIndices.size < 2) {
           this.selectedCardIndices.add(index);
+        } else {
+          // Already have 2, remove the LAST one (LIFO) and add the new one
+          const last = Array.from(this.selectedCardIndices).pop();
+          if (last !== undefined) {
+            this.selectedCardIndices.delete(last);
+          }
+          this.selectedCardIndices.add(index);
         }
       }
     } else if (this.gameService.snapshot.phase === 'pegging') {
@@ -113,8 +162,9 @@ export class GameTableComponent implements OnInit {
       this.selectedCardIndices.clear();
     }
   }
-  getCardClasses(card: any, index: number): any {
+  getCardClasses(card: any, index: number, playerId?: string): any {
     const isSelected = this.selectedCardIndices.has(index);
+    // Optional: Use playerId to distinctive styling if needed (e.g., border color)
     return {
       'red': card.suit === 'H' || card.suit === 'D',
       'black': card.suit === 'C' || card.suit === 'S',
@@ -207,5 +257,68 @@ export class GameTableComponent implements OnInit {
 
   restartGame() {
     this.gameService.restartGame();
+  }
+
+  getPopupData() {
+    const state = this.gameService.snapshot;
+
+    // Priority 1: Pegging Score (Transient)
+    if (state.lastPeggingScore) {
+      return {
+        visible: true,
+        points: state.lastPeggingScore.points,
+        breakdown: state.lastPeggingScore.description ? state.lastPeggingScore.description.split(', ') : [],
+        type: 'pegging' as const,
+        title: 'Pegging Score'
+      };
+    }
+
+    // Priority 2: Counting Phase (Persistent)
+    if (state.phase === 'counting') {
+      const score = this.getCountingScore(state);
+      let title = 'Hand Score';
+
+      // Determine Title based on sub-stage
+      // We know localCountingStage.
+      // But localCountingStage is determined by:
+      // if !countingResults.nonDealer -> non_dealer_hand
+      // else if !countingResults.dealer -> dealer_hand
+      // else if !countingResults.crib -> crib
+
+      // Let's re-derive or use the property if it matches the current view state logic
+      // Actually, we can just look at who is being counted.
+      // We have `this.localCountingStage`.
+
+      if (this.localCountingStage === 'crib') {
+        title = 'Crib Score';
+      } else if (this.localCountingStage === 'dealer_hand') {
+        const dealer = state.players.find(p => p.isDealer);
+        title = dealer ? `${dealer.name} Score` : 'Dealer Score';
+      } else if (this.localCountingStage === 'non_dealer_hand') {
+        const nonDealer = state.players.find(p => !p.isDealer);
+        title = nonDealer ? `${nonDealer.name} Score` : 'Player Score';
+      }
+
+      if (score && score.total > 0) {
+        return {
+          visible: true,
+          points: score.total,
+          breakdown: formatScoreBreakdown(score),
+          type: 'counting' as const,
+          title: title.toUpperCase()
+        };
+      }
+      if (score && score.total === 0) {
+        return {
+          visible: true,
+          points: 0,
+          breakdown: ['No points'],
+          type: 'counting' as const,
+          title: title.toUpperCase()
+        };
+      }
+    }
+
+    return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '' };
   }
 }

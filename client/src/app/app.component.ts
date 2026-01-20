@@ -33,7 +33,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
     LobbyComponent
   ],
   template: `
-    <div class="relative min-h-screen pb-12 transition-colors duration-200">
+    <div class="relative min-h-screen transition-colors duration-200" [class.pb-12]="viewMode !== 'game'">
         
       <!-- HAMBURGER MENU COMPONENT -->
       <app-hamburger-menu 
@@ -51,7 +51,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
             {{ isMenuOpen ? '✕' : '☰' }}
       </button>
 
-      <div class="container animate-fade-in pt-8 max-w-7xl mx-auto px-4">
+      <div [ngClass]="viewMode === 'game' ? 'w-full h-full' : 'container animate-fade-in pt-8 max-w-7xl mx-auto px-4'">
         
         <!-- HEADER -->
 

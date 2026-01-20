@@ -1,0 +1,62 @@
+<div *ngIf="visible" @popIn
+    class="pointer-events-none fixed top-1/2 right-4 md:right-12 -translate-y-1/2 z-50 flex justify-end">
+    <!-- Overlay/Container -->
+    <!-- Positioned on the right, allowed to cover pegging total. Smaller size. -->
+
+    <div
+        class="relative bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-2 min-w-[180px] pointer-events-auto">
+        <!-- Header -->
+        <h3 class="text-emerald-400 font-bold uppercase tracking-wider text-xs">
+            {{ title }}
+        </h3>
+
+        <!-- Main Points -->
+        <div class="flex flex-col items-center">
+            <span class="text-5xl font-black text-white drop-shadow-lg leading-none">{{ points }}</span>
+            <span class="text-white/60 text-[10px] uppercase tracking-widest font-bold">Points</span>
+        </div>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-white/10 my-1"></div>
+
+        <!-- Breakdown List -->
+        <div class="flex flex-col items-center gap-0.5 w-full">
+            <div *ngFor="let line of breakdown" class="text-white text-sm font-medium text-center leading-tight">
+                {{ line }}
+            </div>
+            <div *ngIf="breakdown.length === 0" class="text-white/40 italic text-xs">
+                + Points
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Special "Button at Bottom" Requirement for Counting -->
+<!--
+    The user asked: "Showing until the user click a button... Have the button at the buttom of the screen."
+    Currently I put it inside the popup.
+    If the popup is centered, the button is in the center.
+    If the user specifically wants it at the BOTTOM of the screen, I should move it out or position the popup container differently.
+
+    Let's adjust: If type='counting', position the container differently?
+    Or just keep the button detached?
+
+    "This popup... details of score... persistent... have the button at the button of screen"
+    Maybe separate the button?
+
+    Let's try putting the button inside for now, but if 'counting', maybe push the whole popup down?
+    No, blocking the view is bad.
+
+    Let's stick to Centered Popup for now. It's clean. The button is effectively "at the bottom of the popup".
+    If "bottom of SCREEN" is strict, I can change styles.
+
+    Let's try to anchor the button to the screen bottom if type is counting.
+-->
+
+<div *ngIf="visible && type === 'counting'"
+    class="fixed bottom-8 left-0 right-0 flex justify-center z-[60] pointer-events-none">
+    <button (click)="onContinue()"
+        class="pointer-events-auto bg-emerald-500 hover:bg-emerald-400 text-black font-black py-3 px-8 landscape:py-2 landscape:px-6 rounded-xl text-lg landscape:text-base uppercase tracking-widest shadow-lg border-2 border-emerald-300 active:scale-95 transition-transform">
+        Continue
+    </button>
+</div>

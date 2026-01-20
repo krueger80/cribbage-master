@@ -137,3 +137,12 @@ export function isRun(cards: Card[]): boolean {
     }
     return true;
 }
+export function formatScoreBreakdown(score: ScoreBreakdown): string[] {
+    const lines: string[] = [];
+    if (score.fifteens > 0) lines.push(`15s -- ${score.fifteens} pts`);
+    if (score.pairs > 0) lines.push(`Pairs -- ${score.pairs} pts`);
+    if (score.runs > 0) lines.push(`Runs -- ${score.runs} pts`);
+    if (score.flush > 0) lines.push(`Flush -- ${score.flush} pts`);
+    if (score.nobs > 0) lines.push(`Nobs -- ${score.nobs} pts`);
+    return lines;
+}
