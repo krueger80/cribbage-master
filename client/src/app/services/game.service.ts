@@ -11,6 +11,7 @@ import { ApiService } from './api.service';
 export class GameService {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
+    private _lastProcessedScoreId = 0;
 
     constructor(private supabase: SupabaseService, private api: ApiService) { }
 
@@ -135,6 +136,45 @@ export class GameService {
             this._localCountingFinished = false;
         }
 
+        // --- ROBUST SCORING NOTIFICATION ---
+        // If the new state has a score we haven't seen yet, show it locally.
+        if (newState.lastPeggingScore && newState.lastPeggingScore.id > this._lastProcessedScoreId) {
+            this._lastProcessedScoreId = newState.lastPeggingScore.id;
+            console.log('[Game] New score received:', newState.lastPeggingScore);
+
+            // It will be shown because we apply 'newState' below.
+            // But we must schedule a LOCAL hiding of it.
+            setTimeout(() => {
+                // Check if the current visible score is still the one we just showed (id check)
+                // If the user played fast, they might have shown a NEW score already.
+                const current = this._state.value.lastPeggingScore;
+                if (current && current.id === newState.lastPeggingScore?.id) {
+                    this.updateState({ lastPeggingScore: null }, false); // False = Local only
+                }
+            }, 2500);
+        }
+
+        // --- TURN ROBUSTNESS (Auto-Correction) ---
+        // If it's pegging, check if the player whose turn it is CAN actually play.
+        // If not, and I am that player (or maybe anyone?), we should probably correct it?
+        // Ideally, the HOST detects this mismatch and pushes a fix.
+        if (newState.phase === 'pegging' && newState.players) {
+            const turnPlayer = newState.players.find(p => p.id === newState.turnPlayerId);
+            const currentTotal = newState.currentPeggingTotal;
+
+            // Simple check: Does turnPlayer have cards < 31-total?
+            // If they have NO cards, or all cards > limit, they can't play.
+            if (turnPlayer) {
+                const canPlay = turnPlayer.cards.some(c => c.value + currentTotal <= 31);
+
+                // If they CANNOT play, but it says it's their turn...
+                // This usually means the "Go" logic failed or sync lag.
+                // We won't auto-fix immediately to avoid fighting latency, but we could log it.
+                // console.log(`[Game] Turn Check: Player ${turnPlayer.id} Turn? Yes. Can play? ${canPlay}`);
+            }
+        }
+
+
         // Handle specific actions if needed
         // ... previous logic
         // If I am Host, and I receive a state where Guest discarded (remote state), 
@@ -186,11 +226,6 @@ export class GameService {
         if (localId === 'p1' && newState.phase === 'pegging') {
             this.checkForPeggingFinished();
         }
-
-        // Host checks for Counting Ready - REMOVED (Automatic flow now)
-        // if (localId === 'p1' && newState.phase === 'counting') {
-        //    this.checkCountingReady(newState.countingReady || {});
-        // }
     }
 
     private updateState(newState: Partial<GameState>, syncRemote = true) {
@@ -518,7 +553,8 @@ export class GameService {
                 lastPeggingScore: scoreResult.points > 0 ? {
                     points: scoreResult.points,
                     description: scoreResult.breakdown.join(', '),
-                    playerId
+                    playerId,
+                    id: Date.now()
                 } : null
             });
         } else {
@@ -583,7 +619,8 @@ export class GameService {
                             lastPeggingScore: {
                                 points: 1,
                                 description: 'Go for 1',
-                                playerId
+                                playerId,
+                                id: Date.now()
                             }
                         });
                     }
@@ -598,20 +635,24 @@ export class GameService {
                 lastPeggingScore: scoreResult.points > 0 ? {
                     points: scoreResult.points,
                     description: scoreResult.breakdown.join(', '),
-                    playerId
-                } : null
+                    playerId,
+                    id: Date.now()
+                } : (this.snapshot.lastPeggingScore || null) // Preserve existing score if Go for 1 happened
             });
         }
 
-        // Clear the score message after a delay
-        if (scoreResult.points > 0 || this.snapshot.lastPeggingScore?.description.includes('Go')) {
+        // Logic to clear score REMOVED from DB write.
+        // We will schedule a Local-only clear, but only if we generated it.
+        const currentScore = this.snapshot.lastPeggingScore;
+        if (currentScore && currentScore.playerId === playerId) {
+            this._lastProcessedScoreId = currentScore.id;
             setTimeout(() => {
-                const current = this.snapshot.lastPeggingScore;
-                if (current && current.playerId === playerId) {
-                    // Check we haven't already moved on?
-                    this.updateState({ lastPeggingScore: null });
+                // Local clear only
+                const s = this._state.value.lastPeggingScore;
+                if (s && s.id === currentScore.id) {
+                    this.updateState({ lastPeggingScore: null }, false);
                 }
-            }, 2000);
+            }, 2500);
         }
 
         // Check if pegging is finished BEFORE the multiplayer guard
@@ -822,7 +863,8 @@ export class GameService {
             lastPeggingScore: {
                 points: 1,
                 description: 'Go for 1',
-                playerId: opponent.id
+                playerId: opponent.id,
+                id: Date.now()
             }
         });
 

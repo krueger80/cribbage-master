@@ -54,7 +54,7 @@ export interface GameState {
     countingReady?: { [playerId: string]: boolean };
 
     // Transient UI State
-    lastPeggingScore: { points: number; description: string; playerId: string } | null;
+    lastPeggingScore: { points: number; description: string; playerId: string; id: number } | null;
 
     turnPlayerId: string;
     deck: Card[]; // Hidden state, but present for local engine

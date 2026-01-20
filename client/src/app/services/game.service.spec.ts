@@ -1,12 +1,33 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { GameService } from './game.service';
 import { GameState } from './game.state';
+import { of } from 'rxjs';
+import { ApiService } from './api.service';
+import { SupabaseService } from './supabase.service';
+
+class MockSupabaseService {
+    currentUserSnapshot = { id: 'test-user', user_metadata: { full_name: 'Test User' } };
+    subscribeToGame() { return of({}); }
+    updateGameState() { return Promise.resolve(); }
+    getGameState() { return Promise.resolve(null); }
+}
+
+class MockApiService {
+    analyze() { return of({ results: [] }); }
+    getPeggingCard() { return of({ card: null }); }
+}
 
 describe('GameService', () => {
     let service: GameService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            providers: [
+                GameService,
+                { provide: SupabaseService, useClass: MockSupabaseService },
+                { provide: ApiService, useClass: MockApiService }
+            ]
+        });
         service = TestBed.inject(GameService);
     });
 
