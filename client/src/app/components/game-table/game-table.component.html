@@ -41,7 +41,8 @@
                 class="flex flex-col items-center p-6 bg-white/5 rounded-2xl border border-white/10"
                 [class.border-yellow-400]="p.id === state.winnerId"
                 [class.shadow-[0_0_30px_rgba(250,204,21,0.2)]]="p.id === state.winnerId">
-                <div class="text-4xl font-bold mb-2" [class.text-yellow-400]="p.id === state.winnerId">{{ p.score }}
+                <div class="text-4xl font-bold mb-2" [class.text-yellow-400]="p.id === state.winnerId">{{
+                    getScoreDisplay(p.score) }}
                 </div>
                 <div class="text-sm uppercase tracking-wider text-slate-400">{{ getPlayerNameKey(p.name) | translate }}
                 </div>
@@ -56,7 +57,7 @@
 
     <!-- Real Score Board -->
     <div
-        class="shrink-0 w-full h-24 landscape:w-24 landscape:h-auto bg-[#3e2723] rounded-lg border-2 border-[#5d4037] shadow-xl overflow-hidden relative">
+        class="shrink-0 w-full h-28 md:h-48 landscape:h-full landscape:w-auto bg-[#3e2723] rounded-lg border-2 border-[#5d4037] shadow-xl overflow-hidden relative">
         <app-cribbage-board [p1Score]="getVisualScore(0)" [p2Score]="getVisualScore(1)" [p1Color]="'#ef4444'"
             [p2Color]="'#3b82f6'" [vertical]="isLandscape">
         </app-cribbage-board>

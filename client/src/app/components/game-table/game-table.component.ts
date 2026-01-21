@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { GameService } from '../../services/game.service';
 import { GameState } from '../../services/game.state';
@@ -63,12 +63,16 @@ export class GameTableComponent implements OnInit {
   selectedCardIndices: Set<number> = new Set();
 
 
-  constructor(private gameService: GameService, private translate: TranslateService) {
+  constructor(private gameService: GameService, private translate: TranslateService, private ngZone: NgZone) {
     this.state$ = this.gameService.state$;
 
     const mq = window.matchMedia('(orientation: landscape)');
     this.isLandscape = mq.matches;
-    mq.onchange = (e) => this.isLandscape = e.matches;
+    mq.onchange = (e) => {
+      this.ngZone.run(() => {
+        this.isLandscape = e.matches;
+      });
+    };
   }
 
   localCountingStage: 'non_dealer_hand' | 'dealer_hand' | 'crib' | 'finished' = 'non_dealer_hand';
@@ -330,6 +334,10 @@ export class GameTableComponent implements OnInit {
     }
 
     return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '' };
+  }
+
+  getScoreDisplay(score: number): number {
+    return Math.min(score, 121);
   }
 
   getVisualScore(playerIndex: number): number {
