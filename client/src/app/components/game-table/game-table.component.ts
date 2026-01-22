@@ -130,35 +130,39 @@ export class GameTableComponent implements OnInit {
 
   private animateScore(playerId: string, start: number, end: number) {
     if (this.scoreAnimationIntervals[playerId]) {
-      clearInterval(this.scoreAnimationIntervals[playerId]);
+      cancelAnimationFrame(this.scoreAnimationIntervals[playerId]);
     }
 
     const diff = end - start;
     if (diff === 0) return;
 
-    // Pin animation is usually around 700ms-1000ms
-    const duration = 1000;
-    const steps = Math.abs(diff);
-    // If it's a huge jump (reset?), do it instantly
-    if (steps > 60) {
-      this.displayedScores[playerId] = end;
-      return;
-    }
+    // Pin CSS transition is 'duration-700 ease-in-out'
+    const duration = 700;
+    const startTime = performance.now();
 
-    const stepTime = Math.max(50, Math.min(200, duration / steps));
-    let current = start;
-    const increment = diff > 0 ? 1 : -1;
+    const easeInOutQuad = (t: number): number => {
+      // Ease in out quad: 
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    };
 
-    this.scoreAnimationIntervals[playerId] = setInterval(() => {
-      current += increment;
-      this.displayedScores[playerId] = current;
-
-      if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      if (elapsed >= duration) {
         this.displayedScores[playerId] = end;
-        clearInterval(this.scoreAnimationIntervals[playerId]);
         delete this.scoreAnimationIntervals[playerId];
+        return;
       }
-    }, stepTime);
+
+      const progress = elapsed / duration;
+      const easedProgress = easeInOutQuad(progress);
+
+      const currentVal = start + (diff * easedProgress);
+      this.displayedScores[playerId] = Math.round(currentVal);
+
+      this.scoreAnimationIntervals[playerId] = requestAnimationFrame(animate);
+    };
+
+    this.scoreAnimationIntervals[playerId] = requestAnimationFrame(animate);
   }
 
   // Actions
