@@ -118,13 +118,20 @@ export class GameTableComponent implements OnInit {
         }
       }
 
-      // Check for score updates and animate
-      s.players.forEach(p => {
-        const currentDisplayed = this.displayedScores[p.id] || 0;
-        if (p.score !== currentDisplayed) {
-          this.animateScore(p.id, currentDisplayed, p.score);
-        }
-      });
+      // Check for score updates and animate based on VISUAL target
+      this.updateVisualScores();
+    });
+  }
+
+  updateVisualScores() {
+    const state = this.gameService.snapshot;
+    state.players.forEach((p, index) => {
+      const targetVisualScore = this.getVisualScore(index);
+      const currentDisplayed = this.displayedScores[p.id] || 0;
+
+      if (targetVisualScore !== currentDisplayed) {
+        this.animateScore(p.id, currentDisplayed, targetVisualScore);
+      }
     });
   }
 
@@ -308,6 +315,7 @@ export class GameTableComponent implements OnInit {
       this.finishCounting();
     }
     console.log('[GameTable] New Stage:', this.localCountingStage);
+    this.updateVisualScores();
   }
 
   finishCounting() {
