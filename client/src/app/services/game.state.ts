@@ -1,6 +1,6 @@
 import { Card, ScoreBreakdown } from '../logic/cards';
 
-export type GamePhase = 'setup' | 'dealing' | 'discarding' | 'cutting' | 'pegging' | 'counting' | 'gameover';
+export type GamePhase = 'setup' | 'cut_for_deal' | 'dealing' | 'discarding' | 'cutting' | 'pegging' | 'counting' | 'gameover';
 export type CountingStage = 'none' | 'non_dealer_hand' | 'dealer_hand' | 'crib';
 
 export interface Player {
@@ -41,6 +41,9 @@ export interface GameState {
     players: Player[];
     crib: Card[];
     cutCard: Card | null;
+
+    // Cut for Dealer Cards
+    cutForDealCards?: { [playerId: string]: Card };
 
     // Pegging State
     peggingStack: PeggingEntry[]; // Cards played in current "to 31" sequence

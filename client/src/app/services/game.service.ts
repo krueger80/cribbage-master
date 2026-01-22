@@ -12,6 +12,7 @@ export class GameService {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
     private _lastProcessedScoreId = 0;
+    private _cpuCutTimeout: any;
 
     constructor(private supabase: SupabaseService, private api: ApiService) { }
 
@@ -36,7 +37,7 @@ export class GameService {
                 score: 0,
                 cards: [],
                 playedCards: [],
-                isDealer: true
+                isDealer: false // Determined by cut
             },
             {
                 id: 'p2',
@@ -45,23 +46,128 @@ export class GameService {
                 score: 0,
                 cards: [],
                 playedCards: [],
-                isDealer: false
+                isDealer: false // Determined by cut
             }
         ];
+
+        // Draw a fresh deck for the cut
+        const deck = getAllCards();
+        // Shuffle deck
+        deck.sort(() => Math.random() - 0.5);
 
         this.updateState({
             ...INITIAL_GAME_STATE,
             players,
-            phase: 'dealing',
+            deck,
+            phase: 'cut_for_deal',
+            cutForDealCards: {}, // Initialize empty
             isMultiplayer: false
         });
 
+        // In this phase, anyone can cut.
+        // Trigger CPU cut after delay if Single Player
+        if (!this.snapshot.isMultiplayer) {
+            this._cpuCutTimeout = setTimeout(() => this.performCutForDeal('p2'), 1500);
+        }
+    }
+
+    performCutForDeal(playerId: string) {
+        const state = this.snapshot;
+        if (state.phase !== 'cut_for_deal') return;
+        if (state.cutForDealCards && state.cutForDealCards[playerId]) return; // Already cut
+
+        const deck = [...state.deck];
+        const randomIndex = Math.floor(Math.random() * deck.length);
+        const card = deck.splice(randomIndex, 1)[0];
+
+        const newCutCards = { ...state.cutForDealCards, [playerId]: card };
+
+        this.updateState({
+            ...state,
+            deck,
+            cutForDealCards: newCutCards
+        });
+
+        // Check completion
+        if (Object.keys(newCutCards).length === state.players.length) {
+            // If Single Player or Host, valid to resolve.
+            // If Multiplayer Guest cuts last, they just push state. HOST must resolve.
+            if (!state.isMultiplayer || state.localPlayerId === 'p1') {
+                if (!this._resolvingCut) {
+                    this._resolvingCut = true;
+                    setTimeout(() => this.resolveCutForDeal(), 2000);
+                }
+            }
+        }
+    }
+
+    private _resolvingCut = false;
+
+    private resolveCutForDeal() {
+        const state = this.snapshot;
+        const cuts = state.cutForDealCards || {};
+        const p1Card = cuts['p1'];
+        const p2Card = cuts['p2'];
+
+        // Rank Value: A=1, 2=2 ... K=13. 
+        // Need helper for rank value? 
+        // Card.value is 10 for Face cards. We need Rank ORDER.
+        // "A" "2" "3" "4" "5" "6" "7" "8" "9" "10" "J" "Q" "K"
+        const rankOrder = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const getRankVal = (c: Card) => rankOrder.indexOf(c.rank);
+
+        const v1 = getRankVal(p1Card);
+        const v2 = getRankVal(p2Card);
+
+        if (v1 === v2) {
+            // Tie - Redraw
+            // Reset cuts but keep current state message?
+            // Maybe clear and restart
+            // Need to notify UI about Tie?
+            // For now, just reset cutForDealCards to {} and refill deck? 
+            // Or keep deck depleted? Usually depleted is fine unless empty.
+
+            // To be simple: Reset
+            console.log('Tie for Deal! Redrawing...');
+
+            // Re-trigger CPU
+            if (!state.isMultiplayer) {
+                setTimeout(() => this.performCutForDeal('p2'), 1500);
+            }
+
+            this.updateState({
+                ...state,
+                cutForDealCards: {} // Clear cuts
+            });
+            this._resolvingCut = false;
+            return;
+        }
+
+        const winnerId = v1 < v2 ? 'p1' : 'p2';
+
+        // Update Dealer
+        const players = state.players.map(p => ({
+            ...p,
+            isDealer: p.id === winnerId
+        }));
+
+        this.updateState({
+            ...state,
+            players,
+            // Phase transition handled in dealRound? No, dealRound sets 'dealing'.
+            // But we want to show the result for a moment.
+            // Let's transition to dealing.
+        });
+
         this.dealRound();
+        this._resolvingCut = false;
     }
 
     initMultiplayerGame(gameId: string, isHost: boolean) {
         // Reset state
         // Subscribe to game updates
+        clearTimeout(this._cpuCutTimeout); // Cancel any pending CPU cut
+
         this.supabase.subscribeToGame(gameId).subscribe(newState => {
             if (newState && newState.state) {
                 console.log('Received Remote State:', newState.state);
@@ -90,7 +196,8 @@ export class GameService {
                 ...p,
                 isHuman: true, // Force all human for now in multiplayer
                 id: idx === 0 ? 'p1' : 'p2',
-                name: idx === 0 ? 'Host' : 'Guest'
+                // Keep existing name if set, otherwise fallback
+                name: p.name
             }));
 
             const initialState: GameState = {
@@ -134,6 +241,16 @@ export class GameService {
         // This ensures that for the NEXT round, we don't auto-ready ourselves
         if (newState.phase !== 'counting') {
             this._localCountingFinished = false;
+        }
+
+        // --- CUT FOR DEAL MONITORING (HOST) ---
+        if (localId === 'p1' && newState.phase === 'cut_for_deal' && newState.cutForDealCards) {
+            const hasAllCuts = Object.keys(newState.cutForDealCards).length === newState.players.length;
+            if (hasAllCuts && !this._resolvingCut) {
+                this._resolvingCut = true;
+                console.log('[Game] Host detected full cuts. Resolving in 2s...');
+                setTimeout(() => this.resolveCutForDeal(), 2000);
+            }
         }
 
         // --- ROBUST SCORING NOTIFICATION ---
