@@ -27,6 +27,7 @@ export class ScorePopupComponent implements OnChanges {
     @Input() type: 'pegging' | 'counting' = 'pegging';
     @Input() visible: boolean = false;
     @Input() title: string = '';
+    @Input() playerId: string = ''; // For coloring
 
     // For counting phase, we wait for user formatting
     @Output() continue = new EventEmitter<void>();
