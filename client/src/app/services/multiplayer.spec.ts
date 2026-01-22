@@ -5,6 +5,13 @@ import { SupabaseService } from '../services/supabase.service';
 import { GameState, INITIAL_GAME_STATE } from '../services/game.state';
 import { of, BehaviorSubject } from 'rxjs';
 
+class MockTranslateService {
+    instant(key: string, params?: any) {
+        if (params) return `${key} params: ${JSON.stringify(params)}`;
+        return key;
+    }
+}
+
 // Mock SupabaseService
 class MockSupabaseService {
     private _state = new BehaviorSubject<GameState | null>(null);
@@ -51,16 +58,18 @@ describe('Multiplayer Flow Integration', () => {
     let guestService: GameService;
     let mockSupabase: MockSupabaseService;
     let mockApi: MockApiService;
+    let mockTranslate: MockTranslateService;
 
     beforeEach(() => {
         mockSupabase = new MockSupabaseService();
         mockApi = new MockApiService();
+        mockTranslate = new MockTranslateService();
 
         // Host Service Instance
-        hostService = new GameService(mockSupabase as any, mockApi as any);
+        hostService = new GameService(mockSupabase as any, mockApi as any, mockTranslate as any);
 
         // Guest Service Instance
-        guestService = new GameService(mockSupabase as any, mockApi as any);
+        guestService = new GameService(mockSupabase as any, mockApi as any, mockTranslate as any);
     });
 
     it('should sync state between host and guest', async () => {

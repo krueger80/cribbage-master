@@ -18,7 +18,7 @@
         <!-- Main Points -->
         <div class="flex flex-col items-center">
             <span class="text-5xl font-black text-white drop-shadow-lg leading-none">{{ points }}</span>
-            <span class="text-white/60 text-[10px] uppercase tracking-widest font-bold">Points</span>
+            <span class="text-white/60 text-[10px] uppercase tracking-widest font-bold">{{ 'GAME.POINTS' | translate }}</span>
         </div>
 
         <!-- Divider -->
@@ -30,7 +30,7 @@
                 {{ line }}
             </div>
             <div *ngIf="breakdown.length === 0" class="text-white/40 italic text-xs">
-                + Points
+                + {{ 'GAME.POINTS' | translate }}
             </div>
         </div>
     </div>
@@ -62,6 +62,6 @@
     class="fixed bottom-8 left-0 right-0 flex justify-center z-[60] pointer-events-none">
     <button (click)="onContinue()"
         class="pointer-events-auto bg-emerald-500 hover:bg-emerald-400 text-black font-black py-3 px-8 landscape:py-2 landscape:px-6 rounded-xl text-lg landscape:text-base uppercase tracking-widest shadow-lg border-2 border-emerald-300 active:scale-95 transition-transform">
-        Continue
+        {{ 'SCORE.CONTINUE' | translate }}
     </button>
 </div>

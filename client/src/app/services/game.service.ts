@@ -4,6 +4,7 @@ import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
 import { SupabaseService } from './supabase.service';
 import { ApiService } from './api.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +14,7 @@ export class GameService {
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
     private _lastProcessedScoreId = 0;
 
-    constructor(private supabase: SupabaseService, private api: ApiService) { }
+    constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) { }
 
     get state$(): Observable<GameState> {
         return this._state.asObservable();
@@ -618,7 +619,7 @@ export class GameService {
                         this.updateState({
                             lastPeggingScore: {
                                 points: 1,
-                                description: 'Go for 1',
+                                description: this.translate.instant('SCORE.GO'),
                                 playerId,
                                 id: Date.now()
                             }
@@ -862,7 +863,7 @@ export class GameService {
             turnPlayerId: this.getNextPlayablePlayerId(playerId, resetPlayers), // Leader of new round with validation
             lastPeggingScore: {
                 points: 1,
-                description: 'Go for 1',
+                    description: this.translate.instant('SCORE.GO'),
                 playerId: opponent.id,
                 id: Date.now()
             }
@@ -892,11 +893,11 @@ export class GameService {
 
         if (total === 15) {
             points += 2;
-            breakdown.push('15 for 2');
+            breakdown.push(this.translate.instant('SCORE.FIFTEEN'));
         }
         if (total === 31) {
             points += 2;
-            breakdown.push('31 for 2');
+            breakdown.push(this.translate.instant('SCORE.THIRTY_ONE'));
         }
 
         // Pairs
@@ -914,8 +915,12 @@ export class GameService {
                 const n = matches + 1;
                 const pairPoints = n * (n - 1);
                 points += pairPoints;
-                const labels = ['', 'Pair', 'Pair Royal', 'Double Pair Royal'];
-                breakdown.push(`${labels[matches] || 'Pairs'} for ${pairPoints}`);
+
+                let key = 'SCORE.PAIR';
+                if (matches === 2) key = 'SCORE.PAIR_ROYAL';
+                if (matches === 3) key = 'SCORE.DOUBLE_PAIR_ROYAL';
+
+                breakdown.push(this.translate.instant(key, { points: pairPoints }));
             }
         }
 
@@ -924,7 +929,7 @@ export class GameService {
             const lastK = stack.slice(stack.length - k).map(item => item.card);
             if (isRun(lastK)) {
                 points += k;
-                breakdown.push(`Run of ${k} for ${k}`);
+                breakdown.push(this.translate.instant('SCORE.RUN', { length: k, points: k }));
                 break;
             }
         }

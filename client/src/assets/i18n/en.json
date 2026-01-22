@@ -57,10 +57,31 @@
         "NO_HISTORY": "No history available yet.",
         "ORIGINAL_HAND": "Original Hand",
         "DISCONNECTED": "Disconnected",
-        "WAITING_HOST": "Waiting for Host..."
+        "WAITING_HOST": "Waiting for Host...",
+        "REANALYZE": "Re-analyze"
     },
     "ANALYSIS": {
         "REANALYZE": "Re-analyze"
+    },
+    "SCORE": {
+        "FIFTEEN": "15 for 2",
+        "THIRTY_ONE": "31 for 2",
+        "PAIR": "Pair for {{points}}",
+        "PAIR_ROYAL": "Pair Royal for {{points}}",
+        "DOUBLE_PAIR_ROYAL": "Double Pair Royal for {{points}}",
+        "RUN": "Run of {{length}} for {{points}}",
+        "GO": "Go for 1",
+        "FLUSH": "Flush -- {{points}} pts",
+        "NOBS": "Nobs -- {{points}} pts",
+        "15S": "15s -- {{points}} pts",
+        "PAIRS": "Pairs -- {{points}} pts",
+        "RUNS": "Runs -- {{points}} pts",
+        "CONTINUE": "Continue",
+        "PEGGING_SCORE": "Pegging Score",
+        "HAND_SCORE": "Hand Score",
+        "CRIB_SCORE": "Crib Score",
+        "DEALER_SCORE": "Dealer Score",
+        "PLAYER_SCORE": "Player Score"
     },
     "LOBBY": {
         "TITLE": "Multiplayer Lobby",

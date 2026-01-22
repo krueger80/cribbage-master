@@ -327,6 +327,16 @@ export class GameTableComponent implements OnInit {
     this.gameService.restartGame();
   }
 
+  formatScoreBreakdownTranslated(score: ScoreBreakdown): string[] {
+    const lines: string[] = [];
+    if (score.fifteens > 0) lines.push(this.translate.instant('SCORE.15S', { points: score.fifteens }));
+    if (score.pairs > 0) lines.push(this.translate.instant('SCORE.PAIRS', { points: score.pairs }));
+    if (score.runs > 0) lines.push(this.translate.instant('SCORE.RUNS', { points: score.runs }));
+    if (score.flush > 0) lines.push(this.translate.instant('SCORE.FLUSH', { points: score.flush }));
+    if (score.nobs > 0) lines.push(this.translate.instant('SCORE.NOBS', { points: score.nobs }));
+    return lines;
+  }
+
   getPopupData() {
     const state = this.gameService.snapshot;
 
@@ -337,7 +347,7 @@ export class GameTableComponent implements OnInit {
         points: state.lastPeggingScore.points,
         breakdown: state.lastPeggingScore.description ? state.lastPeggingScore.description.split(', ') : [],
         type: 'pegging' as const,
-        title: 'Pegging Score',
+        title: this.translate.instant('SCORE.PEGGING_SCORE'),
         playerId: state.lastPeggingScore.playerId
       };
     }
@@ -345,20 +355,20 @@ export class GameTableComponent implements OnInit {
     // Priority 2: Counting Phase (Persistent)
     if (state.phase === 'counting') {
       const score = this.getCountingScore(state);
-      let title = 'Hand Score';
+      let title = this.translate.instant('SCORE.HAND_SCORE');
       let playerId = '';
 
       if (this.localCountingStage === 'crib') {
-        title = 'Crib Score';
+        title = this.translate.instant('SCORE.CRIB_SCORE');
         const dealer = state.players.find(p => p.isDealer);
         playerId = dealer ? dealer.id : '';
       } else if (this.localCountingStage === 'dealer_hand') {
         const dealer = state.players.find(p => p.isDealer);
-        title = dealer ? `${dealer.name} Score` : 'Dealer Score';
+        title = dealer ? `${dealer.name} ${this.translate.instant('GAME.SCORE')}` : this.translate.instant('SCORE.DEALER_SCORE');
         playerId = dealer ? dealer.id : '';
       } else if (this.localCountingStage === 'non_dealer_hand') {
         const nonDealer = state.players.find(p => !p.isDealer);
-        title = nonDealer ? `${nonDealer.name} Score` : 'Player Score';
+        title = nonDealer ? `${nonDealer.name} ${this.translate.instant('GAME.SCORE')}` : this.translate.instant('SCORE.PLAYER_SCORE');
         playerId = nonDealer ? nonDealer.id : '';
       }
 
@@ -369,7 +379,7 @@ export class GameTableComponent implements OnInit {
         return {
           visible: true,
           points: score.total,
-          breakdown: score.total > 0 ? formatScoreBreakdown(score) : ['No points'],
+          breakdown: score.total > 0 ? this.formatScoreBreakdownTranslated(score) : [this.translate.instant('GAME.NO_POINTS')],
           type: 'counting' as const,
           title: upperTitle,
           playerId: playerId

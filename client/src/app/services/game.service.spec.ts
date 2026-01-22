@@ -4,6 +4,7 @@ import { GameState } from './game.state';
 import { of } from 'rxjs';
 import { ApiService } from './api.service';
 import { SupabaseService } from './supabase.service';
+import { TranslateService } from '@ngx-translate/core';
 
 class MockSupabaseService {
     currentUserSnapshot = { id: 'test-user', user_metadata: { full_name: 'Test User' } };
@@ -17,6 +18,13 @@ class MockApiService {
     getPeggingCard() { return of({ card: null }); }
 }
 
+class MockTranslateService {
+    instant(key: string, params?: any) {
+        if (params) return `${key} params: ${JSON.stringify(params)}`;
+        return key;
+    }
+}
+
 describe('GameService', () => {
     let service: GameService;
 
@@ -25,7 +33,8 @@ describe('GameService', () => {
             providers: [
                 GameService,
                 { provide: SupabaseService, useClass: MockSupabaseService },
-                { provide: ApiService, useClass: MockApiService }
+                { provide: ApiService, useClass: MockApiService },
+                { provide: TranslateService, useClass: MockTranslateService }
             ]
         });
         service = TestBed.inject(GameService);
