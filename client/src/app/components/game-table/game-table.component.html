@@ -71,17 +71,22 @@
         <div
             class="relative flex items-center justify-between bg-green-800/30 rounded-xl p-1 landscape:p-2 border border-white/5 gap-2 w-full basis-0 flex-1 min-h-0 overflow-visible">
 
-            <div
-                class="info-card relative flex flex-col items-center justify-center bg-black/40 rounded-xl p-1 shrink-0 z-10 transition-all gap-0.5 landscape:gap-1">
+            <div class="info-card relative flex flex-col items-center justify-center transition-colors duration-500 rounded-xl p-1 shrink-0 z-10 gap-0.5 landscape:gap-1"
+                [ngClass]="{
+                    'bg-red-900/60 border-red-500/30': topPlayer.id === 'p1',
+                    'bg-blue-900/60 border-blue-500/30': topPlayer.id !== 'p1'
+                }">
                 <!-- Avatar Placeholder -->
                 <div
                     class="w-8 h-8 landscape:w-6 landscape:h-6 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center">
                     <span class="text-xl landscape:text-sm md:text-xl">🤖</span>
                 </div>
-                <div class="text-emerald-300 font-bold text-[10px] md:text-sm text-center leading-none">
+                <div class="font-bold text-[10px] md:text-sm text-center leading-none"
+                    [ngClass]="topPlayer.id === 'p1' ? 'text-red-100' : 'text-blue-100'">
                     {{ getPlayerNameKey(topPlayer.name) | translate }}</div>
-                <div class="text-white font-black text-base landscape:text-lg md:text-xl leading-none">{{
-                    topPlayer.score }}</div>
+                <div class="text-white font-black text-base landscape:text-lg md:text-xl leading-none">
+                    {{ displayedScores[topPlayer.id] | number:'1.0-0' }}
+                </div>
                 <span *ngIf="topPlayer.isDealer"
                     class="absolute top-1 right-1 text-yellow-400 text-[9px] uppercase border border-yellow-400 px-1 rounded">D</span>
             </div>
@@ -201,17 +206,24 @@
             class="relative flex items-center justify-between bg-green-800/30 rounded-xl p-1 landscape:p-2 border border-white/5 pb-safe gap-2 w-full basis-0 flex-1 min-h-0 overflow-visible">
 
             <!-- Left: Player Info / Avatar Area -->
-            <div class="info-card relative flex flex-col items-center justify-center bg-black/40 rounded-xl p-1 shrink-0 z-10 transition-all gap-0.5 landscape:gap-1"
-                [ngClass]="{'ring-2 ring-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] animate-pulse': isMyTurn && !showSayGo && state.phase === 'pegging'}">
+            <div class="info-card relative flex flex-col items-center justify-center transition-colors duration-500 rounded-xl p-1 shrink-0 z-10 gap-0.5 landscape:gap-1"
+                [ngClass]="{
+                    'bg-red-900/60 border-red-500/30': bottomPlayer.id === 'p1',
+                    'bg-blue-900/60 border-blue-500/30': bottomPlayer.id !== 'p1', 
+                    'ring-2 ring-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] animate-pulse': isMyTurn && !showSayGo && state.phase === 'pegging'
+                }">
                 <!-- Avatar Placeholder -->
                 <div
                     class="w-8 h-8 landscape:w-6 landscape:h-6 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center">
                     <span class="text-xl landscape:text-sm md:text-xl">👤</span>
                 </div>
-                <div class="text-emerald-300 font-bold text-[10px] md:text-sm text-center leading-none">{{
-                    getPlayerNameKey(bottomPlayer.name) | translate }}</div>
-                <div class="text-white font-black text-base landscape:text-lg md:text-xl leading-none">{{
-                    bottomPlayer.score }}</div>
+                <div class="font-bold text-[10px] md:text-sm text-center leading-none"
+                    [ngClass]="bottomPlayer.id === 'p1' ? 'text-red-100' : 'text-blue-100'">
+                    {{ getPlayerNameKey(bottomPlayer.name) | translate }}
+                </div>
+                <div class="text-white font-black text-base landscape:text-lg md:text-xl leading-none">
+                    {{ displayedScores[bottomPlayer.id] | number:'1.0-0' }}
+                </div>
                 <span *ngIf="bottomPlayer.isDealer"
                     class="absolute top-1 right-1 text-yellow-400 text-[9px] uppercase border border-yellow-400 px-1 rounded">D</span>
             </div>
@@ -255,6 +267,6 @@
     <!-- New Popup Component -->
     <app-score-popup [points]="getPopupData().points" [breakdown]="getPopupData().breakdown"
         [type]="getPopupData().type" [visible]="getPopupData().visible" [title]="getPopupData().title"
-        (continue)="advanceCounting()">
+        [playerId]="getPopupData().playerId" (continue)="advanceCounting()">
     </app-score-popup>
 </div>

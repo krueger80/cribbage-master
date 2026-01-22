@@ -77,32 +77,13 @@ export class GameTableComponent implements OnInit {
 
   localCountingStage: 'non_dealer_hand' | 'dealer_hand' | 'crib' | 'finished' = 'non_dealer_hand';
 
-  ngOnInit() {
-    // Game initialization is handled by Lobby/GameService now.
-    // If not multiplayer, we could init default.
-    const state = this.gameService.snapshot;
-    if (!state.isMultiplayer && state.players.length === 0) {
-      this.gameService.initGame();
-    }
+  displayedScores: { [id: string]: number } = { 'p1': 0, 'p2': 0 };
+  private scoreAnimationIntervals: { [id: string]: any } = {};
 
-    // Subscribe to state to reset local counting stage on new round
-    this.gameService.state$.subscribe(s => {
-      // console.log('[GameTable] State update. Phase:', s.phase, 'LocalStage:', this.localCountingStage);
-      if (s.phase !== 'counting') {
-        if (this.localCountingStage !== 'non_dealer_hand') {
-          console.log('[GameTable] Resetting local counting stage to non_dealer_hand');
-          this.localCountingStage = 'non_dealer_hand';
-        }
-      }
-    });
-  }
-
-  // Helper to get the correct player object for "MY" hand (bottom screen)
   get bottomPlayer() {
     const state = this.gameService.snapshot;
-    if (!state.isMultiplayer) return state.players[0]; // Single player: P1 is human
+    if (!state.isMultiplayer) return state.players[0];
 
-    // Multiplayer: match localPlayerId
     const p = state.players.find(p => p.id === state.localPlayerId) || state.players[0];
     if (!p) console.warn('[GameTable] bottomPlayer not found!', state.localPlayerId, state.players);
     return p;
@@ -111,12 +92,84 @@ export class GameTableComponent implements OnInit {
   // Helper to get opponent (top screen)
   get topPlayer() {
     const state = this.gameService.snapshot;
-    if (!state.isMultiplayer) return state.players[1]; // Single player: P2 is CPU
+    if (!state.isMultiplayer) return state.players[1];
 
-    // Multiplayer: whoever is NOT me
     const p = state.players.find(p => p.id !== state.localPlayerId) || state.players[1];
     if (!p) console.warn('[GameTable] topPlayer not found!', state.localPlayerId, state.players);
     return p;
+  }
+
+  ngOnInit() {
+    const state = this.gameService.snapshot;
+    if (!state.isMultiplayer && state.players.length === 0) {
+      this.gameService.initGame();
+    }
+
+    // Initialize displayed scores immediately to avoid jump from 0
+    if (state.players.length > 0) {
+      state.players.forEach(p => this.displayedScores[p.id] = p.score);
+    }
+
+    this.gameService.state$.subscribe(s => {
+      // Check counting stage reset
+      if (s.phase !== 'counting') {
+        if (this.localCountingStage !== 'non_dealer_hand') {
+          this.localCountingStage = 'non_dealer_hand';
+        }
+      }
+
+      // Check for score updates and animate based on VISUAL target
+      this.updateVisualScores();
+    });
+  }
+
+  updateVisualScores() {
+    const state = this.gameService.snapshot;
+    state.players.forEach((p, index) => {
+      const targetVisualScore = this.getVisualScore(index);
+      const currentDisplayed = this.displayedScores[p.id] || 0;
+
+      if (targetVisualScore !== currentDisplayed) {
+        this.animateScore(p.id, currentDisplayed, targetVisualScore);
+      }
+    });
+  }
+
+  private animateScore(playerId: string, start: number, end: number) {
+    if (this.scoreAnimationIntervals[playerId]) {
+      cancelAnimationFrame(this.scoreAnimationIntervals[playerId]);
+    }
+
+    const diff = end - start;
+    if (diff === 0) return;
+
+    // Pin CSS transition is 'duration-700 ease-in-out'
+    const duration = 700;
+    const startTime = performance.now();
+
+    const easeInOutQuad = (t: number): number => {
+      // Ease in out quad: 
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    };
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      if (elapsed >= duration) {
+        this.displayedScores[playerId] = end;
+        delete this.scoreAnimationIntervals[playerId];
+        return;
+      }
+
+      const progress = elapsed / duration;
+      const easedProgress = easeInOutQuad(progress);
+
+      const currentVal = start + (diff * easedProgress);
+      this.displayedScores[playerId] = Math.round(currentVal);
+
+      this.scoreAnimationIntervals[playerId] = requestAnimationFrame(animate);
+    };
+
+    this.scoreAnimationIntervals[playerId] = requestAnimationFrame(animate);
   }
 
   // Actions
@@ -262,6 +315,7 @@ export class GameTableComponent implements OnInit {
       this.finishCounting();
     }
     console.log('[GameTable] New Stage:', this.localCountingStage);
+    this.updateVisualScores();
   }
 
   finishCounting() {
@@ -283,7 +337,8 @@ export class GameTableComponent implements OnInit {
         points: state.lastPeggingScore.points,
         breakdown: state.lastPeggingScore.description ? state.lastPeggingScore.description.split(', ') : [],
         type: 'pegging' as const,
-        title: 'Pegging Score'
+        title: 'Pegging Score',
+        playerId: state.lastPeggingScore.playerId
       };
     }
 
@@ -291,49 +346,38 @@ export class GameTableComponent implements OnInit {
     if (state.phase === 'counting') {
       const score = this.getCountingScore(state);
       let title = 'Hand Score';
-
-      // Determine Title based on sub-stage
-      // We know localCountingStage.
-      // But localCountingStage is determined by:
-      // if !countingResults.nonDealer -> non_dealer_hand
-      // else if !countingResults.dealer -> dealer_hand
-      // else if !countingResults.crib -> crib
-
-      // Let's re-derive or use the property if it matches the current view state logic
-      // Actually, we can just look at who is being counted.
-      // We have `this.localCountingStage`.
+      let playerId = '';
 
       if (this.localCountingStage === 'crib') {
         title = 'Crib Score';
+        const dealer = state.players.find(p => p.isDealer);
+        playerId = dealer ? dealer.id : '';
       } else if (this.localCountingStage === 'dealer_hand') {
         const dealer = state.players.find(p => p.isDealer);
         title = dealer ? `${dealer.name} Score` : 'Dealer Score';
+        playerId = dealer ? dealer.id : '';
       } else if (this.localCountingStage === 'non_dealer_hand') {
         const nonDealer = state.players.find(p => !p.isDealer);
         title = nonDealer ? `${nonDealer.name} Score` : 'Player Score';
+        playerId = nonDealer ? nonDealer.id : '';
       }
 
-      if (score && score.total > 0) {
+      const upperTitle = title.toUpperCase(); // Ensure title is computed
+      // Note: title was computed above, I will pass it directly.
+
+      if (score && score.total >= 0) { // Handle 0 points too
         return {
           visible: true,
           points: score.total,
-          breakdown: formatScoreBreakdown(score),
+          breakdown: score.total > 0 ? formatScoreBreakdown(score) : ['No points'],
           type: 'counting' as const,
-          title: title.toUpperCase()
-        };
-      }
-      if (score && score.total === 0) {
-        return {
-          visible: true,
-          points: 0,
-          breakdown: ['No points'],
-          type: 'counting' as const,
-          title: title.toUpperCase()
+          title: upperTitle,
+          playerId: playerId
         };
       }
     }
 
-    return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '' };
+    return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '', playerId: '' };
   }
 
   getScoreDisplay(score: number): number {
