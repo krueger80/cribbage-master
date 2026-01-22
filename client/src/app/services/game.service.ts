@@ -12,6 +12,7 @@ export class GameService {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
     private _lastProcessedScoreId = 0;
+    private _cpuCutTimeout: any;
 
     constructor(private supabase: SupabaseService, private api: ApiService) { }
 
@@ -66,7 +67,7 @@ export class GameService {
         // In this phase, anyone can cut.
         // Trigger CPU cut after delay if Single Player
         if (!this.snapshot.isMultiplayer) {
-            setTimeout(() => this.performCutForDeal('p2'), 1500);
+            this._cpuCutTimeout = setTimeout(() => this.performCutForDeal('p2'), 1500);
         }
     }
 
@@ -154,6 +155,8 @@ export class GameService {
     initMultiplayerGame(gameId: string, isHost: boolean) {
         // Reset state
         // Subscribe to game updates
+        clearTimeout(this._cpuCutTimeout); // Cancel any pending CPU cut
+
         this.supabase.subscribeToGame(gameId).subscribe(newState => {
             if (newState && newState.state) {
                 console.log('Received Remote State:', newState.state);
@@ -182,7 +185,8 @@ export class GameService {
                 ...p,
                 isHuman: true, // Force all human for now in multiplayer
                 id: idx === 0 ? 'p1' : 'p2',
-                name: idx === 0 ? 'Host' : 'Guest'
+                // Keep existing name if set, otherwise fallback
+                name: p.name
             }));
 
             const initialState: GameState = {
