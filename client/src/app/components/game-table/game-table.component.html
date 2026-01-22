@@ -41,7 +41,8 @@
                 class="flex flex-col items-center p-6 bg-white/5 rounded-2xl border border-white/10"
                 [class.border-yellow-400]="p.id === state.winnerId"
                 [class.shadow-[0_0_30px_rgba(250,204,21,0.2)]]="p.id === state.winnerId">
-                <div class="text-4xl font-bold mb-2" [class.text-yellow-400]="p.id === state.winnerId">{{ p.score }}
+                <div class="text-4xl font-bold mb-2" [class.text-yellow-400]="p.id === state.winnerId">{{
+                    getScoreDisplay(p.score) }}
                 </div>
                 <div class="text-sm uppercase tracking-wider text-slate-400">{{ getPlayerNameKey(p.name) | translate }}
                 </div>
@@ -54,34 +55,12 @@
         </button>
     </div>
 
-    <!-- DUMMY SCORE BOARD -->
+    <!-- Real Score Board -->
     <div
-        class="shrink-0 w-full h-24 landscape:w-24 landscape:h-auto bg-[#3e2723] rounded-lg border-2 border-[#5d4037] shadow-xl flex landscape:flex-col items-center justify-around p-2 landscape:py-4 relative overflow-hidden">
-        <!-- Board Texture / Tracks -->
-        <div
-            class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black to-transparent">
-        </div>
-
-        <!-- Decoration: Holes/Pegs layout -->
-        <div class="flex landscape:flex-col gap-2 landscape:gap-4 w-full h-full items-center justify-center opacity-40">
-            <!-- Track 1 -->
-            <div
-                class="w-full landscape:w-2 h-2 landscape:h-full border-t-2 landscape:border-t-0 landscape:border-l-2 border-white/30 border-dashed">
-            </div>
-            <!-- Track 2 -->
-            <div
-                class="w-full landscape:w-2 h-2 landscape:h-full border-t-2 landscape:border-t-0 landscape:border-l-2 border-white/30 border-dashed">
-            </div>
-            <!-- Track 3 -->
-            <div
-                class="w-full landscape:w-2 h-2 landscape:h-full border-t-2 landscape:border-t-0 landscape:border-l-2 border-white/30 border-dashed">
-            </div>
-        </div>
-
-        <span
-            class="absolute top-20 text-white/10 font-black tracking-widest uppercase text-base landscape:writing-mode-vertical pointer-events-none">
-            Cribbage Board
-        </span>
+        class="shrink-0 w-full h-28 md:h-48 landscape:h-full landscape:w-auto bg-[#3e2723] rounded-lg border-2 border-[#5d4037] shadow-xl overflow-hidden relative">
+        <app-cribbage-board [p1Score]="getVisualScore(0)" [p2Score]="getVisualScore(1)" [p1Color]="'#ef4444'"
+            [p2Color]="'#3b82f6'" [vertical]="isLandscape">
+        </app-cribbage-board>
     </div>
 
     <!-- Main Game Area -->

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { GameService } from '../../services/game.service';
 import { GameState } from '../../services/game.state';
 import { ScorePopupComponent } from '../score-popup/score-popup.component'; // Import Popup
+import { CribbageBoardComponent } from '../cribbage-board/cribbage-board.component';
 import { formatScoreBreakdown, ScoreBreakdown } from '../../logic/cards'; // Import Helper
 import { Observable } from 'rxjs';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
@@ -12,7 +13,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-game-table',
   standalone: true,
-  imports: [CommonModule, TranslateModule, ScorePopupComponent],
+  imports: [CommonModule, TranslateModule, ScorePopupComponent, CribbageBoardComponent],
   templateUrl: './game-table.component.html',
   styleUrl: './game-table.component.css',
   animations: [
@@ -57,12 +58,21 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 })
 export class GameTableComponent implements OnInit {
   state$: Observable<GameState>;
+  isLandscape: boolean = false;
 
   selectedCardIndices: Set<number> = new Set();
 
 
-  constructor(private gameService: GameService, private translate: TranslateService) {
+  constructor(private gameService: GameService, private translate: TranslateService, private ngZone: NgZone) {
     this.state$ = this.gameService.state$;
+
+    const mq = window.matchMedia('(orientation: landscape)');
+    this.isLandscape = mq.matches;
+    mq.onchange = (e) => {
+      this.ngZone.run(() => {
+        this.isLandscape = e.matches;
+      });
+    };
   }
 
   localCountingStage: 'non_dealer_hand' | 'dealer_hand' | 'crib' | 'finished' = 'non_dealer_hand';
@@ -356,5 +366,53 @@ export class GameTableComponent implements OnInit {
     }
 
     return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '', playerId: '' };
+  }
+
+  getScoreDisplay(score: number): number {
+    return Math.min(score, 121);
+  }
+
+  getVisualScore(playerIndex: number): number {
+    const state = this.gameService.snapshot;
+    if (!state.players[playerIndex]) return 0;
+
+    const player = state.players[playerIndex];
+    let score = player.score;
+
+    // 1. Deduction from Pegging Popup (if active for this player)
+    if (state.lastPeggingScore && state.lastPeggingScore.playerId === player.id) {
+      score -= state.lastPeggingScore.points;
+    }
+
+    // 2. Deduction from Counting Phase (if phases not yet "visually" completed)
+    if (state.phase === 'counting' && state.countingResults) {
+      const res = state.countingResults;
+      const isDealer = player.isDealer;
+
+      if (this.localCountingStage === 'non_dealer_hand') {
+        if (isDealer) {
+          // Dealer hasn't been counted yet -> Deduct everything
+          score -= (res.dealer.total + res.crib.total);
+        } else {
+          // Non-Dealer is being counted (Popup Visible) -> Deduct so we see "before" score
+          score -= res.nonDealer.total;
+        }
+      } else if (this.localCountingStage === 'dealer_hand') {
+        if (isDealer) {
+          // Dealer is being counted -> Deduct Hand + Crib (Crib is next)
+          score -= (res.dealer.total + res.crib.total);
+        } else {
+          // Non-Dealer Finished -> No deduction (Score displayed)
+        }
+      } else if (this.localCountingStage === 'crib') {
+        if (isDealer) {
+          // Crib being counted -> Deduct Crib
+          score -= res.crib.total;
+        }
+        // Dealer Hand Finished -> Don't deduct
+      }
+    }
+
+    return Math.max(0, score);
   }
 }
