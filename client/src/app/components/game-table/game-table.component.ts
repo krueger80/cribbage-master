@@ -380,6 +380,10 @@ export class GameTableComponent implements OnInit {
     return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '', playerId: '' };
   }
 
+  getScoreDisplay(score: number): number {
+    return Math.min(score, 121);
+  }
+
   cutForDeal() {
     this.gameService.performCutForDeal(this.bottomPlayer.id);
   }

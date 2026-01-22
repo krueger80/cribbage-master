@@ -90,9 +90,18 @@ export class GameService {
 
         // Check completion
         if (Object.keys(newCutCards).length === state.players.length) {
-            setTimeout(() => this.resolveCutForDeal(), 2000);
+            // If Single Player or Host, valid to resolve.
+            // If Multiplayer Guest cuts last, they just push state. HOST must resolve.
+            if (!state.isMultiplayer || state.localPlayerId === 'p1') {
+                if (!this._resolvingCut) {
+                    this._resolvingCut = true;
+                    setTimeout(() => this.resolveCutForDeal(), 2000);
+                }
+            }
         }
     }
+
+    private _resolvingCut = false;
 
     private resolveCutForDeal() {
         const state = this.snapshot;
@@ -130,6 +139,7 @@ export class GameService {
                 ...state,
                 cutForDealCards: {} // Clear cuts
             });
+            this._resolvingCut = false;
             return;
         }
 
@@ -150,6 +160,7 @@ export class GameService {
         });
 
         this.dealRound();
+        this._resolvingCut = false;
     }
 
     initMultiplayerGame(gameId: string, isHost: boolean) {
@@ -230,6 +241,16 @@ export class GameService {
         // This ensures that for the NEXT round, we don't auto-ready ourselves
         if (newState.phase !== 'counting') {
             this._localCountingFinished = false;
+        }
+
+        // --- CUT FOR DEAL MONITORING (HOST) ---
+        if (localId === 'p1' && newState.phase === 'cut_for_deal' && newState.cutForDealCards) {
+            const hasAllCuts = Object.keys(newState.cutForDealCards).length === newState.players.length;
+            if (hasAllCuts && !this._resolvingCut) {
+                this._resolvingCut = true;
+                console.log('[Game] Host detected full cuts. Resolving in 2s...');
+                setTimeout(() => this.resolveCutForDeal(), 2000);
+            }
         }
 
         // --- ROBUST SCORING NOTIFICATION ---
