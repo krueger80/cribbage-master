@@ -4,10 +4,14 @@
     "scripts": {
         "start": "npm run start:client",
         "start:client": "cd client && npm start",
-        "test:pegging": "npx ts-node test_pegging.ts"
+        "test:pegging": "npx ts-node test_pegging.ts",
+        "dev": "vercel dev"
     },
     "dependencies": {
         "@types/node": "^25.0.6",
         "@vercel/node": "^5.5.16"
+    },
+    "devDependencies": {
+        "vercel": "^50.4.9"
     }
 }
