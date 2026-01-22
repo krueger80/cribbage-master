@@ -57,10 +57,31 @@
         "NO_HISTORY": "Aucun historique disponible.",
         "ORIGINAL_HAND": "Main originale",
         "DISCONNECTED": "Déconnecté",
-        "WAITING_HOST": "En attente de l'hôte..."
+        "WAITING_HOST": "En attente de l'hôte...",
+        "REANALYZE": "Ré-analyser"
     },
     "ANALYSIS": {
         "REANALYZE": "Ré-analyser"
+    },
+    "SCORE": {
+        "FIFTEEN": "15 pour 2",
+        "THIRTY_ONE": "31 pour 2",
+        "PAIR": "Paire pour {{points}}",
+        "PAIR_ROYAL": "Brelan Royal pour {{points}}",
+        "DOUBLE_PAIR_ROYAL": "Double Brelan Royal pour {{points}}",
+        "RUN": "Suite de {{length}} pour {{points}}",
+        "GO": "Go pour 1",
+        "FLUSH": "Couleur -- {{points}} pts",
+        "NOBS": "Nobs -- {{points}} pts",
+        "15S": "15 -- {{points}} pts",
+        "PAIRS": "Paires -- {{points}} pts",
+        "RUNS": "Suites -- {{points}} pts",
+        "CONTINUE": "Continuer",
+        "PEGGING_SCORE": "Pointage Pegging",
+        "HAND_SCORE": "Pointage Main",
+        "CRIB_SCORE": "Pointage Crible",
+        "DEALER_SCORE": "Pointage Donneur",
+        "PLAYER_SCORE": "Pointage Joueur"
     },
     "LOBBY": {
         "TITLE": "Lobby Multijoueur",
