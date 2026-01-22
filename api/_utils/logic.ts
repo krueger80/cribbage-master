@@ -80,17 +80,11 @@ export function calculateScore(hand: Card[], cutCard: Card | null = null, isCrib
 
     // Runs
     // Sort by order
-    const sorted = [...fullHand].sort((a, b) => a.order - b.order);
-    let maxMultiplier = 1;
-    let currentRunLength = 1; // Length of CONSISTENT run (e.g. 3,4,5 is 3)
-    // We need to find the longest run, and allow for multipliers.
-    // Instead of complex logic, just check for runs of length 5, then 4, then 3.
-    // Optimization: If a run of 5 exists, we add 5. If not, check 4s, etc.
-    let runFound = false;
+    const sortedHand = [...fullHand].sort((a, b) => a.order - b.order);
 
     // Check for runs, starting from the full hand size down to 3
-    for (let k = fullHand.length; k >= 3; k--) {
-        const runs = combinations(fullHand, k).filter(isRun);
+    for (let k = sortedHand.length; k >= 3; k--) {
+        const runs = combinations(sortedHand, k).filter(c => isRun(c, true));
         if (runs.length > 0) {
             score.runs += k * runs.length;
             break; // Found max length runs, stop.
@@ -127,9 +121,12 @@ export function calculateScore(hand: Card[], cutCard: Card | null = null, isCrib
     return score;
 }
 
-export function isRun(cards: Card[]): boolean {
+export function isRun(cards: Card[], isSorted: boolean = false): boolean {
     if (cards.length < 3) return false;
-    const sorted = [...cards].sort((a, b) => a.order - b.order);
+    let sorted = cards;
+    if (!isSorted) {
+        sorted = [...cards].sort((a, b) => a.order - b.order);
+    }
     for (let i = 0; i < sorted.length - 1; i++) {
         if (sorted[i + 1].order !== sorted[i].order + 1) {
             return false;
