@@ -380,8 +380,16 @@ export class GameTableComponent implements OnInit {
     return { visible: false, points: 0, breakdown: [], type: 'pegging' as const, title: '', playerId: '' };
   }
 
-  getScoreDisplay(score: number): number {
-    return Math.min(score, 121);
+  cutForDeal() {
+    this.gameService.performCutForDeal(this.bottomPlayer.id);
+  }
+
+  getCutCard(playerId: string): any {
+    const state = this.gameService.snapshot;
+    if (state.cutForDealCards && state.cutForDealCards[playerId]) {
+      return state.cutForDealCards[playerId];
+    }
+    return null;
   }
 
   getVisualScore(playerIndex: number): number {

@@ -36,7 +36,7 @@ export class GameService {
                 score: 0,
                 cards: [],
                 playedCards: [],
-                isDealer: true
+                isDealer: false // Determined by cut
             },
             {
                 id: 'p2',
@@ -45,15 +45,107 @@ export class GameService {
                 score: 0,
                 cards: [],
                 playedCards: [],
-                isDealer: false
+                isDealer: false // Determined by cut
             }
         ];
+
+        // Draw a fresh deck for the cut
+        const deck = getAllCards();
+        // Shuffle deck
+        deck.sort(() => Math.random() - 0.5);
 
         this.updateState({
             ...INITIAL_GAME_STATE,
             players,
-            phase: 'dealing',
+            deck,
+            phase: 'cut_for_deal',
+            cutForDealCards: {}, // Initialize empty
             isMultiplayer: false
+        });
+
+        // In this phase, anyone can cut.
+        // Trigger CPU cut after delay if Single Player
+        if (!this.snapshot.isMultiplayer) {
+            setTimeout(() => this.performCutForDeal('p2'), 1500);
+        }
+    }
+
+    performCutForDeal(playerId: string) {
+        const state = this.snapshot;
+        if (state.phase !== 'cut_for_deal') return;
+        if (state.cutForDealCards && state.cutForDealCards[playerId]) return; // Already cut
+
+        const deck = [...state.deck];
+        const randomIndex = Math.floor(Math.random() * deck.length);
+        const card = deck.splice(randomIndex, 1)[0];
+
+        const newCutCards = { ...state.cutForDealCards, [playerId]: card };
+
+        this.updateState({
+            ...state,
+            deck,
+            cutForDealCards: newCutCards
+        });
+
+        // Check completion
+        if (Object.keys(newCutCards).length === state.players.length) {
+            setTimeout(() => this.resolveCutForDeal(), 2000);
+        }
+    }
+
+    private resolveCutForDeal() {
+        const state = this.snapshot;
+        const cuts = state.cutForDealCards || {};
+        const p1Card = cuts['p1'];
+        const p2Card = cuts['p2'];
+
+        // Rank Value: A=1, 2=2 ... K=13. 
+        // Need helper for rank value? 
+        // Card.value is 10 for Face cards. We need Rank ORDER.
+        // "A" "2" "3" "4" "5" "6" "7" "8" "9" "10" "J" "Q" "K"
+        const rankOrder = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const getRankVal = (c: Card) => rankOrder.indexOf(c.rank);
+
+        const v1 = getRankVal(p1Card);
+        const v2 = getRankVal(p2Card);
+
+        if (v1 === v2) {
+            // Tie - Redraw
+            // Reset cuts but keep current state message?
+            // Maybe clear and restart
+            // Need to notify UI about Tie?
+            // For now, just reset cutForDealCards to {} and refill deck? 
+            // Or keep deck depleted? Usually depleted is fine unless empty.
+
+            // To be simple: Reset
+            console.log('Tie for Deal! Redrawing...');
+
+            // Re-trigger CPU
+            if (!state.isMultiplayer) {
+                setTimeout(() => this.performCutForDeal('p2'), 1500);
+            }
+
+            this.updateState({
+                ...state,
+                cutForDealCards: {} // Clear cuts
+            });
+            return;
+        }
+
+        const winnerId = v1 < v2 ? 'p1' : 'p2';
+
+        // Update Dealer
+        const players = state.players.map(p => ({
+            ...p,
+            isDealer: p.id === winnerId
+        }));
+
+        this.updateState({
+            ...state,
+            players,
+            // Phase transition handled in dealRound? No, dealRound sets 'dealing'.
+            // But we want to show the result for a moment.
+            // Let's transition to dealing.
         });
 
         this.dealRound();

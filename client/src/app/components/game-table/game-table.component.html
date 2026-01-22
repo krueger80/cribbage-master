@@ -154,8 +154,55 @@
                 </div>
             </div>
 
+            <!-- Cut For Deal Phase -->
+            <div *ngIf="state.phase === 'cut_for_deal'"
+                class="w-full h-full flex flex-col items-center justify-center p-4 gap-4 z-40 relative animate-fade-in">
+                <h2 class="text-2xl font-bold text-amber-300 uppercase tracking-widest drop-shadow-md">Cut for Deal</h2>
+                <p class="text-sm text-white/60 mb-4">Lowest card deals first (A = 1, K = 13)</p>
+
+                <div class="flex flex-row items-center justify-center gap-12 w-full">
+                    <!-- My Cut -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="text-xs uppercase text-emerald-300 font-bold tracking-wider">{{ 'GAME.YOU' |
+                            translate }}</div>
+
+                        <ng-container *ngIf="getCutCard(bottomPlayer.id) as card; else cutAction">
+                            <div class="playing-card bg-white animate-flip-in" [ngClass]="getCardClasses(card, -1)">
+                                <ng-container *ngTemplateOutlet="cardTemplate; context: {card: card}"></ng-container>
+                            </div>
+                        </ng-container>
+                        <ng-template #cutAction>
+                            <button (click)="cutForDeal()"
+                                class="playing-card bg-blue-800 border-2 border-white/20 border-dashed flex items-center justify-center hover:scale-105 hover:bg-blue-700 transition-all cursor-pointer shadow-lg group">
+                                <span
+                                    class="text-white/40 font-bold uppercase text-[10px] group-hover:text-white/80 transition-colors">Cut</span>
+                            </button>
+                        </ng-template>
+                    </div>
+
+                    <!-- Opponent Cut -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="text-xs uppercase text-blue-300 font-bold tracking-wider">{{ 'GAME.OPPONENT' |
+                            translate }}</div>
+
+                        <ng-container *ngIf="getCutCard(topPlayer.id) as card; else waitingCut">
+                            <div class="playing-card bg-white animate-flip-in" [ngClass]="getCardClasses(card, -1)">
+                                <ng-container *ngTemplateOutlet="cardTemplate; context: {card: card}"></ng-container>
+                            </div>
+                        </ng-container>
+                        <ng-template #waitingCut>
+                            <div
+                                class="playing-card bg-blue-900/50 border-2 border-white/10 border-dashed flex items-center justify-center animate-pulse">
+                                <span class="text-white/20 text-xs">...</span>
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pegging Board (Center) -->
-            <div class="w-full h-full flex items-center justify-center p-2 z-40 relative">
+            <div *ngIf="state.phase !== 'cut_for_deal'"
+                class="w-full h-full flex items-center justify-center p-2 z-40 relative">
 
                 <!-- Cards Stack -->
                 <div class="relative w-full h-full max-h-32 md:max-h-64 flex items-center justify-center -space-x-8">
