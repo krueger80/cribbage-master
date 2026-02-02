@@ -5,13 +5,14 @@
         "start": "npm run start:client",
         "start:client": "cd client && npm start",
         "test:pegging": "npx ts-node test_pegging.ts",
-        "dev": "vercel dev"
+        "dev": "npm run start:client",
+        "dev:full": "vercel dev"
     },
     "dependencies": {
         "@types/node": "^25.0.6",
         "@vercel/node": "^5.5.16"
     },
     "devDependencies": {
-        "vercel": "^50.4.9"
+        "vercel": "^50.9.6"
     }
 }
