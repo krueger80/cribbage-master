@@ -49,7 +49,10 @@
         "PAIRS": "Pair",
         "RUNS": "Run",
         "FLUSH": "Flush",
-        "NOBS": "Nobs"
+        "NOBS": "Nobs",
+        "TOTAL": "Total Score",
+        "PEG_POINTS": "Pegging Score",
+        "BEST_PEGGING": "Best Pegging"
     },
     "HISTORY_VIEW": {
         "TITLE": "Analysis History",

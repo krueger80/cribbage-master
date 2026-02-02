@@ -49,7 +49,10 @@
         "PAIRS": "Paire",
         "RUNS": "Suite",
         "FLUSH": "Couleur",
-        "NOBS": "Nobs"
+        "NOBS": "Nobs",
+        "TOTAL": "Score Total",
+        "PEG_POINTS": "Points de Peg",
+        "BEST_PEGGING": "Meilleur Peg"
     },
     "HISTORY_VIEW": {
         "TITLE": "Historique d'analyse",

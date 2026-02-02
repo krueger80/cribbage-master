@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -34,16 +34,17 @@ import { CommonModule } from '@angular/common';
             <div class="absolute inset-0 w-full h-full z-10">
                  
                  <!-- P1 (Host) - Red Pin -->
-                 <div class="absolute w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.9)] border border-white/40 transition-all duration-700 ease-in-out"
+                 <!-- Removing transition-all to allow manual JS animation step-by-step without fighting CSS -->
+                 <div class="absolute w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.9)] border border-white/40 ease-linear transition-all duration-150"
                       [style.background-color]="'#ff3333'"
-                      [ngStyle]="getPinStyle(p1Score, 0)">
+                      [ngStyle]="getPinStyle(p1DisplayScore, 0)">
                       <div class="absolute top-[25%] left-[25%] w-[30%] h-[30%] bg-white rounded-full opacity-70 blur-[0.5px]"></div>
                  </div>
 
                  <!-- P2 (Guest) - Blue Pin -->
-                 <div class="absolute w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.9)] border border-white/40 transition-all duration-700 ease-in-out"
+                 <div class="absolute w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.9)] border border-white/40 ease-linear transition-all duration-150"
                       [style.background-color]="'#3366ff'"
-                      [ngStyle]="getPinStyle(p2Score, 1)">
+                      [ngStyle]="getPinStyle(p2DisplayScore, 1)">
                       <div class="absolute top-[25%] left-[25%] w-[30%] h-[30%] bg-white rounded-full opacity-70 blur-[0.5px]"></div>
                  </div>
             </div>
@@ -53,12 +54,67 @@ import { CommonModule } from '@angular/common';
   `,
 
 })
-export class CribbageBoardComponent {
+export class CribbageBoardComponent implements OnChanges {
   @Input() p1Score: number = 0; // Host (Left Side)
   @Input() p2Score: number = 0; // Guest (Right Side)
   @Input() p1Color: string = '#ef4444';
   @Input() p2Color: string = '#3b82f6';
   @Input() vertical: boolean = true;
+
+  p1DisplayScore: number = 0;
+  p2DisplayScore: number = 0;
+
+  private p1AnimationInterval: any;
+  private p2AnimationInterval: any;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['p1Score']) {
+      this.animatePin(0, this.p1DisplayScore, this.p1Score);
+    }
+    if (changes['p2Score']) {
+      this.animatePin(1, this.p2DisplayScore, this.p2Score);
+    }
+  }
+
+  animatePin(playerIdx: number, start: number, end: number) {
+    // If starting fresh (first load), just jump. Or animate? 0->0 is fine.
+    // If we want instant load on init, we check first change. 
+    // But let's animate everything for smoothness.
+
+    if (start === end) {
+      if (playerIdx === 0) this.p1DisplayScore = end;
+      else this.p2DisplayScore = end;
+      return;
+    }
+
+    const direction = end > start ? 1 : -1;
+    let current = start;
+
+    // Clear existing interval for this player
+    if (playerIdx === 0 && this.p1AnimationInterval) clearInterval(this.p1AnimationInterval);
+    if (playerIdx === 1 && this.p2AnimationInterval) clearInterval(this.p2AnimationInterval);
+
+    const intervalId = setInterval(() => {
+      current += direction;
+
+      if (playerIdx === 0) this.p1DisplayScore = current;
+      else this.p2DisplayScore = current;
+
+      // Check if reached or passed target
+      if ((direction === 1 && current >= end) || (direction === -1 && current <= end)) {
+        if (playerIdx === 0) {
+          this.p1DisplayScore = end;
+          clearInterval(this.p1AnimationInterval);
+        } else {
+          this.p2DisplayScore = end;
+          clearInterval(this.p2AnimationInterval);
+        }
+      }
+    }, 150); // 150ms per hole
+
+    if (playerIdx === 0) this.p1AnimationInterval = intervalId;
+    else this.p2AnimationInterval = intervalId;
+  }
 
   // Path Definitions (Percentage 0-100) based on Vertical Image Layout
   // Standard 120-hole board with 3 lanes per player (Up-Down-Up).
