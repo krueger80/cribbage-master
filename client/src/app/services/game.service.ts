@@ -346,6 +346,57 @@ export class GameService {
         }
     }
 
+    // --- SAVE STATE LOGIC ---
+    private readonly LOCAL_STORAGE_KEY = 'cribbage_local_save';
+    private _saveDebounceTimer: any;
+
+    private saveLocalState(state: GameState) {
+        try {
+            localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.error('Failed to save to localStorage', e);
+        }
+    }
+
+    private loadLocalState(): GameState | null {
+        try {
+            const saved = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            console.error('Failed to load from localStorage', e);
+            return null;
+        }
+    }
+
+    async tryRestoreState(): Promise<boolean> {
+        // 1. Check Cloud Save if Logged In
+        const userId = this.supabase.currentUserId;
+        if (userId) {
+            const cloudState = await this.supabase.getSoloGame();
+            if (cloudState && cloudState.phase !== 'gameover' && cloudState.phase !== 'setup') {
+                console.log('[Game] Restoring Cloud Save');
+                this._state.next(cloudState);
+                return true;
+            }
+        }
+
+        // 2. Check Local Save
+        const localState = this.loadLocalState();
+        if (localState && localState.phase !== 'gameover' && localState.phase !== 'setup') {
+            console.log('[Game] Restoring Local Save');
+            this._state.next(localState);
+            return true;
+        }
+
+        return false;
+    }
+
+    clearSaveState() {
+        localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+        // Optional: clear cloud save? Or just leave it as 'gameover' state?
+        // We'll leave cloud save update logic to handle overwrites.
+    }
+
     private updateState(newState: Partial<GameState>, syncRemote = true) {
         const mergedState = { ...this._state.value, ...newState };
         this._state.next(mergedState);
@@ -353,6 +404,20 @@ export class GameService {
         // Sync if multiplayer
         if (syncRemote && mergedState.isMultiplayer && mergedState.gameId) {
             this.supabase.updateGameState(mergedState.gameId, mergedState);
+        }
+
+        // --- AUTO SAVE (Single Player) ---
+        if (!mergedState.isMultiplayer && mergedState.phase !== 'setup') {
+            // 1. Always save to LocalStorage for resilience
+            this.saveLocalState(mergedState);
+
+            // 2. If Logged In, Debounce save to Cloud
+            if (this.supabase.currentUserId) {
+                if (this._saveDebounceTimer) clearTimeout(this._saveDebounceTimer);
+                this._saveDebounceTimer = setTimeout(() => {
+                    this.supabase.saveSoloGame(mergedState);
+                }, 2000); // 2 second debounce for cloud save
+            }
         }
     }
 
@@ -980,7 +1045,7 @@ export class GameService {
             turnPlayerId: this.getNextPlayablePlayerId(playerId, resetPlayers), // Leader of new round with validation
             lastPeggingScore: {
                 points: 1,
-                    description: this.translate.instant('SCORE.GO'),
+                description: this.translate.instant('SCORE.GO'),
                 playerId: opponent.id,
                 id: Date.now()
             }

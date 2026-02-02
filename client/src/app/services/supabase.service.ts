@@ -259,4 +259,68 @@ export class SupabaseService {
                 })
         );
     }
+
+    // --- SOLO GAME SAVE STATE ---
+
+    /**
+     * Retrieves the last saved single-player game for this user.
+     */
+    async getSoloGame(): Promise<GameState | null> {
+        const userId = this.currentUserId;
+        if (!userId) return null;
+
+        const { data, error } = await this.supabase
+            .from('games')
+            .select('state')
+            .eq('host_id', userId)
+            .eq('status', 'solo_save')
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error fetching solo game:', error);
+            return null;
+        }
+
+        return data?.state || null;
+    }
+
+    /**
+     * Upserts a single-player game save state.
+     * We use a specific status 'solo_save' to distinguish from multiplayer games.
+     */
+    async saveSoloGame(state: GameState) {
+        const userId = this.currentUserId;
+        if (!userId) return; // Silent return if not logged in
+
+        // Ideally we would do an UPSERT based on (host_id, status).
+        // Since we might not have a unique constraint on (host_id, status),
+        // we first check if one exists. (Or we can just rely on RLS/Data logic)
+
+        // 1. Check for existing ID
+        const { data: existing } = await this.supabase
+            .from('games')
+            .select('id')
+            .eq('host_id', userId)
+            .eq('status', 'solo_save')
+            .limit(1)
+            .maybeSingle();
+
+        if (existing) {
+            const { error } = await this.supabase
+                .from('games')
+                .update({ state, updated_at: new Date() }) // Assuming updated_at exists or is auto
+                .eq('id', existing.id);
+            if (error) console.error('Error updating solo save:', error);
+        } else {
+            const { error } = await this.supabase
+                .from('games')
+                .insert({
+                    host_id: userId,
+                    status: 'solo_save',
+                    state
+                });
+            if (error) console.error('Error creating solo save:', error);
+        }
+    }
 }

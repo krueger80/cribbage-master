@@ -12,6 +12,7 @@ import { ApiService, AnalysisResult } from './services/api.service';
 import { SupabaseService, HandHistory } from './services/supabase.service';
 import { ToastService } from './services/toast.service';
 import { GameTableComponent } from './components/game-table/game-table.component';
+import { GameService } from './services/game.service'; // Added
 import { LobbyComponent } from './components/lobby/lobby.component';
 
 @Component({
@@ -215,7 +216,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private api: ApiService,
     private translate: TranslateService,
     private toast: ToastService,
-    private supabase: SupabaseService
+    private supabase: SupabaseService,
+    private gameService: GameService
   ) {
     this.translate.addLangs(['en', 'fr']);
     this.translate.setDefaultLang('en');
@@ -235,6 +237,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.supabase.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+
+    // Auto-restore game state (Local or Cloud)
+    setTimeout(() => {
+      this.gameService.tryRestoreState().then(restored => {
+        if (restored) {
+          console.log('Game restored! Switching to game view.');
+          this.viewMode = 'game';
+          this.toast.show('Game restored successfully');
+        }
+      });
+    }, 500); // Small delay to allow auth to settle if needed
   }
 
   ngOnDestroy() {
