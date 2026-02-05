@@ -4,13 +4,14 @@ import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
 import { SupabaseService } from './supabase.service';
 import { ApiService } from './api.service';
+import { deepCopy } from '../logic/utils';
 
 @Injectable({
     providedIn: 'root'
 })
 export class GameService {
 
-    private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
+    private _state = new BehaviorSubject<GameState>(deepCopy(INITIAL_GAME_STATE));
     private _lastProcessedScoreId = 0;
 
     constructor(private supabase: SupabaseService, private api: ApiService) { }
