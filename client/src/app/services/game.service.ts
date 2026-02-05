@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
@@ -9,13 +9,30 @@ import { TranslateService } from '@ngx-translate/core';
 @Injectable({
     providedIn: 'root'
 })
-export class GameService {
+export class GameService implements OnDestroy {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
     private _lastProcessedScoreId = 0;
     private _cpuCutTimeout: any;
+    private _beforeUnloadHandler: () => void;
 
-    constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) { }
+    constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) {
+        // Ensure pending saves are flushed on close
+        this._beforeUnloadHandler = () => this.flushLocalSave();
+        if (typeof window !== 'undefined') {
+            window.addEventListener('beforeunload', this._beforeUnloadHandler);
+        }
+    }
+
+    ngOnDestroy() {
+        if (this._localSaveDebounceTimer) clearTimeout(this._localSaveDebounceTimer);
+        if (this._saveDebounceTimer) clearTimeout(this._saveDebounceTimer);
+        if (this._cpuCutTimeout) clearTimeout(this._cpuCutTimeout);
+
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+        }
+    }
 
     get state$(): Observable<GameState> {
         return this._state.asObservable();
@@ -349,12 +366,22 @@ export class GameService {
     // --- SAVE STATE LOGIC ---
     private readonly LOCAL_STORAGE_KEY = 'cribbage_local_save';
     private _saveDebounceTimer: any;
+    private _localSaveDebounceTimer: any;
 
     private saveLocalState(state: GameState) {
         try {
             localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(state));
         } catch (e) {
             console.error('Failed to save to localStorage', e);
+        }
+    }
+
+    private flushLocalSave() {
+        if (this._localSaveDebounceTimer) {
+            clearTimeout(this._localSaveDebounceTimer);
+            this._localSaveDebounceTimer = null;
+            // Save the latest state immediately
+            this.saveLocalState(this.snapshot);
         }
     }
 
@@ -408,8 +435,12 @@ export class GameService {
 
         // --- AUTO SAVE (Single Player) ---
         if (!mergedState.isMultiplayer && mergedState.phase !== 'setup') {
-            // 1. Always save to LocalStorage for resilience
-            this.saveLocalState(mergedState);
+            // 1. Debounce save to LocalStorage for resilience & performance
+            if (this._localSaveDebounceTimer) clearTimeout(this._localSaveDebounceTimer);
+            this._localSaveDebounceTimer = setTimeout(() => {
+                this.saveLocalState(mergedState);
+                this._localSaveDebounceTimer = null;
+            }, 500);
 
             // 2. If Logged In, Debounce save to Cloud
             if (this.supabase.currentUserId) {
