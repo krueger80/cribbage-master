@@ -28,14 +28,15 @@ export function parseCard(input: string): Card {
     return createCard(rank, suit);
 }
 
-export function getAllCards(): Card[] {
-    const deck: Card[] = [];
-    for (const s of SUITS) {
-        for (const r of RANKS) {
-            deck.push(createCard(r, s));
-        }
+const DECK: Card[] = [];
+for (const s of SUITS) {
+    for (const r of RANKS) {
+        DECK.push(createCard(r, s));
     }
-    return deck;
+}
+
+export function getAllCards(): Card[] {
+    return [...DECK];
 }
 
 // Scoring Logic
