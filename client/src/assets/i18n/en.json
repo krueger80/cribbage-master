@@ -138,6 +138,7 @@
         "NEXT_ROUND": "Next Hand",
         "CRIB": "Crib",
         "YOU": "You",
-        "OPPONENT": "Opponent"
+        "OPPONENT": "Opponent",
+        "AUTO_SELECT": "Auto Select"
     }
 }

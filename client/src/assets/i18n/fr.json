@@ -138,6 +138,7 @@
         "NEXT_ROUND": "Prochaine main",
         "CRIB": "Le Crible",
         "YOU": "Vous",
-        "OPPONENT": "Adversaire"
+        "OPPONENT": "Adversaire",
+        "AUTO_SELECT": "Sélection Auto"
     }
 }

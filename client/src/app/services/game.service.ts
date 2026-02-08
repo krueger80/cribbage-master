@@ -922,6 +922,14 @@ export class GameService implements OnDestroy {
         return 'SUCCESS';
     }
 
+    acknowledgePeggingScore() {
+        if (this.snapshot.lastPeggingScore) {
+            this.updateState({ lastPeggingScore: null });
+            this.checkForPeggingFinished();
+            this.checkAutoPlay();
+        }
+    }
+
     private checkForPeggingFinished() {
         const state = this.snapshot;
         if (state.phase !== 'pegging') return;

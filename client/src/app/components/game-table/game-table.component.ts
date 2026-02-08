@@ -10,6 +10,8 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { ApiService } from '../../services/api.service';
+
 @Component({
   selector: 'app-game-table',
   standalone: true,
@@ -61,9 +63,10 @@ export class GameTableComponent implements OnInit {
   isLandscape: boolean = false;
 
   selectedCardIndices: Set<number> = new Set();
+  isAnalyzing: boolean = false;
 
 
-  constructor(private gameService: GameService, private translate: TranslateService, private ngZone: NgZone) {
+  constructor(private gameService: GameService, private apiService: ApiService, private translate: TranslateService, private ngZone: NgZone) {
     this.state$ = this.gameService.state$;
 
     const mq = window.matchMedia('(orientation: landscape)');
@@ -229,6 +232,71 @@ export class GameTableComponent implements OnInit {
       this.selectedCardIndices.clear();
     }
   }
+  autoSelect() {
+    const state = this.gameService.snapshot;
+    if (state.phase !== 'discarding') return;
+
+    const player = this.bottomPlayer;
+    if (!player.cards || player.cards.length === 0) return;
+
+    this.isAnalyzing = true;
+
+    // Convert cards to string codes (Rank+Suit, e.g. "5H", "10S")
+    const cardCodes = player.cards.map(c => c.rank + c.suit);
+    const numPlayers = state.players.length;
+
+    this.apiService.analyze(cardCodes, player.isDealer, numPlayers, 'quick').subscribe({
+      next: (response) => {
+        // Find best result (highest EV)
+        if (!response.results || response.results.length === 0) {
+          this.isAnalyzing = false;
+          return;
+        }
+
+        // Sort by Total EV descending
+        const best = [...response.results].sort((a, b) => b.totalExpectedValue - a.totalExpectedValue)[0];
+
+        // Update selection to match the DISCARDED cards from the best result
+        // The user wants to "select the best cards to discard"
+        this.selectedCardIndices.clear();
+        const hand = player.cards;
+
+        best.discarded.forEach(discardCard => {
+          // Find index in hand
+          // We match by rank and suit
+          const index = hand.findIndex(c => c.rank === discardCard.rank && c.suit === discardCard.suit);
+          if (index !== -1) {
+            this.selectedCardIndices.add(index);
+          }
+        });
+
+        // Save to History
+        this.apiService.saveHistory({
+          user_id: this.gameService.snapshot.localPlayerId || 'anon',
+          cards: cardCodes,
+          is_dealer: player.isDealer,
+          num_players: numPlayers,
+          results: response.results
+        }).subscribe(); // Fire and forget
+
+        this.isAnalyzing = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  onPopupContinue() {
+    const popupData = this.getPopupData();
+    if (popupData.type === 'pegging') {
+      this.gameService.acknowledgePeggingScore();
+    } else if (popupData.type === 'counting') {
+      this.advanceCounting();
+    }
+  }
+
   getCardClasses(card: any, index: number, playerId?: string): any {
     const isSelected = this.selectedCardIndices.has(index);
     // Optional: Use playerId to distinctive styling if needed (e.g., border color)
@@ -245,7 +313,6 @@ export class GameTableComponent implements OnInit {
     return map[suit] || '?';
   }
 
-  // Counting Phase Helpers
   // Counting Phase Helpers
   getCountingCards(state: GameState): any[] {
     // If not multiplayer, just show everything?

@@ -1,0 +1,112 @@
+
+> cribbage-master@1.0.0 dev:full
+> vercel dev
+
+Vercel CLI 50.9.6
+Retrieving projectΓÇª
+> NOTE: Requested port 3000 is already in use
+> NOTE: Requested port 3001 is already in use
+> Running Dev Command ΓÇ£cd client && npx ng serve --port $PORTΓÇ¥
+Node.js version v25.2.1 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+[33mΓ¥»[39m Building...
+[32mΓ£ö[39m Building...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 254.74 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+styles.css          | styles        |  54.57 kB | 
+
+                    | Initial total | 399.51 kB
+
+Application bundle generation complete. [5.514 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  Γ₧£  Local:   http://localhost:3002/
+  Γ₧£  press h + enter to show help
+> Ready! Available at http://localhost:3002
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 255.13 kB | 
+
+Application bundle generation complete. [2.606 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 256.10 kB | 
+styles.css          | styles |  54.61 kB | 
+
+Application bundle generation complete. [0.664 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 255.80 kB | 
+
+Application bundle generation complete. [0.652 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.644 seconds]
+
+X [ERROR] NG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags [plugin angular-compiler]
+
+    src/app/components/analysis-view/analysis-view.component.ts:168:4:
+      168 Γöé     </div>
+          Γò╡     ~~~~~~
+
+
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.306 seconds]
+
+X [ERROR] NG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags [plugin angular-compiler]
+
+    src/app/components/analysis-view/analysis-view.component.ts:168:4:
+      168 Γöé     </div>
+          Γò╡     ~~~~~~
+
+
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 255.38 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+styles.css          | styles        |  54.65 kB | 
+
+                    | Initial total | 400.23 kB
+
+Application bundle generation complete. [0.558 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 255.66 kB | 
+
+Application bundle generation complete. [0.858 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 257.99 kB | 
+styles.css          | styles |  56.07 kB | 
+
+Application bundle generation complete. [0.434 seconds]
+
+Page reload sent to client(s).
+[33mΓ¥»[39m Changes detected. Rebuilding...
+[32mΓ£ö[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 259.69 kB | 
+styles.css          | styles |  56.17 kB | 
+
+Application bundle generation complete. [0.974 seconds]
+
+Page reload sent to client(s).
