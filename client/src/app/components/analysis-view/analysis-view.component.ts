@@ -186,7 +186,11 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
     }
     .playing-card-micro.red { color: #e11d48; }
     .playing-card-micro.black { color: #0f172a; }
-  `]
+    
+    /* Smooth reordering animation placeholder */
+    /* Note: Angular's *ngFor reordering without animations module is instant. */
+    /* To make it "nice", we rely on View Transitions (if supported) or CSS transforms. */
+    /* Since we use view-transition-name, modern browsers will animate automatically. */
 })
 export class AnalysisViewComponent {
     @Input() set results(value: AnalysisResult[]) {
@@ -235,7 +239,7 @@ export class AnalysisViewComponent {
         // Unique ID for View Transitions: Card ranks/suits + dealer status (redundant but safe)
         // Sanitizing just in case
         const keptId = res.kept.map(c => c.rank + c.suit).join('');
-        return `card-${keptId}`;
+        return `card - ${ keptId }`;
     }
 
     trackByResult = (index: number, res: AnalysisResult): string => {

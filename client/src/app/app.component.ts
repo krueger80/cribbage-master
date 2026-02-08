@@ -309,36 +309,56 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    this.analysisResults = []; // Clear previous results
     const mode = this.isQuickMode ? 'quick' : 'precise';
-    this.api.analyze(this.cards, this.isDealer, this.numPlayers, mode).subscribe({
+
+    // Use Streaming API
+    this.api.analyzeStream(this.cards, this.isDealer, this.numPlayers, mode).subscribe({
       next: (res) => {
-        this.analysisResults = res.results;
-        this.isLoading = false;
+        // Progressive Update: Add new result to array
+        // We create a new array reference to trigger change detection in child component
+        this.analysisResults = [...this.analysisResults, res];
 
-        setTimeout(() => {
-          const el = document.getElementById('results-anchor');
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            // Check if top is roughly visible
-            const isTopVisible = rect.top >= 0 && rect.top <= window.innerHeight;
-
-            if (!isTopVisible) {
+        // Scroll to results on first item
+        if (this.analysisResults.length === 1) {
+          setTimeout(() => {
+            const el = document.getElementById('results-anchor');
+            if (el) {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-          }
-        }, 250);
-
-        if (saveToHistory && this.analysisResults.length > 0) {
-          const best = this.analysisResults[0];
-          this.saveToHistory(best);
+          }, 100);
         }
       },
       error: (err) => {
         const msg = this.translate.instant('APP.ERROR_CALCULATING') || 'Error: ';
-        this.toast.error(msg + err.message);
+        console.error(err);
+        this.toast.error(msg + (err.message || err));
         this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
+
+        // Save best result to history on completion
+        if (saveToHistory && this.analysisResults.length > 0) {
+          // Sort to find best (AnalysisView does its own sorting, but we need best for history)
+          // Logic duplicated from AnalysisView for now, or we can just pick the one with max Net Value
+          const best = this.analysisResults.reduce((prev, current) => {
+            const netPrev = this.getNetValue(prev);
+            const netCurr = this.getNetValue(current);
+            return netCurr > netPrev ? current : prev;
+          });
+          this.saveToHistory(best);
+        }
       }
     });
+  }
+
+  private getNetValue(res: AnalysisResult): number {
+    if (this.isDealer) {
+      return res.handStats.avg + res.cribStats.avg + res.peggingScore;
+    } else {
+      return res.handStats.avg - res.cribStats.avg + res.peggingScore;
+    }
   }
 
   private saveToHistory(result: AnalysisResult) {
