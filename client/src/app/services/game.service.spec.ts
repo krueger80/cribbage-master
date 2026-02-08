@@ -71,8 +71,12 @@ describe('GameService', () => {
     });
 
     describe('Game Initialization', () => {
-        it('should initialize a standard 2-player game', () => {
+        it('should initialize a standard 2-player game', fakeAsync(() => {
             service.initGame();
+
+            // Advance time to allow cut_for_deal -> dealing -> discarding transition
+            tick(6000);
+
             const state = service.snapshot;
 
             expect(state.players.length).toBe(2);
@@ -80,9 +84,11 @@ describe('GameService', () => {
             expect(state.players[0].isHuman).toBeTrue();
             expect(state.players[1].name).toBe('CPU');
             expect(state.players[1].isHuman).toBeFalse();
+            expect(state.players[1].name).toBe('CPU');
+            expect(state.players[1].isHuman).toBeFalse();
             expect(state.phase).toBe('cut_for_deal');
             expect(state.deck.length).toBe(52);
-        });
+        }));
 
         it('should alternate dealer correctly', fakeAsync(() => {
             initAndStartGame();
@@ -90,14 +96,14 @@ describe('GameService', () => {
 
             // Advance round
             service.nextRound();
-            tick(1000); // clear any auto-play timers from dealing
+            tick(3000); // clear any auto-play timers from dealing
 
             const secondDealer = service.snapshot.players.find(p => p.isDealer)?.id;
             expect(firstDealer).not.toBe(secondDealer);
 
             // Advance again (back to p1 for 2 players)
             service.nextRound();
-            tick(1000);
+            tick(3000);
 
             const thirdDealer = service.snapshot.players.find(p => p.isDealer)?.id;
             expect(thirdDealer).toBe(firstDealer);
@@ -110,17 +116,18 @@ describe('GameService', () => {
             initAndStartGame();
         }));
 
-        it('should allow player to discard 2 cards', () => {
+        it('should allow player to discard 2 cards', fakeAsync(() => {
             const p1 = service.snapshot.players[0];
             const initialHandSize = p1.cards.length;
 
             // discard first 2 cards
             service.discard(p1.id, [0, 1]);
+            tick(2000); // Flush timers
 
             const state = service.snapshot;
             expect(state.players[0].cards.length).toBe(initialHandSize - 2);
             expect(state.crib.length).toBe(4); // P2 (Auto) + P1
-        });
+        }));
 
         it('should NOT transition to pegging if only one player has discarded', () => {
             // Note: P2 (CPU) has ALREADY discarded due to initAndStartGame auto-play.
@@ -140,16 +147,13 @@ describe('GameService', () => {
             expect(service.snapshot.cutCard).not.toBeNull();
 
             // Flush pending timers
-            tick(2000);
+            tick(3000);
         }));
 
         it('should handle CPU auto-discard correctly', fakeAsync(() => {
             // Setup game where CPU needs to discard checking checkAutoPlay logic
             // We use initAndStartGame but we need to tick enough for CheckAutoPlay?
             // initAndStartGame calls tick(2100). dealing calls checkAutoPlay.
-
-            // Check if CPU has already discarded due to initAndStartGame ticks?
-            // checkAutoPlay sets timeout 1000ms.
             // initAndStartGame does tick(2100).
             // So CPU might have already discarded!
 
@@ -480,6 +484,7 @@ describe('GameService', () => {
             state.peggingStack = [{ card: { rank: 'K', suit: 'H', value: 10, order: 13 } as any, playerId: 'p2' }]; // Dummy stack
 
             service.playCard(state.players[0].id, 0);
+            tick(1000);
 
             const finalState = service.snapshot;
             expect(finalState.players[0].score).toBe(122); // 120 + 2
