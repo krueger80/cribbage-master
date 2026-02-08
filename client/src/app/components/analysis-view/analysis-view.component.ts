@@ -11,17 +11,23 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
     <div class="flex flex-col gap-4 animate-fade-in">
         
         <!-- Sorting Controls -->
-        <div class="flex justify-end items-center">
+        <div class="flex justify-end items-center gap-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ 'ANALYSIS_VIEW.SORT_BY' | translate }}</span>
             <div class="bg-gray-100 dark:bg-white/10 p-1 rounded-lg flex gap-1">
                 <button (click)="setSort('total')" 
                         class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
                         [ngClass]="sortMethod === 'total' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
-                    {{ 'ANALYSIS_VIEW.TOTAL' | translate }} (Total)
+                    {{ 'ANALYSIS_VIEW.TOTAL' | translate }}
+                </button>
+                <button (click)="setSort('hand')"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
+                        [ngClass]="sortMethod === 'hand' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
+                    {{ 'ANALYSIS_VIEW.HAND_SCORE' | translate }}
                 </button>
                 <button (click)="setSort('peg')" 
                         class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
                         [ngClass]="sortMethod === 'peg' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
-                    {{ 'ANALYSIS_VIEW.PEG_POINTS' | translate }} (Pegging)
+                    {{ 'ANALYSIS_VIEW.PEG_POINTS' | translate }}
                 </button>
             </div>
         </div>
@@ -38,18 +44,29 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                  [style.view-transition-name]="getTransitionName(res)"
                  style="min-width: 250px">
                  
-                <!-- Badge for Best Choice -->
-                <div *ngIf="i===0 && sortMethod==='total'" class="absolute -top-px -right-px bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl rounded-tr-md z-10 shadow-sm">
-                    {{ 'ANALYSIS_VIEW.BEST' | translate }}
-                </div>
-                <!-- Badge for Best Pegging -->
-                <div *ngIf="i===0 && sortMethod==='peg'" class="absolute -top-px -right-px bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl rounded-tr-md z-10 shadow-sm">
-                    {{ 'ANALYSIS_VIEW.BEST_PEGGING' | translate }}
+                <!-- Badges Container -->
+                <div class="absolute -top-px -right-px flex flex-row items-start z-10 gap-px">
+    
+                    <!-- Badge for Best Choice (Total) -->
+                    <div *ngIf="isBestTotal(res)" class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_TOTAL' | translate }}
+                    </div>
+
+                    <!-- Badge for Best Hand -->
+                    <div *ngIf="isBestHand(res)" class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_HAND' | translate }}
+                    </div>
+
+                    <!-- Badge for Best Pegging -->
+                    <div *ngIf="isBestPeg(res)" class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_PEG' | translate }}
+                    </div>
                 </div>
 
                 <!-- Range (Moved to Top Right, underneath badge space or just top right if no badge) -->
-                <div class="absolute top-1.5 right-2 text-[10px] text-gray-400 font-bold" [class.mt-4]="i===0">
-                    {{res.handStats.min + (isDealer ? res.cribStats.min : 0) }}-{{res.handStats.max + (isDealer ? res.cribStats.max : 0)}}
+                <!-- Range (Moved to Top Right) - REMOVED -->
+                <div class="absolute top-1.5 right-2 text-[10px] text-gray-400 font-bold hidden" [class.mt-4]="i===0">
+                    <!-- Placeholder to avoid breaking layout if something relies on it, or just remove content -->
                 </div>
 
                 <!-- Cards Row (Prominent at Top) -->
@@ -84,7 +101,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                     
                     <!-- Collapsed View (Summary Row) -->
                     <!-- Cols: Icon | Peg | Hand | Crib | Total -->
-                    <div class="grid grid-cols-5 p-1.5 text-center items-center">
+                    <div class="grid grid-cols-5 p-1.5 text-center items-stretch">
                         <!-- Icon -->
                         <div class="flex flex-col justify-center items-center text-gray-400 text-[10px]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
@@ -104,12 +121,14 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                         <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                             <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.HAND' | translate }}</span>
                              <span class="font-bold text-sm leading-none mt-0.5" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</span>
+                             <span class="text-[9px] text-gray-400 font-medium leading-none block -mt-0.5">{{res.handStats.min}}-{{res.handStats.max}}</span>
                         </div>
 
                         <!-- Crib -->
                         <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                             <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.CRIB' | translate }}</span>
                             <span class="font-bold text-sm leading-none mt-0.5" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</span>
+                            <span class="text-[9px] text-gray-400 font-medium leading-none block -mt-0.5">{{res.cribStats.min}}-{{res.cribStats.max}}</span>
                         </div>
 
                         <!-- Total -->
@@ -186,7 +205,12 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
     }
     .playing-card-micro.red { color: #e11d48; }
     .playing-card-micro.black { color: #0f172a; }
-  `]
+    
+    /* Smooth reordering animation placeholder */
+    /* Note: Angular's *ngFor reordering without animations module is instant. */
+    /* To make it "nice", we rely on View Transitions (if supported) or CSS transforms. */
+    /* Since we use view-transition-name, modern browsers will animate automatically. */
+    `]
 })
 export class AnalysisViewComponent {
     @Input() set results(value: AnalysisResult[]) {
@@ -205,7 +229,7 @@ export class AnalysisViewComponent {
     constructor(private cdr: ChangeDetectorRef) { }
 
     expandedIndices: Set<number> = new Set();
-    sortMethod: 'total' | 'peg' = 'total';
+    sortMethod: 'total' | 'peg' | 'hand' = 'total';
 
     get sortedResults(): AnalysisResult[] {
         if (!this.results) return [];
@@ -213,13 +237,15 @@ export class AnalysisViewComponent {
         return [...this.results].sort((a, b) => {
             if (this.sortMethod === 'total') {
                 return b.totalExpectedValue - a.totalExpectedValue;
-            } else {
+            } else if (this.sortMethod === 'peg') {
                 return b.peggingScore - a.peggingScore;
+            } else {
+                return b.handStats.avg - a.handStats.avg;
             }
         });
     }
 
-    setSort(method: 'total' | 'peg') {
+    setSort(method: 'total' | 'peg' | 'hand') {
         const doc = document as any;
         if (doc.startViewTransition) {
             doc.startViewTransition(() => {
@@ -235,7 +261,7 @@ export class AnalysisViewComponent {
         // Unique ID for View Transitions: Card ranks/suits + dealer status (redundant but safe)
         // Sanitizing just in case
         const keptId = res.kept.map(c => c.rank + c.suit).join('');
-        return `card-${keptId}`;
+        return "card-" + keptId;
     }
 
     trackByResult = (index: number, res: AnalysisResult): string => {
@@ -285,5 +311,37 @@ export class AnalysisViewComponent {
         return this.isDealer
             ? 'text-emerald-900 dark:text-emerald-100'
             : 'text-rose-900 dark:text-rose-100';
+    }
+
+    getTotalMin(res: AnalysisResult): number {
+        if (this.isDealer) {
+            return res.handStats.min + res.cribStats.min + res.peggingScore;
+        }
+        return res.handStats.min - res.cribStats.max + res.peggingScore;
+    }
+
+    getTotalMax(res: AnalysisResult): number {
+        if (this.isDealer) {
+            return res.handStats.max + res.cribStats.max + res.peggingScore;
+        }
+        return res.handStats.max - res.cribStats.min + res.peggingScore;
+    }
+
+    isBestTotal(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxTotal = Math.max(...this.results.map(r => r.totalExpectedValue));
+        return Math.abs(res.totalExpectedValue - maxTotal) < 0.001;
+    }
+
+    isBestPeg(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxPeg = Math.max(...this.results.map(r => r.peggingScore));
+        return Math.abs(res.peggingScore - maxPeg) < 0.001;
+    }
+
+    isBestHand(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxHand = Math.max(...this.results.map(r => r.handStats.avg));
+        return Math.abs(res.handStats.avg - maxHand) < 0.001;
     }
 }

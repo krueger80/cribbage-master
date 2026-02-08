@@ -31,14 +31,15 @@
         "SIGN_IN_GOOGLE": "Sign in with Google",
         "OR": "OR",
         "GAME": "Game",
-        "LOBBY": "Multiplayer Lobby"
+        "LOBBY": "Multiplayer Lobby",
+        "QUICK_MODE": "Quick Mode"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Select Your Hand",
         "CLEAR_ALL": "Clear All"
     },
     "ANALYSIS_VIEW": {
-        "BEST": "BEST",
+        "BEST_TOTAL": "Best Total",
         "EXPECTED": "Expected",
         "RANGE": "Range",
         "HAND": "Hand",
@@ -51,12 +52,16 @@
         "FLUSH": "Flush",
         "NOBS": "Nobs",
         "TOTAL": "Total Score",
-        "PEG_POINTS": "Pegging Score",
-        "BEST_PEGGING": "Best Pegging"
+        "PEG_POINTS": "Peg Score",
+        "BEST_PEG": "Best Peg",
+        "HAND_SCORE": "Hand Score",
+        "BEST_HAND": "Best Hand",
+        "SORT_BY": "Sort by:"
     },
     "HISTORY_VIEW": {
         "TITLE": "Analysis History",
         "LOADING": "Loading history...",
+        "LOADING_MORE": "Loading more...",
         "NO_HISTORY": "No history available yet.",
         "ORIGINAL_HAND": "Original Hand",
         "DISCONNECTED": "Disconnected",

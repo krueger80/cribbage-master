@@ -41,11 +41,12 @@ function getCombinations<T>(arr: T[], k: number): [T[], T[]][] {
     return [...discardFirst, ...keepFirst];
 }
 
-export function analyzeHand(
+export function* analyzeHandGenerator(
     hand: Card[],
     isDealer: boolean,
-    numPlayers: number
-): AnalysisResult[] {
+    numPlayers: number,
+    simulationMode: 'quick' | 'precise' = 'precise'
+): Generator<AnalysisResult> {
     const numToDiscard = (numPlayers === 2) ? 2 : 1;
     const allCards = getAllCards();
 
@@ -57,44 +58,32 @@ export function analyzeHand(
     );
 
     const options = getCombinations(hand, numToDiscard);
-    const results: AnalysisResult[] = [];
+    // const results: AnalysisResult[] = []; // Generator doesn't need to accumulate
 
     for (const [kept, discarded] of options) {
         // 1. Calculate Hand Stats
         const handStats = calculateStats(kept, possibleCutCards, false);
 
         // 2. Calculate Crib Stats
-        // This is complex. 
-        // If 2 players: Crib = 2 discarded + 2 opponent + Cut.
-        // If 3 players: Crib = 1 discarded + 1 opp1 + 1 opp2 + 1 deck + Cut.
-        // If 4 players: Crib = 1 discarded + 1 opp1 + 1 opp2 + 1 opp3 + Cut.
-
         let cribStats: StatResult = { min: 0, max: 0, avg: 0, breakdown: { fifteens: 0, pairs: 0, runs: 0, flush: 0, nobs: 0, total: 0 } };
 
         if (numPlayers === 2) {
-            // Simulation: Sample 100 random opponent discards (2 cards)
-            // This is a trade-off for performance.
-            cribStats = simulateCrib2Player(discarded, possibleCutCards, 50);
+            if (simulationMode === 'quick') {
+                // Quick Mode: Simulation with limited samples (e.g. 2000)
+                cribStats = simulateCrib2Player(discarded, possibleCutCards, 2000);
+            } else {
+                // Precise Mode: Exact calculation (~45k iterations)
+                cribStats = calculateExactCribEV(discarded, possibleCutCards);
+            }
         } else {
-            // For 3/4 players, simplified metric (just value of discarded card?)
-            // Or assume random completions.
-            // Let's do a very small sample sim.
-            cribStats = simulateCribMultiPlayer(discarded, possibleCutCards, numPlayers, 20);
+            // For 3/4 players
+            cribStats = simulateCribMultiPlayer(discarded, possibleCutCards, numPlayers, 500);
         }
 
         // 3. Pegging Heuristic
         const peggingScore = kept.reduce((sum, c) => sum + (PEGGING_VALUES[c.rank] || 0.4), 0);
 
         // 4. Total EV
-        // If Dealer: Hand + Crib + Pegging
-        // If Not Dealer: Hand - Crib + Pegging (We want to minimize Crib)
-        // Wait, "Total EV" usually means "My Points".
-        // So If Not Dealer, Crib EV doesn't add to MY score (it adds to Opp).
-        // The user wants "Points I'm expecting to get".
-        // So if Not Dealer, Crib points = 0 (for me).
-        // BUT, the strategy should penalize giving points.
-        // I will return the raw Crib points, but the sorting logic (strategy) will handle the diff.
-
         let totalEV = handStats.avg + peggingScore;
         if (isDealer) {
             totalEV += cribStats.avg;
@@ -102,22 +91,30 @@ export function analyzeHand(
             totalEV -= cribStats.avg;
         }
 
-        results.push({
+        yield {
             kept,
             discarded,
             handStats,
             cribStats,
             peggingScore,
-            totalExpectedValue: totalEV // This is purely display? No, let's make it the key metric.
-            // Actually, for non-dealer, minimizing opponent crib is key.
-            // A discard that gives me 10 hand points but gives opponent 20 crib points is BAD.
-            // Versus a discard of 8 hand points giving opponent 2 crib points.
-            // Net: -10 vs +6. 
-            // So I should calculate Net Expected Benefit.
-        });
+            totalExpectedValue: totalEV
+        };
+    }
+}
+
+export function analyzeHand(
+    hand: Card[],
+    isDealer: boolean,
+    numPlayers: number,
+    simulationMode: 'quick' | 'precise' = 'precise'
+): AnalysisResult[] {
+    const generator = analyzeHandGenerator(hand, isDealer, numPlayers, simulationMode);
+    const results: AnalysisResult[] = [];
+    for (const res of generator) {
+        results.push(res);
     }
 
-    // Sort by Net Benefit
+    // Sort by Net Benefit (Legacy support for non-streaming callers)
     results.sort((a, b) => {
         const netA = getNetValue(a, isDealer);
         const netB = getNetValue(b, isDealer);
@@ -170,23 +167,64 @@ function calculateStats(hand: Card[], possibleCuts: Card[], isCrib: boolean): St
     };
 }
 
-function simulateCrib2Player(discarded: Card[], possibleCuts: Card[], samples: number): StatResult {
-    // discarded is 2 cards.
-    // Need 2 random others + cut.
-    // We can't iterate all pairs of "others" (46*45/2 ~ 1000) * 44 cuts = 44,000 checks.
-    // Actually, that's fine. It's fast enough. 44,000 basic calcs is roughly 50ms in V8.
-    // Let's do full iteration if samples is high, or just random if we want super speed.
-    // Let's try sampling to be safe.
+function calculateExactCribEV(discarded: Card[], possibleCuts: Card[]): StatResult {
+    let total = 0;
+    const accum: ScoreBreakdown = { fifteens: 0, pairs: 0, runs: 0, flush: 0, nobs: 0, total: 0 };
+    let min = 999;
+    let max = 0;
+    let count = 0;
 
+    // Iterate all Cut Cards
+    for (let c = 0; c < possibleCuts.length; c++) {
+        const cut = possibleCuts[c];
+
+        // For opponent discards, we iterate all pairs from the *other* cards
+        // To avoid creating arrays inside loops, we iterate indices.
+        for (let i = 0; i < possibleCuts.length; i++) {
+            if (i === c) continue;
+            for (let j = i + 1; j < possibleCuts.length; j++) {
+                if (j === c) continue;
+
+                const opp1 = possibleCuts[i];
+                const opp2 = possibleCuts[j];
+
+                // Construct Crib Hand: 2 My Discards + 2 Opponent Discards
+                const cribHand = [discarded[0], discarded[1], opp1, opp2];
+
+                // Score it
+                const score = calculateScore(cribHand, cut, true);
+
+                total += score.total;
+                if (score.total < min) min = score.total;
+                if (score.total > max) max = score.total;
+
+                accum.fifteens += score.fifteens;
+                accum.pairs += score.pairs;
+                accum.runs += score.runs;
+                accum.flush += score.flush;
+                accum.nobs += score.nobs;
+                count++;
+            }
+        }
+    }
+
+    return {
+        min, max, avg: total / count,
+        breakdown: {
+            fifteens: accum.fifteens / count,
+            pairs: accum.pairs / count,
+            runs: accum.runs / count,
+            flush: accum.flush / count,
+            nobs: accum.nobs / count,
+            total: total / count
+        }
+    };
+}
+
+function simulateCrib2Player(discarded: Card[], possibleCuts: Card[], samples: number): StatResult {
     let total = 0;
     const accum: ScoreBreakdown = { fifteens: 0, pairs: 0, runs: 0, flush: 0, nobs: 0, total: 0 };
     let min = 999, max = 0;
-
-    // We iterate 'samples' times.
-    // In each sample:
-    // 1. Pick a Cut Card.
-    // 2. Pick 2 "Opponent" Cards from remaining.
-    // 3. Score.
 
     for (let i = 0; i < samples; i++) {
         // Pick Cut
@@ -197,7 +235,6 @@ function simulateCrib2Player(discarded: Card[], possibleCuts: Card[], samples: n
         const remaining = possibleCuts.filter((_, idx) => idx !== cutIdx);
 
         // Pick 2 Opponents
-        // Optimization: Just pick 2 random indices
         const idx1 = Math.floor(Math.random() * remaining.length);
         let idx2 = Math.floor(Math.random() * remaining.length);
         while (idx2 === idx1) idx2 = Math.floor(Math.random() * remaining.length);

@@ -31,14 +31,15 @@
         "SIGN_IN_GOOGLE": "Se connecter avec Google",
         "OR": "OU",
         "GAME": "Jeu",
-        "LOBBY": "Lobby Multijoueur"
+        "LOBBY": "Lobby Multijoueur",
+        "QUICK_MODE": "Mode Rapide"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Sélectionnez votre main",
         "CLEAR_ALL": "Tout effacer"
     },
     "ANALYSIS_VIEW": {
-        "BEST": "MEILLEUR",
+        "BEST_TOTAL": "Meilleur total",
         "EXPECTED": "Espéré",
         "RANGE": "Intervalle",
         "HAND": "Main",
@@ -50,13 +51,17 @@
         "RUNS": "Suite",
         "FLUSH": "Couleur",
         "NOBS": "Nobs",
-        "TOTAL": "Score Total",
-        "PEG_POINTS": "Points de Peg",
-        "BEST_PEGGING": "Meilleur Peg"
+        "TOTAL": "Points totaux",
+        "PEG_POINTS": "Points peg",
+        "BEST_PEG": "Meilleur peg",
+        "HAND_SCORE": "Points main",
+        "BEST_HAND": "Meilleure main",
+        "SORT_BY": "Trier par :"
     },
     "HISTORY_VIEW": {
         "TITLE": "Historique d'analyse",
         "LOADING": "Chargement de l'historique...",
+        "LOADING_MORE": "Chargement de la suite...",
         "NO_HISTORY": "Aucun historique disponible.",
         "ORIGINAL_HAND": "Main originale",
         "DISCONNECTED": "Déconnecté",

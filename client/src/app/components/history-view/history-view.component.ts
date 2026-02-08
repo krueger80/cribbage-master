@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
@@ -11,9 +11,17 @@ import { HandHistory } from '../../services/supabase.service';
   templateUrl: './history-view.component.html',
   styleUrl: './history-view.component.css'
 })
-export class HistoryViewComponent implements OnInit {
+export class HistoryViewComponent implements OnInit, AfterViewInit, OnDestroy {
   history: HandHistory[] = [];
   isLoading = true;
+  isLoadingMore = false;
+
+  offset = 0;
+  limit = 20;
+  hasMore = true;
+
+  @ViewChild('sentinel') sentinel!: ElementRef<HTMLElement>;
+  private observer: IntersectionObserver | undefined;
 
   @Output() restore = new EventEmitter<HandHistory>();
 
@@ -24,14 +32,73 @@ export class HistoryViewComponent implements OnInit {
   constructor(private api: ApiService) { }
 
   ngOnInit() {
-    this.api.getHistory().subscribe({
+    this.loadHistory(true);
+  }
+
+  ngAfterViewInit() {
+    this.setupObserver();
+  }
+
+  ngOnDestroy() {
+    this.observer?.disconnect();
+  }
+
+  setupObserver() {
+    const options = {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1
+    };
+
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !this.isLoading && !this.isLoadingMore && this.hasMore) {
+        this.loadHistory();
+      }
+    }, options);
+
+    if (this.sentinel) {
+      this.observer.observe(this.sentinel.nativeElement);
+    }
+  }
+
+  loadHistory(reset: boolean = false) {
+    if (reset) {
+      this.offset = 0;
+      this.hasMore = true;
+      this.isLoading = true;
+      this.history = [];
+    } else {
+      this.isLoadingMore = true;
+    }
+
+    this.api.getHistory(this.limit, this.offset).subscribe({
       next: (data) => {
-        this.history = data;
+        if (data.length < this.limit) {
+          this.hasMore = false;
+        }
+
+        if (reset) {
+          this.history = data;
+        } else {
+          this.history = [...this.history, ...data];
+        }
+
+        this.offset += this.limit;
         this.isLoading = false;
+        this.isLoadingMore = false;
+
+        // Re-attach observer if needed (sometimes needed if element was hidden)
+        setTimeout(() => {
+          if (this.sentinel && this.observer) {
+            this.observer.unobserve(this.sentinel.nativeElement);
+            this.observer.observe(this.sentinel.nativeElement);
+          }
+        }, 100);
       },
       error: (err) => {
         console.error(err);
         this.isLoading = false;
+        this.isLoadingMore = false;
       }
     });
   }

@@ -247,12 +247,13 @@ export class SupabaseService {
         if (error) throw error;
     }
 
-    getHistory(): Observable<HandHistory[]> {
+    getHistory(limit: number = 20, offset: number = 0): Observable<HandHistory[]> {
         return from(
             this.supabase
                 .from('hand_history')
                 .select('*')
                 .order('created_at', { ascending: false })
+                .range(offset, offset + limit - 1)
                 .then(({ data, error }) => {
                     if (error) throw error;
                     return data as HandHistory[];

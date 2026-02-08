@@ -45,8 +45,82 @@ export class ApiService {
 
   constructor(private http: HttpClient, private supabase: SupabaseService) { }
 
-  analyze(cards: string[], isDealer: boolean, numPlayers: number): Observable<{ results: AnalysisResult[] }> {
-    return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers });
+  analyze(cards: string[], isDealer: boolean, numPlayers: number, mode: 'quick' | 'precise' = 'precise'): Observable<{ results: AnalysisResult[] }> {
+    return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers, simulationMode: mode });
+  }
+
+  // Streaming version
+  analyzeStream(cards: string[], isDealer: boolean, numPlayers: number, mode: 'quick' | 'precise' = 'precise'): Observable<AnalysisResult> {
+    return new Observable(observer => {
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      fetch(`${this.apiUrl}/analyze?stream=true`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cards, isDealer, numPlayers, simulationMode: mode }),
+        signal
+      }).then(async response => {
+        if (!response.ok) {
+          const error = await response.json();
+          observer.error(error);
+          return;
+        }
+
+        const activeReader = response.body?.getReader();
+        if (!activeReader) {
+          observer.error('No response body');
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        try {
+          while (true) {
+            const { done, value } = await activeReader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            buffer += chunk;
+
+            const lines = buffer.split('\n');
+            // Use all lines except the last one (which might be incomplete)
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.trim()) {
+                try {
+                  const result = JSON.parse(line) as AnalysisResult;
+                  observer.next(result);
+                } catch (e) {
+                  console.error('Error parsing JSON line', e);
+                }
+              }
+            }
+          }
+
+          // Process any remaining buffer
+          if (buffer.trim()) {
+            try {
+              const result = JSON.parse(buffer) as AnalysisResult;
+              observer.next(result);
+            } catch (e) {
+              console.error('Error parsing final JSON line', e);
+            }
+          }
+
+          observer.complete();
+
+        } catch (err) {
+          observer.error(err);
+        }
+      }).catch(err => {
+        observer.error(err);
+      });
+
+      return () => controller.abort();
+    });
   }
 
   getPeggingCard(hand: string[], stack: string[], total: number): Observable<{ card: Card | null, score: number, debug?: string }> {
@@ -58,8 +132,8 @@ export class ApiService {
     return from(this.supabase.saveHistory(data));
   }
 
-  getHistory(): Observable<HandHistory[]> {
+  getHistory(limit: number = 20, offset: number = 0): Observable<HandHistory[]> {
     // Delegate to Supabase
-    return this.supabase.getHistory();
+    return this.supabase.getHistory(limit, offset);
   }
 }

@@ -400,22 +400,60 @@ export class GameService implements OnDestroy {
         const userId = this.supabase.currentUserId;
         if (userId) {
             const cloudState = await this.supabase.getSoloGame();
-            if (cloudState && cloudState.phase !== 'gameover' && cloudState.phase !== 'setup') {
+            if (this.isValidState(cloudState)) {
                 console.log('[Game] Restoring Cloud Save');
-                this._state.next(cloudState);
+                this._state.next(cloudState!);
+                this.resumeGameLogic();
                 return true;
             }
         }
 
         // 2. Check Local Save
         const localState = this.loadLocalState();
-        if (localState && localState.phase !== 'gameover' && localState.phase !== 'setup') {
+        if (this.isValidState(localState)) {
             console.log('[Game] Restoring Local Save');
-            this._state.next(localState);
+            this._state.next(localState!);
+            this.resumeGameLogic();
             return true;
         }
 
         return false;
+    }
+
+    private isValidState(state: GameState | null): boolean {
+        if (!state) return false;
+        if (state.phase === 'gameover' || state.phase === 'setup') return false;
+        if (!state.players || state.players.length === 0) return false;
+        return true;
+    }
+
+    private resumeGameLogic() {
+        const state = this.snapshot;
+        if (state.isMultiplayer) return;
+
+        console.log(`[Game] Resuming Game in phase: ${state.phase}`);
+
+        if (state.phase === 'cut_for_deal') {
+            // Ensure cutForDealCards exists
+            const cuts = state.cutForDealCards || {};
+
+            // If P2 (CPU) hasn't cut, trigger it
+            if (!cuts['p2']) {
+                console.log('[Game] Resuming: Triggering CPU Cut');
+                if (this._cpuCutTimeout) clearTimeout(this._cpuCutTimeout);
+                this._cpuCutTimeout = setTimeout(() => this.performCutForDeal('p2'), 1000);
+            }
+
+            // If P1 (Human) hasn't cut, we just wait for them.
+
+            // If BOTH have cut, maybe we failed to resolve?
+            if (cuts['p1'] && cuts['p2']) {
+                console.log('[Game] Resuming: Both cut, resolving...');
+                this.resolveCutForDeal();
+            }
+        } else {
+            this.checkAutoPlay();
+        }
     }
 
     clearSaveState() {

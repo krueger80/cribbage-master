@@ -118,6 +118,12 @@ import { LobbyComponent } from './components/lobby/lobby.component';
 
                       <!-- DESKTOP ANALYZE BUTTON (Hidden on mobile) -->
                       <div class="hidden lg:block w-full">
+                           <div class="flex items-center justify-center gap-2 mb-2">
+                                <input type="checkbox" id="quickModeDesktop" [(ngModel)]="isQuickMode" class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                                <label for="quickModeDesktop" class="text-xs font-bold text-slate-500 dark:text-slate-400 cursor-pointer select-none uppercase tracking-wider">
+                                    {{ 'APP.QUICK_MODE' | translate }} ⚡
+                                </label>
+                           </div>
                            <button class="btn btn-primary w-full py-3 px-4 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center justify-center" 
                                    [disabled]="isLoading"
                                    (click)="analyze()">
@@ -138,8 +144,14 @@ import { LobbyComponent } from './components/lobby/lobby.component';
                   </div>
 
                   <!-- 3. MOBILE ANALYZE BUTTON (Hidden on desktop) -->
-                  <div class="lg:hidden w-full flex justify-center pt-6 border-t border-gray-200 dark:border-slate-700/50">
-                       <button class="btn btn-primary py-3 px-8 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center" 
+                  <div class="lg:hidden w-full flex flex-col items-center pt-6 border-t border-gray-200 dark:border-slate-700/50">
+                       <div class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="quickModeMobile" [(ngModel)]="isQuickMode" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                            <label for="quickModeMobile" class="text-sm font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                                {{ 'APP.QUICK_MODE' | translate }} ⚡
+                            </label>
+                       </div>
+                       <button class="btn btn-primary py-3 px-8 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center w-full" 
                                [disabled]="isLoading"
                                (click)="analyze()">
                           <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
@@ -159,6 +171,13 @@ import { LobbyComponent } from './components/lobby/lobby.component';
                    <div id="results-anchor" *ngIf="analysisResults.length > 0" class="animate-fade-in">
                       <app-analysis-view [results]="analysisResults" [isDealer]="isDealer" />
                    </div>
+
+                   <!-- Loading State -->
+                   <div *ngIf="isLoading && analysisResults.length === 0" class="text-center py-12 animate-pulse">
+                        <div class="inline-block animate-spin text-4xl mb-4 text-emerald-500">↻</div>
+                        <p class="text-sm uppercase tracking-widest text-slate-600 dark:text-slate-400 font-semibold">{{ 'APP.PROCESSING' | translate }}</p>
+                   </div>
+
                    <!-- Clean Empty State via Opacity -->
                    <div *ngIf="analysisResults.length === 0 && !isLoading" class="text-center py-12 opacity-60 pointer-events-none transition-opacity duration-500">
                       <div class="text-6xl mb-4 grayscale opacity-50">🃏</div>
@@ -210,6 +229,7 @@ export class AppComponent implements OnInit, OnDestroy {
   currentLang = 'en';
   isMenuOpen = false;
   theme: 'light' | 'dark' | 'auto' = 'auto';
+  isQuickMode: boolean = false; // Add Quick Mode toggle
   private darkQuery: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 
   constructor(
@@ -296,35 +316,56 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.api.analyze(this.cards, this.isDealer, this.numPlayers).subscribe({
+    this.analysisResults = []; // Clear previous results
+    const mode = this.isQuickMode ? 'quick' : 'precise';
+
+    // Use Streaming API
+    this.api.analyzeStream(this.cards, this.isDealer, this.numPlayers, mode).subscribe({
       next: (res) => {
-        this.analysisResults = res.results;
-        this.isLoading = false;
+        // Progressive Update: Add new result to array
+        // We create a new array reference to trigger change detection in child component
+        this.analysisResults = [...this.analysisResults, res];
 
-        setTimeout(() => {
-          const el = document.getElementById('results-anchor');
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            // Check if top is roughly visible
-            const isTopVisible = rect.top >= 0 && rect.top <= window.innerHeight;
-
-            if (!isTopVisible) {
+        // Scroll to results on first item
+        if (this.analysisResults.length === 1) {
+          setTimeout(() => {
+            const el = document.getElementById('results-anchor');
+            if (el) {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-          }
-        }, 250);
-
-        if (saveToHistory && this.analysisResults.length > 0) {
-          const best = this.analysisResults[0];
-          this.saveToHistory(best);
+          }, 100);
         }
       },
       error: (err) => {
         const msg = this.translate.instant('APP.ERROR_CALCULATING') || 'Error: ';
-        this.toast.error(msg + err.message);
+        console.error(err);
+        this.toast.error(msg + (err.message || err));
         this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
+
+        // Save best result to history on completion
+        if (saveToHistory && this.analysisResults.length > 0) {
+          // Sort to find best (AnalysisView does its own sorting, but we need best for history)
+          // Logic duplicated from AnalysisView for now, or we can just pick the one with max Net Value
+          const best = this.analysisResults.reduce((prev, current) => {
+            const netPrev = this.getNetValue(prev);
+            const netCurr = this.getNetValue(current);
+            return netCurr > netPrev ? current : prev;
+          });
+          this.saveToHistory(best);
+        }
       }
     });
+  }
+
+  private getNetValue(res: AnalysisResult): number {
+    if (this.isDealer) {
+      return res.handStats.avg + res.cribStats.avg + res.peggingScore;
+    } else {
+      return res.handStats.avg - res.cribStats.avg + res.peggingScore;
+    }
   }
 
   private saveToHistory(result: AnalysisResult) {

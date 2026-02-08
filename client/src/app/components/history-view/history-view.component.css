@@ -1,22 +1,29 @@
-.mini-card {
+/* Replicating AnalysisView card styles */
+.playing-card-micro {
     width: 32px;
     height: 48px;
-    background-color: var(--card-bg, #1e293b);
-    border-radius: 4px;
+    background-color: white;
+    border-radius: 3px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid #475569;
-    user-select: none;
-    font-size: 0.75rem;
-    line-height: 1;
+    border: 1px solid #999;
+    position: relative;
+    z-index: 1;
 }
 
-.mini-card.red {
-    color: #e11d48;
+.playing-card-micro:hover {
+    z-index: 10;
+    transform: translateY(-5px);
+    transition: transform 0.2s;
 }
 
-.mini-card.black {
-    color: #0f172a;
+.playing-card-micro.red { color: #e11d48; }
+.playing-card-micro.black { color: #0f172a; }
+
+/* Dark mode tweaks if global styles don't cover */
+:host-context(.dark) .playing-card-micro {
+    background-color: #cbd5e1; /* slate-300 */
+    border-color: #475569;
 }
