@@ -72,14 +72,12 @@ export function analyzeHand(
         let cribStats: StatResult = { min: 0, max: 0, avg: 0, breakdown: { fifteens: 0, pairs: 0, runs: 0, flush: 0, nobs: 0, total: 0 } };
 
         if (numPlayers === 2) {
-            // Simulation: Sample 100 random opponent discards (2 cards)
-            // This is a trade-off for performance.
-            cribStats = simulateCrib2Player(discarded, possibleCutCards, 50);
+            // Simulation: Sample 2000 random opponent discards
+            // Higher sample count needed to detect rare events like Flushes (approx 1%)
+            cribStats = simulateCrib2Player(discarded, possibleCutCards, 2000);
         } else {
-            // For 3/4 players, simplified metric (just value of discarded card?)
-            // Or assume random completions.
-            // Let's do a very small sample sim.
-            cribStats = simulateCribMultiPlayer(discarded, possibleCutCards, numPlayers, 20);
+            // For 3/4 players
+            cribStats = simulateCribMultiPlayer(discarded, possibleCutCards, numPlayers, 500);
         }
 
         // 3. Pegging Heuristic
