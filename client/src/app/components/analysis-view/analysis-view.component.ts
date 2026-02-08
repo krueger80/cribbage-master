@@ -48,8 +48,9 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                 </div>
 
                 <!-- Range (Moved to Top Right, underneath badge space or just top right if no badge) -->
-                <div class="absolute top-1.5 right-2 text-[10px] text-gray-400 font-bold" [class.mt-4]="i===0">
-                    {{res.handStats.min + (isDealer ? res.cribStats.min : 0) }}-{{res.handStats.max + (isDealer ? res.cribStats.max : 0)}}
+                <!-- Range (Moved to Top Right) - REMOVED -->
+                <div class="absolute top-1.5 right-2 text-[10px] text-gray-400 font-bold hidden" [class.mt-4]="i===0">
+                    <!-- Placeholder to avoid breaking layout if something relies on it, or just remove content -->
                 </div>
 
                 <!-- Cards Row (Prominent at Top) -->
@@ -84,7 +85,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                     
                     <!-- Collapsed View (Summary Row) -->
                     <!-- Cols: Icon | Peg | Hand | Crib | Total -->
-                    <div class="grid grid-cols-5 p-1.5 text-center items-center">
+                    <div class="grid grid-cols-5 p-1.5 text-center items-stretch">
                         <!-- Icon -->
                         <div class="flex flex-col justify-center items-center text-gray-400 text-[10px]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
@@ -104,12 +105,14 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                         <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                             <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.HAND' | translate }}</span>
                              <span class="font-bold text-sm leading-none mt-0.5" [ngClass]="handColorClass">{{ res.handStats.avg | number:'1.1-1' }}</span>
+                             <span class="text-[9px] text-gray-400 font-medium leading-none block -mt-0.5">{{res.handStats.min}}-{{res.handStats.max}}</span>
                         </div>
 
                         <!-- Crib -->
                         <div class="flex flex-col border-l border-gray-100 dark:border-white/5">
                             <span class="text-[9px] uppercase text-gray-500 font-bold tracking-wider">{{ 'ANALYSIS_VIEW.CRIB' | translate }}</span>
                             <span class="font-bold text-sm leading-none mt-0.5" [ngClass]="cribColorClass">{{ res.cribStats.avg | number:'1.1-1' }}</span>
+                            <span class="text-[9px] text-gray-400 font-medium leading-none block -mt-0.5">{{res.cribStats.min}}-{{res.cribStats.max}}</span>
                         </div>
 
                         <!-- Total -->
@@ -191,6 +194,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
     /* Note: Angular's *ngFor reordering without animations module is instant. */
     /* To make it "nice", we rely on View Transitions (if supported) or CSS transforms. */
     /* Since we use view-transition-name, modern browsers will animate automatically. */
+    `]
 })
 export class AnalysisViewComponent {
     @Input() set results(value: AnalysisResult[]) {
@@ -239,7 +243,7 @@ export class AnalysisViewComponent {
         // Unique ID for View Transitions: Card ranks/suits + dealer status (redundant but safe)
         // Sanitizing just in case
         const keptId = res.kept.map(c => c.rank + c.suit).join('');
-        return `card - ${ keptId }`;
+        return "card-" + keptId;
     }
 
     trackByResult = (index: number, res: AnalysisResult): string => {
@@ -289,5 +293,19 @@ export class AnalysisViewComponent {
         return this.isDealer
             ? 'text-emerald-900 dark:text-emerald-100'
             : 'text-rose-900 dark:text-rose-100';
+    }
+
+    getTotalMin(res: AnalysisResult): number {
+        if (this.isDealer) {
+            return res.handStats.min + res.cribStats.min + res.peggingScore;
+        }
+        return res.handStats.min - res.cribStats.max + res.peggingScore;
+    }
+
+    getTotalMax(res: AnalysisResult): number {
+        if (this.isDealer) {
+            return res.handStats.max + res.cribStats.max + res.peggingScore;
+        }
+        return res.handStats.max - res.cribStats.min + res.peggingScore;
     }
 }

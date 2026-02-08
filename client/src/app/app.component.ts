@@ -171,6 +171,13 @@ import { LobbyComponent } from './components/lobby/lobby.component';
                    <div id="results-anchor" *ngIf="analysisResults.length > 0" class="animate-fade-in">
                       <app-analysis-view [results]="analysisResults" [isDealer]="isDealer" />
                    </div>
+
+                   <!-- Loading State -->
+                   <div *ngIf="isLoading && analysisResults.length === 0" class="text-center py-12 animate-pulse">
+                        <div class="inline-block animate-spin text-4xl mb-4 text-emerald-500">↻</div>
+                        <p class="text-sm uppercase tracking-widest text-slate-600 dark:text-slate-400 font-semibold">{{ 'APP.PROCESSING' | translate }}</p>
+                   </div>
+
                    <!-- Clean Empty State via Opacity -->
                    <div *ngIf="analysisResults.length === 0 && !isLoading" class="text-center py-12 opacity-60 pointer-events-none transition-opacity duration-500">
                       <div class="text-6xl mb-4 grayscale opacity-50">🃏</div>

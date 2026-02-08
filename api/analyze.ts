@@ -1,8 +1,8 @@
-import { analyzeHand } from './_utils/analysis';
+import { analyzeHand, analyzeHandGenerator } from './_utils/analysis';
 import { parseCard, Card } from './_utils/logic';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -47,10 +47,12 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
             // Let's assume the user will update the import separately or we do it here if possible.
             // Actually, analyzeHand uses the generator internally now, but we want to use the generator directly.
 
-            const generator = require('./_utils/analysis').analyzeHandGenerator(parsedHand, isDealer, numPlayers, mode);
+            const generator = analyzeHandGenerator(parsedHand, isDealer, numPlayers, mode);
 
             for (const result of generator) {
                 res.write(JSON.stringify(result) + '\n');
+                // Yield to event loop to ensure chunk is flushed/sent
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
             res.end();
 
