@@ -1,5 +1,6 @@
 <div class="flex flex-col gap-4 w-full animate-fade-in">
-    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 w-fit mb-4">
+    <h2
+        class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 w-fit mb-4">
         {{ 'HISTORY_VIEW.TITLE' | translate }}
     </h2>
 
@@ -12,22 +13,25 @@
     </div>
 
     <!-- Grid Layout matching AnalysisView -->
-    <div *ngIf="!isLoading && history.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <div *ngFor="let item of history" 
-             class="card relative p-3 border border-gray-200 dark:border-slate-700 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md">
+    <div *ngIf="history.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div *ngFor="let item of history"
+            class="card relative p-3 border border-gray-200 dark:border-slate-700 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md">
 
             <!-- Header: Game Info & Action -->
             <div class="flex justify-between items-start mb-3 pb-2 border-b border-gray-100 dark:border-white/5">
                 <!-- Game Info (Top Left) -->
                 <div class="flex flex-col gap-0.5">
                     <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                       <span>{{ item.created_at | date:'shortTime' }}</span>
-                       <span class="opacity-50">•</span>
-                       <span>{{ item.created_at | date:'d MMM' }}</span>
+                        <span>{{ item.created_at | date:'shortTime' }}</span>
+                        <span class="opacity-50">•</span>
+                        <span>{{ item.created_at | date:'d MMM' }}</span>
                     </div>
                     <div class="flex items-center gap-1.5 text-[10px] font-medium text-gray-600 dark:text-gray-300">
-                        <span class="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-xs">{{ item.num_players }}P</span>
-                        <span class="flex items-center gap-1" [class.text-emerald-600]="item.is_dealer" [class.dark:text-emerald-400]="item.is_dealer" [class.text-rose-600]="!item.is_dealer" [class.dark:text-rose-400]="!item.is_dealer">
+                        <span class="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded text-xs">{{ item.num_players
+                            }}P</span>
+                        <span class="flex items-center gap-1" [class.text-emerald-600]="item.is_dealer"
+                            [class.dark:text-emerald-400]="item.is_dealer" [class.text-rose-600]="!item.is_dealer"
+                            [class.dark:text-rose-400]="!item.is_dealer">
                             <span *ngIf="item.is_dealer">👑</span>
                             <span *ngIf="!item.is_dealer">👤</span>
                             {{ (item.is_dealer ? 'APP.DEALER' : 'APP.NON_DEALER') | translate }}
@@ -36,8 +40,8 @@
                 </div>
 
                 <!-- Re-analyze Button (Top Right) -->
-                <button (click)="onRestore(item)" 
-                        class="text-[10px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-full uppercase font-bold tracking-wider transition-colors flex items-center gap-1 border border-emerald-500/20">
+                <button (click)="onRestore(item)"
+                    class="text-[10px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-full uppercase font-bold tracking-wider transition-colors flex items-center gap-1 border border-emerald-500/20">
                     <span class="text-xs">↻</span> {{ 'HISTORY_VIEW.REANALYZE' | translate }}
                 </button>
             </div>
@@ -46,12 +50,11 @@
             <div class="flex justify-center items-center gap-3 mt-2 mb-4">
                 <!-- Kept Section -->
                 <div class="flex gap-1 flex-nowrap">
-                    <div *ngFor="let code of getKeptCards(item.original_hand, item.discarded)" 
-                         class="playing-card-micro shadow-md shrink-0" 
-                         [class.red]="getCardDetails(code).color === 'red'" 
-                         [class.black]="getCardDetails(code).color === 'black'">
-                         <span class="text-xs font-bold">{{getCardDetails(code).rank}}</span>
-                         <span class="text-[10px]">{{getCardDetails(code).symbol}}</span>
+                    <div *ngFor="let code of getKeptCards(item.original_hand, item.discarded)"
+                        class="playing-card-micro shadow-md shrink-0" [class.red]="getCardDetails(code).color === 'red'"
+                        [class.black]="getCardDetails(code).color === 'black'">
+                        <span class="text-xs font-bold">{{getCardDetails(code).rank}}</span>
+                        <span class="text-[10px]">{{getCardDetails(code).symbol}}</span>
                     </div>
                 </div>
 
@@ -60,21 +63,32 @@
 
                 <!-- Discard Section -->
                 <div class="flex gap-1 flex-nowrap">
-                    <div *ngFor="let code of item.discarded" 
-                         class="playing-card-micro opacity-75 shrink-0 grayscale-[30%]" 
-                         [class.red]="getCardDetails(code).color === 'red'" 
-                         [class.black]="getCardDetails(code).color === 'black'">
-                         <span class="text-xs font-bold">{{getCardDetails(code).rank}}</span>
-                         <span class="text-[10px]">{{getCardDetails(code).symbol}}</span>
+                    <div *ngFor="let code of item.discarded"
+                        class="playing-card-micro opacity-75 shrink-0 grayscale-[30%]"
+                        [class.red]="getCardDetails(code).color === 'red'"
+                        [class.black]="getCardDetails(code).color === 'black'">
+                        <span class="text-xs font-bold">{{getCardDetails(code).rank}}</span>
+                        <span class="text-[10px]">{{getCardDetails(code).symbol}}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Total Score Box -->
-            <div class="rounded border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 p-3 flex justify-between items-center group hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors">
-                <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ 'ANALYSIS_VIEW.EXPECTED' | translate }}</span>
-                <span class="font-black text-xl leading-none text-gray-900 dark:text-white group-hover:scale-110 transition-transform origin-right">{{ item.expected_value | number:'1.1-1' }}</span>
+            <div
+                class="rounded border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 p-3 flex justify-between items-center group hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors">
+                <span
+                    class="text-[10px] uppercase text-gray-500 font-bold tracking-wider group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{
+                    'ANALYSIS_VIEW.EXPECTED' | translate }}</span>
+                <span
+                    class="font-black text-xl leading-none text-gray-900 dark:text-white group-hover:scale-110 transition-transform origin-right">{{
+                    item.expected_value | number:'1.1-1' }}</span>
             </div>
         </div>
+    </div>
+
+    <!-- Infinite Scroll Sentinel & Loader -->
+    <div #sentinel class="h-4 w-full"></div>
+    <div *ngIf="isLoadingMore" class="text-center py-4 text-slate-400 animate-pulse text-sm">
+        {{ 'HISTORY_VIEW.LOADING_MORE' | translate }}
     </div>
 </div>

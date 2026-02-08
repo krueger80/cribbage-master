@@ -61,6 +61,7 @@
     "HISTORY_VIEW": {
         "TITLE": "Historique d'analyse",
         "LOADING": "Chargement de l'historique...",
+        "LOADING_MORE": "Chargement de la suite...",
         "NO_HISTORY": "Aucun historique disponible.",
         "ORIGINAL_HAND": "Main originale",
         "DISCONNECTED": "Déconnecté",

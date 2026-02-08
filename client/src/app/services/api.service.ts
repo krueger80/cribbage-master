@@ -132,8 +132,8 @@ export class ApiService {
     return from(this.supabase.saveHistory(data));
   }
 
-  getHistory(): Observable<HandHistory[]> {
+  getHistory(limit: number = 20, offset: number = 0): Observable<HandHistory[]> {
     // Delegate to Supabase
-    return this.supabase.getHistory();
+    return this.supabase.getHistory(limit, offset);
   }
 }
