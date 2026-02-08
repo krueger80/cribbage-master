@@ -39,7 +39,7 @@
         "CLEAR_ALL": "Clear All"
     },
     "ANALYSIS_VIEW": {
-        "BEST": "BEST",
+        "BEST_TOTAL": "Best Total",
         "EXPECTED": "Expected",
         "RANGE": "Range",
         "HAND": "Hand",
@@ -52,8 +52,11 @@
         "FLUSH": "Flush",
         "NOBS": "Nobs",
         "TOTAL": "Total Score",
-        "PEG_POINTS": "Pegging Score",
-        "BEST_PEGGING": "Best Pegging"
+        "PEG_POINTS": "Peg Score",
+        "BEST_PEG": "Best Peg",
+        "HAND_SCORE": "Hand Score",
+        "BEST_HAND": "Best Hand",
+        "SORT_BY": "Sort by:"
     },
     "HISTORY_VIEW": {
         "TITLE": "Analysis History",

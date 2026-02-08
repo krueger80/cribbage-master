@@ -11,17 +11,23 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
     <div class="flex flex-col gap-4 animate-fade-in">
         
         <!-- Sorting Controls -->
-        <div class="flex justify-end items-center">
+        <div class="flex justify-end items-center gap-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ 'ANALYSIS_VIEW.SORT_BY' | translate }}</span>
             <div class="bg-gray-100 dark:bg-white/10 p-1 rounded-lg flex gap-1">
                 <button (click)="setSort('total')" 
                         class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
                         [ngClass]="sortMethod === 'total' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
-                    {{ 'ANALYSIS_VIEW.TOTAL' | translate }} (Total)
+                    {{ 'ANALYSIS_VIEW.TOTAL' | translate }}
+                </button>
+                <button (click)="setSort('hand')"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
+                        [ngClass]="sortMethod === 'hand' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
+                    {{ 'ANALYSIS_VIEW.HAND_SCORE' | translate }}
                 </button>
                 <button (click)="setSort('peg')" 
                         class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200"
                         [ngClass]="sortMethod === 'peg' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
-                    {{ 'ANALYSIS_VIEW.PEG_POINTS' | translate }} (Pegging)
+                    {{ 'ANALYSIS_VIEW.PEG_POINTS' | translate }}
                 </button>
             </div>
         </div>
@@ -38,13 +44,23 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                  [style.view-transition-name]="getTransitionName(res)"
                  style="min-width: 250px">
                  
-                <!-- Badge for Best Choice -->
-                <div *ngIf="i===0 && sortMethod==='total'" class="absolute -top-px -right-px bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl rounded-tr-md z-10 shadow-sm">
-                    {{ 'ANALYSIS_VIEW.BEST' | translate }}
-                </div>
-                <!-- Badge for Best Pegging -->
-                <div *ngIf="i===0 && sortMethod==='peg'" class="absolute -top-px -right-px bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl rounded-tr-md z-10 shadow-sm">
-                    {{ 'ANALYSIS_VIEW.BEST_PEGGING' | translate }}
+                <!-- Badges Container -->
+                <div class="absolute -top-px -right-px flex flex-row items-start z-10 gap-px">
+    
+                    <!-- Badge for Best Choice (Total) -->
+                    <div *ngIf="isBestTotal(res)" class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_TOTAL' | translate }}
+                    </div>
+
+                    <!-- Badge for Best Hand -->
+                    <div *ngIf="isBestHand(res)" class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_HAND' | translate }}
+                    </div>
+
+                    <!-- Badge for Best Pegging -->
+                    <div *ngIf="isBestPeg(res)" class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-b shadow-sm">
+                        {{ 'ANALYSIS_VIEW.BEST_PEG' | translate }}
+                    </div>
                 </div>
 
                 <!-- Range (Moved to Top Right, underneath badge space or just top right if no badge) -->
@@ -213,7 +229,7 @@ export class AnalysisViewComponent {
     constructor(private cdr: ChangeDetectorRef) { }
 
     expandedIndices: Set<number> = new Set();
-    sortMethod: 'total' | 'peg' = 'total';
+    sortMethod: 'total' | 'peg' | 'hand' = 'total';
 
     get sortedResults(): AnalysisResult[] {
         if (!this.results) return [];
@@ -221,13 +237,15 @@ export class AnalysisViewComponent {
         return [...this.results].sort((a, b) => {
             if (this.sortMethod === 'total') {
                 return b.totalExpectedValue - a.totalExpectedValue;
-            } else {
+            } else if (this.sortMethod === 'peg') {
                 return b.peggingScore - a.peggingScore;
+            } else {
+                return b.handStats.avg - a.handStats.avg;
             }
         });
     }
 
-    setSort(method: 'total' | 'peg') {
+    setSort(method: 'total' | 'peg' | 'hand') {
         const doc = document as any;
         if (doc.startViewTransition) {
             doc.startViewTransition(() => {
@@ -307,5 +325,23 @@ export class AnalysisViewComponent {
             return res.handStats.max + res.cribStats.max + res.peggingScore;
         }
         return res.handStats.max - res.cribStats.min + res.peggingScore;
+    }
+
+    isBestTotal(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxTotal = Math.max(...this.results.map(r => r.totalExpectedValue));
+        return Math.abs(res.totalExpectedValue - maxTotal) < 0.001;
+    }
+
+    isBestPeg(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxPeg = Math.max(...this.results.map(r => r.peggingScore));
+        return Math.abs(res.peggingScore - maxPeg) < 0.001;
+    }
+
+    isBestHand(res: AnalysisResult): boolean {
+        if (!this.results || this.results.length === 0) return false;
+        const maxHand = Math.max(...this.results.map(r => r.handStats.avg));
+        return Math.abs(res.handStats.avg - maxHand) < 0.001;
     }
 }
