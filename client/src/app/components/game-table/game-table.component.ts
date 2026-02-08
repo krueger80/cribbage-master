@@ -271,13 +271,22 @@ export class GameTableComponent implements OnInit {
         });
 
         // Save to History
+        const discardedCodes = best.discarded.map(c => c.rank + c.suit);
         this.apiService.saveHistory({
-          user_id: this.gameService.snapshot.localPlayerId || 'anon',
-          cards: cardCodes,
+          original_hand: cardCodes,
+          discarded: discardedCodes,
+          expected_value: best.totalExpectedValue,
           is_dealer: player.isDealer,
-          num_players: numPlayers,
-          results: response.results
+          num_players: numPlayers
         }).subscribe(); // Fire and forget
+
+        // Share result with Analyzer View
+        this.gameService.setLastAnalysis({
+          cards: cardCodes,
+          isDealer: player.isDealer,
+          numPlayers: numPlayers,
+          results: response.results
+        });
 
         this.isAnalyzing = false;
       },

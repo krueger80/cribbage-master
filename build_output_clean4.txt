@@ -166,3 +166,119 @@ styles.css          | styles |  56.88 kB |
 Application bundle generation complete. [0.963 seconds]
 
 Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.14 kB | 
+
+Application bundle generation complete. [1.229 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.31 kB | 
+
+Application bundle generation complete. [0.724 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.60 kB | 
+
+Application bundle generation complete. [0.267 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.300 seconds]
+
+X [ERROR] TS2304: Cannot find name 'Subject'. [plugin angular-compiler]
+
+    src/app/services/api.service.ts:130:30:
+      130 Γöé   private _historySaved = new Subject<void>();
+          Γò╡                               ~~~~~~~
+
+
+X [ERROR] TS2304: Cannot find name 'tap'. [plugin angular-compiler]
+
+    src/app/services/api.service.ts:139:6:
+      139 Γöé       tap(() => this._historySaved.next())
+          Γò╡       ~~~
+
+
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 269.81 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+styles.css          | styles        |  56.88 kB | 
+
+                    | Initial total | 416.88 kB
+
+Application bundle generation complete. [0.363 seconds]
+
+Page reload sent to client(s).
+18 h 33 min 45 s [vite] Γ£¿ new dependencies optimized: rxjs/operators
+18 h 33 min 45 s [vite] Γ£¿ optimized dependencies changed. reloading
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.96 kB | 
+
+Application bundle generation complete. [0.487 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 270.01 kB | 
+
+Application bundle generation complete. [0.751 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 270.07 kB | 
+
+Application bundle generation complete. [1.809 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.99 kB | 
+
+Application bundle generation complete. [0.751 seconds]
+
+Page reload sent to client(s).

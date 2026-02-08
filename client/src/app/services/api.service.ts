@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
+import { Observable, from, Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { SupabaseService, HandHistory } from './supabase.service';
 
 export interface Card {
@@ -127,9 +128,17 @@ export class ApiService {
     return this.http.post<{ card: Card | null, score: number, debug?: string }>(`${this.apiUrl}/pegging`, { hand, stack, total });
   }
 
+  private _historySaved = new Subject<void>();
+
+  get historySaved$() {
+    return this._historySaved.asObservable();
+  }
+
   saveHistory(data: any): Observable<any> {
     // Delegate to Supabase
-    return from(this.supabase.saveHistory(data));
+    return from(this.supabase.saveHistory(data)).pipe(
+      tap(() => this._historySaved.next())
+    );
   }
 
   getHistory(limit: number = 20, offset: number = 0): Observable<HandHistory[]> {

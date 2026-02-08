@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GameState, INITIAL_GAME_STATE, Player, GamePhase } from './game.state';
 import { Card, getAllCards, createCard, calculateScore, isRun } from '../logic/cards';
 import { SupabaseService } from './supabase.service';
-import { ApiService } from './api.service';
+import { ApiService, AnalysisResult } from './api.service';
 import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
@@ -12,6 +12,9 @@ import { TranslateService } from '@ngx-translate/core';
 export class GameService implements OnDestroy {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
+    // Holds the last analysis result for easy access in Analyzer View
+    private _lastAnalysis = new BehaviorSubject<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] } | null>(null);
+
     private _lastProcessedScoreId = 0;
     private _cpuCutTimeout: any;
     private _beforeUnloadHandler: () => void;
@@ -36,6 +39,14 @@ export class GameService implements OnDestroy {
 
     get state$(): Observable<GameState> {
         return this._state.asObservable();
+    }
+
+    get lastAnalysis$(): Observable<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] } | null> {
+        return this._lastAnalysis.asObservable();
+    }
+
+    setLastAnalysis(data: { cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] }) {
+        this._lastAnalysis.next(data);
     }
 
     get snapshot(): GameState {

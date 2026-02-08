@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
 import { HandHistory } from '../../services/supabase.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-history-view',
@@ -22,6 +23,7 @@ export class HistoryViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('sentinel') sentinel!: ElementRef<HTMLElement>;
   private observer: IntersectionObserver | undefined;
+  private historySub: Subscription | undefined;
 
   @Output() restore = new EventEmitter<HandHistory>();
 
@@ -33,6 +35,9 @@ export class HistoryViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.loadHistory(true);
+    this.historySub = this.api.historySaved$.subscribe(() => {
+      this.loadHistory(true);
+    });
   }
 
   ngAfterViewInit() {
@@ -41,6 +46,7 @@ export class HistoryViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.observer?.disconnect();
+    this.historySub?.unsubscribe();
   }
 
   setupObserver() {
