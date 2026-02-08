@@ -23,7 +23,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { cards, isDealer, numPlayers } = req.body;
+        const { cards, isDealer, numPlayers, simulationMode } = req.body;
 
         // Validate
         if (!cards || !Array.isArray(cards) || (cards.length !== 6 && cards.length !== 5)) {
@@ -32,7 +32,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         const parsedHand: Card[] = cards.map(c => parseCard(c));
-        const results = analyzeHand(parsedHand, isDealer, numPlayers);
+        const mode = simulationMode === 'quick' ? 'quick' : 'precise';
+        const results = analyzeHand(parsedHand, isDealer, numPlayers, mode);
 
         res.status(200).json({ results });
     } catch (e: any) {

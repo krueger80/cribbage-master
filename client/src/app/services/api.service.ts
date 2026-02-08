@@ -45,8 +45,8 @@ export class ApiService {
 
   constructor(private http: HttpClient, private supabase: SupabaseService) { }
 
-  analyze(cards: string[], isDealer: boolean, numPlayers: number): Observable<{ results: AnalysisResult[] }> {
-    return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers });
+  analyze(cards: string[], isDealer: boolean, numPlayers: number, mode: 'quick' | 'precise' = 'precise'): Observable<{ results: AnalysisResult[] }> {
+    return this.http.post<{ results: AnalysisResult[] }>(`${this.apiUrl}/analyze`, { cards, isDealer, numPlayers, simulationMode: mode });
   }
 
   getPeggingCard(hand: string[], stack: string[], total: number): Observable<{ card: Card | null, score: number, debug?: string }> {

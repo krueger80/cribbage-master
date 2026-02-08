@@ -118,6 +118,12 @@ import { LobbyComponent } from './components/lobby/lobby.component';
 
                       <!-- DESKTOP ANALYZE BUTTON (Hidden on mobile) -->
                       <div class="hidden lg:block w-full">
+                           <div class="flex items-center justify-center gap-2 mb-2">
+                                <input type="checkbox" id="quickModeDesktop" [(ngModel)]="isQuickMode" class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                                <label for="quickModeDesktop" class="text-xs font-bold text-slate-500 dark:text-slate-400 cursor-pointer select-none uppercase tracking-wider">
+                                    {{ 'APP.QUICK_MODE' | translate }} ⚡
+                                </label>
+                           </div>
                            <button class="btn btn-primary w-full py-3 px-4 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center justify-center" 
                                    [disabled]="isLoading"
                                    (click)="analyze()">
@@ -138,8 +144,14 @@ import { LobbyComponent } from './components/lobby/lobby.component';
                   </div>
 
                   <!-- 3. MOBILE ANALYZE BUTTON (Hidden on desktop) -->
-                  <div class="lg:hidden w-full flex justify-center pt-6 border-t border-gray-200 dark:border-slate-700/50">
-                       <button class="btn btn-primary py-3 px-8 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center" 
+                  <div class="lg:hidden w-full flex flex-col items-center pt-6 border-t border-gray-200 dark:border-slate-700/50">
+                       <div class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="quickModeMobile" [(ngModel)]="isQuickMode" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                            <label for="quickModeMobile" class="text-sm font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                                {{ 'APP.QUICK_MODE' | translate }} ⚡
+                            </label>
+                       </div>
+                       <button class="btn btn-primary py-3 px-8 text-base shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all transform active:scale-95 text-white select-none whitespace-normal h-auto text-center w-full" 
                                [disabled]="isLoading"
                                (click)="analyze()">
                           <span *ngIf="!isLoading">{{ 'APP.ANALYZE_HAND' | translate }} 🚀</span>
@@ -210,6 +222,7 @@ export class AppComponent implements OnInit, OnDestroy {
   currentLang = 'en';
   isMenuOpen = false;
   theme: 'light' | 'dark' | 'auto' = 'auto';
+  isQuickMode: boolean = false; // Add Quick Mode toggle
   private darkQuery: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 
   constructor(
@@ -296,7 +309,8 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.api.analyze(this.cards, this.isDealer, this.numPlayers).subscribe({
+    const mode = this.isQuickMode ? 'quick' : 'precise';
+    this.api.analyze(this.cards, this.isDealer, this.numPlayers, mode).subscribe({
       next: (res) => {
         this.analysisResults = res.results;
         this.isLoading = false;

@@ -31,7 +31,8 @@
         "SIGN_IN_GOOGLE": "Sign in with Google",
         "OR": "OR",
         "GAME": "Game",
-        "LOBBY": "Multiplayer Lobby"
+        "LOBBY": "Multiplayer Lobby",
+        "QUICK_MODE": "Quick Mode"
     },
     "CARD_PICKER": {
         "SELECT_HAND": "Select Your Hand",
