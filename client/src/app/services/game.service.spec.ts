@@ -64,10 +64,16 @@ describe('GameService', () => {
             ]
         });
         service = TestBed.inject(GameService);
+        // Clear any lingering save timer
+        if ((service as any)._localSaveDebounceTimer) clearTimeout((service as any)._localSaveDebounceTimer);
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    afterEach(() => {
+        service.ngOnDestroy();
     });
 
     describe('Game Initialization', () => {
@@ -308,12 +314,12 @@ describe('GameService', () => {
             // Reset scores ensuring clean slate is respected by logic or failing if not
             state.players[0].score = 0;
             service.playCard(state.players[0].id, 0);
-            tick(1000);
+            flush();
 
             const updatedState = service.snapshot;
             // Expect 3 points (Run of 3) on top of 0.
             expect(updatedState.players[0].score).toBe(3);
-            tick(3000); // Flush timeout for score highlight
+            flush(); // Flush timeout for score highlight
 
             // Continue: Play 6. Stack: 3, 5, 4, 6. Run of 4.
             // But check turn rotation first. P0 played, so P1 turn.
@@ -324,11 +330,11 @@ describe('GameService', () => {
             (service as any).updateState({ turnPlayerId: updatedState.players[0].id });
             const scoreBefore2 = updatedState.players[0].score;
             service.playCard(updatedState.players[0].id, 0); // Play 6
-            tick(3000); // Flush timeout for score highlight
+            flush(); // Flush timeout for score highlight
 
             const finalState = service.snapshot;
             expect(finalState.players[0].score).toBe(scoreBefore2 + 4);
-            tick(3000);
+            flush();
         }));
 
         it('should score 31 correctly and reset stack', fakeAsync(() => {
@@ -449,14 +455,28 @@ describe('GameService', () => {
 
     it('should handle "Go" correctly', fakeAsync(() => {
         initAndStartGame(); // Initialize game state 
-        const state = service.snapshot;
-        state.currentPeggingTotal = 30;
-        // P0 has a 5 (cannot play).
-        state.players[0].cards = [{ rank: '5', suit: 'C', value: 5, order: 5 } as any];
-        // Ensure P1 also cannot play (give them a King)
-        state.players[1].cards = [{ rank: 'K', suit: 'S', value: 10, order: 13 } as any];
 
-        state.turnPlayerId = state.players[0].id;
+        // Ensure clean slate
+        (service as any)._isPeggingResetting = false;
+
+        let state = service.snapshot;
+        // Initialize state properly
+        (service as any).updateState({
+            currentPeggingTotal: 30,
+            players: state.players.map(p => {
+                if (p.id === state.players[0].id) {
+                    return { ...p, cards: [{ rank: '5', suit: 'C', value: 5, order: 5 } as any] };
+                }
+                if (p.id === state.players[1].id) {
+                    return { ...p, cards: [] }; // Ensure opponent cannot play
+                }
+                return p;
+            }),
+            turnPlayerId: state.players[0].id
+        });
+
+        // Refresh stale state after update
+        state = service.snapshot;
 
         // P1 is the one who will get the point because P0 says Go
         const scoreBefore = state.players[1].score;
@@ -467,7 +487,6 @@ describe('GameService', () => {
         expect(updatedState.players[1].score).toBe(scoreBefore + 1);
 
         // Reset is now async (delayMs)
-        // tick(4000); // Use flush instead
         flush();
         updatedState = service.snapshot;
 

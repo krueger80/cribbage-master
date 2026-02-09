@@ -18,6 +18,7 @@ export class GameService implements OnDestroy {
     private _lastProcessedScoreId = 0;
     private _cpuCutTimeout: any;
     private _peggingResetTimer: any;
+    private _autoPlayTimer: any;
     private _beforeUnloadHandler: () => void;
 
     constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) {
@@ -32,6 +33,8 @@ export class GameService implements OnDestroy {
         if (this._localSaveDebounceTimer) clearTimeout(this._localSaveDebounceTimer);
         if (this._saveDebounceTimer) clearTimeout(this._saveDebounceTimer);
         if (this._cpuCutTimeout) clearTimeout(this._cpuCutTimeout);
+        if (this._peggingResetTimer) clearTimeout(this._peggingResetTimer);
+        if (this._autoPlayTimer) clearTimeout(this._autoPlayTimer);
 
         if (typeof window !== 'undefined') {
             window.removeEventListener('beforeunload', this._beforeUnloadHandler);
@@ -630,7 +633,9 @@ export class GameService implements OnDestroy {
         if (state.phase === 'discarding') {
             const cpu = state.players.find(p => !p.isHuman);
             if (cpu && cpu.cards.length > 4) {
-                setTimeout(() => {
+                if (this._autoPlayTimer) clearTimeout(this._autoPlayTimer);
+                this._autoPlayTimer = setTimeout(() => {
+                    this._autoPlayTimer = null;
                     const s = this.snapshot;
                     const c = s.players.find(p => p.id === cpu.id);
                     if (s.phase === 'discarding' && c && c.cards.length > 4) {
@@ -673,7 +678,9 @@ export class GameService implements OnDestroy {
         } else if (state.phase === 'pegging') {
             const turnPlayer = state.players.find(p => p.id === state.turnPlayerId);
             if (turnPlayer && !turnPlayer.isHuman) {
-                setTimeout(() => {
+                if (this._autoPlayTimer) clearTimeout(this._autoPlayTimer);
+                this._autoPlayTimer = setTimeout(() => {
+                    this._autoPlayTimer = null;
                     const s = this.snapshot;
                     if (s.phase !== 'pegging') return;
 
@@ -693,12 +700,11 @@ export class GameService implements OnDestroy {
                                 } else {
                                     // API returned a card, but it's not in CPU's hand. This is an error, fallback to Go.
                                     // Add slight delay for visual clarity if it's a Go
-                                    setTimeout(() => this.sayGo(cpu.id), 1500);
+                                    this.sayGo(cpu.id);
                                 }
                             } else {
                                 // API says no card (or null), which implies Go
-                                // Add slight delay for visual clarity if it's a Go
-                                setTimeout(() => this.sayGo(cpu.id), 1500);
+                                this.sayGo(cpu.id);
                             }
                         },
                         error: (err) => {
