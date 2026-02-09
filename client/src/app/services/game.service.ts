@@ -17,6 +17,7 @@ export class GameService implements OnDestroy {
 
     private _lastProcessedScoreId = 0;
     private _cpuCutTimeout: any;
+    private _peggingResetTimer: any;
     private _beforeUnloadHandler: () => void;
 
     constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) {
@@ -56,6 +57,10 @@ export class GameService implements OnDestroy {
     // Actions
     initGame(playerNames: string[] = ['Player 1', 'CPU']) {
         this._isPeggingResetting = false; // Reset lock
+        if (this._peggingResetTimer) {
+            clearTimeout(this._peggingResetTimer);
+            this._peggingResetTimer = null;
+        }
         const user = this.supabase.currentUserSnapshot;
         const p1Name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || playerNames[0];
 
@@ -1253,18 +1258,19 @@ export class GameService implements OnDestroy {
         if (this._isPeggingResetting) return;
         this._isPeggingResetting = true;
 
-        setTimeout(() => {
+        if (this._peggingResetTimer) clearTimeout(this._peggingResetTimer);
+
+        this._peggingResetTimer = setTimeout(() => {
             const state = this.snapshot;
-            // Only reset if we are still in pegging phase (might verify this?)
-            // If phase changed to counting while waiting, we should proceed carefully.
-            // But clearing the stack is usually safe as preparation for next round/phase.
+
+            // ... (rest of logic) ...
 
             const resetPlayers = state.players.map(p => ({ ...p, hasSaidGo: false }));
 
             // If we have transitioned to counting (due to checkForPeggingFinished), 
             // we should NOT change the phase back to 'pegging' implicitly, 
             // but we SHOULD clear the stack.
-            // AND we should NOT set turnPlayerId if phase is counting (it doesn't matter, but clean state is good).
+            // AND we should NOT set turnPlayerId if phase is counting.
 
             this.updateState({
                 players: resetPlayers,
@@ -1274,6 +1280,7 @@ export class GameService implements OnDestroy {
             });
 
             this._isPeggingResetting = false;
+            this._peggingResetTimer = null;
 
             // Check if game is over or phase changed
             if (state.phase === 'pegging') {

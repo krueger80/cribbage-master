@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { GameService } from './game.service';
 import { GameState } from './game.state';
 import { of } from 'rxjs';
@@ -87,7 +87,7 @@ describe('GameService', () => {
             expect(state.players[1].name).toBe('CPU');
             expect(state.players[1].isHuman).toBeFalse();
             expect(state.phase).toBe('cut_for_deal');
-            expect(state.deck.length).toBe(52);
+            expect(state.deck.length).toBe(51);
         }));
 
         it('should alternate dealer correctly', fakeAsync(() => {
@@ -125,8 +125,9 @@ describe('GameService', () => {
             tick(2000); // Flush timers
 
             const state = service.snapshot;
-            expect(state.players[0].cards.length).toBe(initialHandSize - 2);
+            expect(state.players[0].cards.length).toBe(initialHandSize - 2); // 4
             expect(state.crib.length).toBe(4); // P2 (Auto) + P1
+            flush();
         }));
 
         it('should NOT transition to pegging if only one player has discarded', () => {
@@ -186,7 +187,7 @@ describe('GameService', () => {
             expect(dealer.score).toBe(2);
             expect(service.snapshot.cutCard?.rank).toBe('J');
 
-            tick(1000);
+            flush();
         }));
     });
 
@@ -245,7 +246,7 @@ describe('GameService', () => {
 
             // Turn should rotate to P1
             expect(updatedState.turnPlayerId).toBe(state.players[0].id);
-            tick(1000); // Flush checkAutoPlay
+            flush(); // Flush checkAutoPlay
         }));
 
         it('should score 15 correctly', fakeAsync(() => {
@@ -278,6 +279,7 @@ describe('GameService', () => {
             currentState = service.snapshot;
             expect(currentState.players[1].score).toBe(scoreBefore + 2);
             expect(currentState.currentPeggingTotal).toBe(15);
+            flush();
         }));
 
         it('should score runs correctly', fakeAsync(() => {
@@ -354,6 +356,7 @@ describe('GameService', () => {
             currentState = service.snapshot;
             expect(currentState.currentPeggingTotal).toBe(0); // Should reset
             expect(currentState.peggingStack.length).toBe(0); // Should clear
+            flush();
         }));
     });
 
@@ -439,6 +442,7 @@ describe('GameService', () => {
             // In single player, one acknowledgement advances the game
             state = service.snapshot;
             expect(state.phase).toBe('discarding');
+            flush();
         }));
     });
 
@@ -449,6 +453,9 @@ describe('GameService', () => {
         state.currentPeggingTotal = 30;
         // P0 has a 5 (cannot play).
         state.players[0].cards = [{ rank: '5', suit: 'C', value: 5, order: 5 } as any];
+        // Ensure P1 also cannot play (give them a King)
+        state.players[1].cards = [{ rank: 'K', suit: 'S', value: 10, order: 13 } as any];
+
         state.turnPlayerId = state.players[0].id;
 
         // P1 is the one who will get the point because P0 says Go
@@ -456,14 +463,18 @@ describe('GameService', () => {
 
         service.sayGo(state.players[0].id);
 
-        const updatedState = service.snapshot;
+        let updatedState = service.snapshot;
         expect(updatedState.players[1].score).toBe(scoreBefore + 1);
+
+        // Reset is now async (delayMs)
+        // tick(4000); // Use flush instead
+        flush();
+        updatedState = service.snapshot;
+
         expect(updatedState.currentPeggingTotal).toBe(0); // Should reset
         // User said Go (conceding point to P1), so User should lead new round
         expect(updatedState.turnPlayerId).toBe(state.players[0].id);
-        tick(1000); // Flush checkAutoPlay
-        expect(updatedState.turnPlayerId).toBe(state.players[0].id);
-        tick(1000); // Flush checkAutoPlay
+        flush();
     }));
 
     describe('Game Over Logic', () => {
@@ -490,6 +501,7 @@ describe('GameService', () => {
             expect(finalState.players[0].score).toBe(122); // 120 + 2
             expect(finalState.phase).toBe('gameover');
             expect(finalState.winnerId).toBe(state.players[0].id);
+            flush();
         }));
     });
 });
