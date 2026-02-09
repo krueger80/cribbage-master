@@ -641,7 +641,7 @@ export class GameService implements OnDestroy {
                     if (s.phase === 'discarding' && c && c.cards.length > 4) {
                         // Use API for analysis
                         const handStrings = c.cards.map(card => card.rank + card.suit);
-                        this.api.analyze(handStrings, c.isDealer, s.players.length).subscribe({
+                        this.api.analyze(handStrings, c.isDealer, s.players.length, 'quick').subscribe({
                             next: (res) => {
                                 if (res.results && res.results.length > 0) {
                                     const best = res.results[0];
