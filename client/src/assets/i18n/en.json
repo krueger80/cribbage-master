@@ -139,6 +139,8 @@
         "CRIB": "Crib",
         "YOU": "You",
         "OPPONENT": "Opponent",
-        "AUTO_SELECT": "Auto Select"
+        "AUTO_SELECT": "Auto Select",
+        "NEW_GAME": "New Game",
+        "CONFIRM_NEW_GAME": "A game is already in progress. Are you sure you want to start a new one?"
     }
 }

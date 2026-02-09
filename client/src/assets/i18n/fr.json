@@ -139,6 +139,8 @@
         "CRIB": "Le Crible",
         "YOU": "Vous",
         "OPPONENT": "Adversaire",
-        "AUTO_SELECT": "Sélection Auto"
+        "AUTO_SELECT": "Sélection Auto",
+        "NEW_GAME": "Nouvelle Partie",
+        "CONFIRM_NEW_GAME": "Une partie est déjà en cours. Voulez-vous vraiment en commencer une nouvelle ?"
     }
 }

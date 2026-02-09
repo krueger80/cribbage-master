@@ -220,8 +220,8 @@ export class GameTableComponent implements OnInit {
     if (!this.isMyTurn) return false;
     const state = this.gameService.snapshot;
     const player = this.bottomPlayer;
-    // You can't "Say Go" if you have no cards (you're just out)
     if (!player.cards || player.cards.length === 0) return false;
+    if (state.currentPeggingTotal === 31) return false;
 
     return !this.canPlay(player.cards, state.currentPeggingTotal);
   }
@@ -340,7 +340,9 @@ export class GameTableComponent implements OnInit {
           cards: cardCodes,
           isDealer: player.isDealer,
           numPlayers: numPlayers,
-          results: response.results
+          results: response.results,
+          logicReason: logicReason,
+          isQuickMode: true
         });
 
         this.isAnalyzing = false;
@@ -455,6 +457,14 @@ export class GameTableComponent implements OnInit {
   }
 
   restartGame() {
+    const state = this.gameService.snapshot;
+    // If game is in progress (not gameover), ask for confirmation
+    if (state.phase !== 'gameover') {
+      const confirmMsg = this.translate.instant('GAME.CONFIRM_NEW_GAME');
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    }
     this.gameService.restartGame();
   }
 

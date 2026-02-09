@@ -13,7 +13,7 @@ export class GameService implements OnDestroy {
 
     private _state = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(INITIAL_GAME_STATE)));
     // Holds the last analysis result for easy access in Analyzer View
-    private _lastAnalysis = new BehaviorSubject<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] } | null>(null);
+    private _lastAnalysis = new BehaviorSubject<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[], logicReason?: string, isQuickMode?: boolean } | null>(null);
 
     private _lastProcessedScoreId = 0;
     private _cpuCutTimeout: any;
@@ -41,11 +41,11 @@ export class GameService implements OnDestroy {
         return this._state.asObservable();
     }
 
-    get lastAnalysis$(): Observable<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] } | null> {
+    get lastAnalysis$(): Observable<{ cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[], logicReason?: string, isQuickMode?: boolean } | null> {
         return this._lastAnalysis.asObservable();
     }
 
-    setLastAnalysis(data: { cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[] }) {
+    setLastAnalysis(data: { cards: string[], isDealer: boolean, numPlayers: number, results: AnalysisResult[], logicReason?: string, isQuickMode?: boolean }) {
         this._lastAnalysis.next(data);
     }
 
@@ -55,6 +55,7 @@ export class GameService implements OnDestroy {
 
     // Actions
     initGame(playerNames: string[] = ['Player 1', 'CPU']) {
+        this._isPeggingResetting = false; // Reset lock
         const user = this.supabase.currentUserSnapshot;
         const p1Name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || playerNames[0];
 
@@ -131,6 +132,7 @@ export class GameService implements OnDestroy {
     }
 
     private _resolvingCut = false;
+    private _isPeggingResetting = false;
 
     private resolveCutForDeal() {
         const state = this.snapshot;
@@ -617,8 +619,8 @@ export class GameService implements OnDestroy {
 
     private checkAutoPlay() {
         const state = this.snapshot;
-        // DISABLE AUTO PLAY IF MULTIPLAYER
-        if (state.isMultiplayer) return;
+        // DISABLE AUTO PLAY IF MULTIPLAYER OR RESETTING
+        if (state.isMultiplayer || this._isPeggingResetting) return;
 
         if (state.phase === 'discarding') {
             const cpu = state.players.find(p => !p.isHuman);
@@ -684,11 +686,14 @@ export class GameService implements OnDestroy {
                                 if (idx !== -1) {
                                     this.playCard(cpu.id, idx);
                                 } else {
-                                    this.sayGo(cpu.id);
+                                    // API returned a card, but it's not in CPU's hand. This is an error, fallback to Go.
+                                    // Add slight delay for visual clarity if it's a Go
+                                    setTimeout(() => this.sayGo(cpu.id), 1500);
                                 }
                             } else {
                                 // API says no card (or null), which implies Go
-                                this.sayGo(cpu.id);
+                                // Add slight delay for visual clarity if it's a Go
+                                setTimeout(() => this.sayGo(cpu.id), 1500);
                             }
                         },
                         error: (err) => {
@@ -762,6 +767,8 @@ export class GameService implements OnDestroy {
 
         if ((state.phase as any) === 'gameover') return 'GAME_OVER';
         if (state.phase !== 'pegging') return 'INVALID_PHASE';
+        // Prevent moves while resetting
+        if (this._isPeggingResetting) return 'RESETTING';
         if (state.turnPlayerId !== playerId) return 'NOT_YOUR_TURN';
 
         const player = state.players.find(p => p.id === playerId);
@@ -794,19 +801,11 @@ export class GameService implements OnDestroy {
         if (newTotal === 31) {
             // Special handling for 31.
             // Reset must happen. Turn passes.
-            setTimeout(() => {
-                const resetPlayers = this.snapshot.players.map(p => ({ ...p, hasSaidGo: false }));
-                const nextId = this.getNextPlayerId(playerId);
-                const actualNextId = this.getNextPlayablePlayerId(nextId, resetPlayers);
+            // Determine next player (Round Leader)
+            const nextId = this.getNextPlayerId(playerId);
+            const actualNextId = this.getNextPlayablePlayerId(nextId, state.players); // Use current players state (cards updated)
 
-                this.updateState({
-                    players: resetPlayers,
-                    currentPeggingTotal: 0,
-                    peggingStack: [],
-                    turnPlayerId: actualNextId
-                });
-                this.checkAutoPlay();
-            }, 1500); // Wait for score animation
+            this.resetPegging(actualNextId, 1500);
 
             this.updateState({
                 players: [...state.players],
@@ -860,20 +859,10 @@ export class GameService implements OnDestroy {
 
                         // Reset Stack
                         // Turn passes to Next Player (Rule: Left of last player starts new round)
-                        setTimeout(() => {
-                            const currentSnapshot = this.snapshot;
-                            const resetPlayers = currentSnapshot.players.map(p => ({ ...p, hasSaidGo: false }));
-                            const nextId = nextPlayerId;
-                            const actualNextId = this.getNextPlayablePlayerId(nextId, resetPlayers);
+                        const nextId = nextPlayerId;
+                        const actualNextId = this.getNextPlayablePlayerId(nextId, state.players);
 
-                            this.updateState({
-                                players: resetPlayers,
-                                currentPeggingTotal: 0,
-                                peggingStack: [],
-                                turnPlayerId: actualNextId
-                            });
-                            this.checkAutoPlay();
-                        }, 1500);
+                        this.resetPegging(actualNextId, 1500);
 
                         nextTurnId = playerId; // Momentarily keep my ID to show the score
 
@@ -971,41 +960,51 @@ export class GameService implements OnDestroy {
         this._localCountingFinished = false;
 
         const state = this.snapshot;
-        const dealerIndex = state.players.findIndex(p => p.isDealer);
-        const nonDealerIndex = (dealerIndex + 1) % state.players.length;
         const cutCard = state.cutCard;
-        const nonDealer = state.players[nonDealerIndex];
-        const dealer = state.players[dealerIndex];
 
-        // Calculate ALL scores
+        // Deep clone players to allow sequential mutation
+        const newPlayers = state.players.map(p => ({ ...p }));
+
+        const dealerIndex = newPlayers.findIndex(p => p.isDealer);
+        const nonDealerIndex = (dealerIndex + 1) % newPlayers.length;
+
+        const dealer = newPlayers[dealerIndex];
+        const nonDealer = newPlayers[nonDealerIndex];
+
+        // Calculate ALL scores first to populate countingResults (UI needs this even if game ends)
         const nonDealerScore = calculateScore(nonDealer.playedCards, cutCard, false);
         const dealerScore = calculateScore(dealer.playedCards, cutCard, false);
         const cribScore = calculateScore(state.crib, cutCard, true);
 
         console.log('[Game] countHands results:', { nonDealerScore, dealerScore, cribScore });
 
-        // Explicitly update players to ensure state immutability triggers updates
         let winnerId: string | null = null;
         let nextPhase: GamePhase = 'counting';
 
-        const newPlayers = state.players.map(p => {
-            let additional = 0;
-            if (p.id === nonDealer.id) additional += nonDealerScore.total;
-            if (p.id === dealer.id) {
-                additional += dealerScore.total;
-                additional += cribScore.total;
-            }
+        // 1. Score Non-Dealer
+        nonDealer.score += nonDealerScore.total;
+        if (nonDealer.score >= 121) {
+            winnerId = nonDealer.id;
+            nextPhase = 'gameover';
+        }
 
-            if (additional > 0) {
-                const newScore = p.score + additional;
-                if (newScore >= 121 && !winnerId) {
-                    winnerId = p.id;
-                    nextPhase = 'gameover';
-                }
-                return { ...p, score: newScore };
+        // 2. Score Dealer Hand (If game continues)
+        if (!winnerId) {
+            dealer.score += dealerScore.total;
+            if (dealer.score >= 121) {
+                winnerId = dealer.id;
+                nextPhase = 'gameover';
             }
-            return p;
-        });
+        }
+
+        // 3. Score Dealer Crib (If game continues)
+        if (!winnerId) {
+            dealer.score += cribScore.total;
+            if (dealer.score >= 121) {
+                winnerId = dealer.id;
+                nextPhase = 'gameover';
+            }
+        }
 
         this.updateState({
             phase: nextPhase,
@@ -1073,6 +1072,8 @@ export class GameService implements OnDestroy {
 
     sayGo(playerId: string) {
         if ((this.snapshot.phase as any) === 'gameover') return;
+        if (this.snapshot.phase !== 'pegging') return;
+        if (this._isPeggingResetting) return;
 
         const state = this.snapshot;
         const opponentId = this.getNextPlayerId(playerId);
@@ -1123,23 +1124,25 @@ export class GameService implements OnDestroy {
         if ((this.snapshot.phase as any) === 'gameover') return;
 
         // Reset Stack
-        // Reset Go Flags
-        const resetPlayers = state.players.map(p => ({ ...p, hasSaidGo: false }));
+        // Pass turn to leader
+        const nextLeader = this.getNextPlayablePlayerId(playerId, state.players);
+        this.resetPegging(nextLeader, 1500); // Use delay to align with playCard UX
 
         this.updateState({
-            players: resetPlayers,
-            currentPeggingTotal: 0,
-            peggingStack: [],
-            turnPlayerId: this.getNextPlayablePlayerId(playerId, resetPlayers), // Leader of new round with validation
+            turnPlayerId: playerId, // Momentarily keep focus on 'Go' sayer or last player? Last player got point.
+            // Let's keep turn on 'playerId' (the one who said Go) so they see the feedback?
+            // Or Opponent? Opponent got the point.
+            // Usually we show the point on the person who got it.
+            // The popup shows point for opponentId.
             lastPeggingScore: {
                 points: 1,
                 description: this.translate.instant('SCORE.GO'),
-                playerId: opponent.id,
+                playerId: opponentId,
                 id: Date.now()
             }
         });
 
-        this.checkAutoPlay();
+        // checkAutoPlay handled by resetPegging callback
         this.checkForPeggingFinished();
     }
 
@@ -1227,6 +1230,7 @@ export class GameService implements OnDestroy {
     }
 
     restartGame() {
+        this.clearSaveState(); // Force clean local storage
         const state = this.snapshot;
         if (state.isMultiplayer) {
             if (state.localPlayerId === 'p1') {
@@ -1243,5 +1247,38 @@ export class GameService implements OnDestroy {
         const players = this.snapshot.players;
         const idx = players.findIndex(p => p.id === currentId);
         return players[(idx + 1) % players.length].id;
+    }
+
+    private resetPegging(nextPlayerId: string, delayMs: number) {
+        if (this._isPeggingResetting) return;
+        this._isPeggingResetting = true;
+
+        setTimeout(() => {
+            const state = this.snapshot;
+            // Only reset if we are still in pegging phase (might verify this?)
+            // If phase changed to counting while waiting, we should proceed carefully.
+            // But clearing the stack is usually safe as preparation for next round/phase.
+
+            const resetPlayers = state.players.map(p => ({ ...p, hasSaidGo: false }));
+
+            // If we have transitioned to counting (due to checkForPeggingFinished), 
+            // we should NOT change the phase back to 'pegging' implicitly, 
+            // but we SHOULD clear the stack.
+            // AND we should NOT set turnPlayerId if phase is counting (it doesn't matter, but clean state is good).
+
+            this.updateState({
+                players: resetPlayers,
+                currentPeggingTotal: 0,
+                peggingStack: [],
+                turnPlayerId: nextPlayerId
+            });
+
+            this._isPeggingResetting = false;
+
+            // Check if game is over or phase changed
+            if (state.phase === 'pegging') {
+                this.checkAutoPlay();
+            }
+        }, delayMs);
     }
 }

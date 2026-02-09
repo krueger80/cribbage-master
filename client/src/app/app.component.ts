@@ -265,6 +265,8 @@ export class AppComponent implements OnInit, OnDestroy {
         this.numPlayers = analysis.numPlayers;
         this.isDealer = analysis.isDealer;
         this.analysisResults = analysis.results;
+        // From game auto-select is always quick mode
+        this.isQuickMode = analysis.isQuickMode || false;
       }
     });
 
