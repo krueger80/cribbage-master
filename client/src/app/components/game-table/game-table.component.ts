@@ -253,8 +253,63 @@ export class GameTableComponent implements OnInit {
           return;
         }
 
-        // Sort by Total EV descending
-        const best = [...response.results].sort((a, b) => b.totalExpectedValue - a.totalExpectedValue)[0];
+        // Create a copy of results for sorting
+        let candidates = [...response.results];
+        let best = candidates[0];
+        let logicReason = "Best Overall Value";
+
+        const currentScore = player.score;
+        const neededToWin = 121 - currentScore;
+
+        // Get Opponent Score to check if they are threatening to win
+        const opponent = state.players.find(p => p.id !== player.id);
+        const opponentScore = opponent ? opponent.score : 0;
+        const opponentThreatening = opponentScore >= 115; // Assume 115 is danger zone
+
+        // ENDGAME LOGIC
+        if (neededToWin <= 5) {
+          // Case 1: Desperate / Very Close -> Prioritize Pegging
+          // If we are this close, pegging is often the fastest way out.
+          candidates.sort((a, b) => b.peggingScore - a.peggingScore);
+          best = candidates[0];
+          logicReason = `Endgame Pegging (Need ${neededToWin})`;
+          console.log(`[AutoSelect] Triggered Endgame Pegging Logic. Needed: ${neededToWin}`);
+        } else if (!player.isDealer && opponentThreatening && neededToWin <= 15) {
+          // Case 2: Desperate Offense
+          // Opponent is about to win. We are NOT dealer, so we count first.
+          // We need to win NOW. Maximize Hand + Pegging.
+          // Ignore Crib (since if we don't win, opponent wins anyway).
+          candidates.sort((a, b) => (b.handStats.avg + b.peggingScore) - (a.handStats.avg + a.peggingScore));
+          best = candidates[0];
+          logicReason = `Desperate Offense (Opponent at ${opponentScore})`;
+          console.log(`[AutoSelect] Triggered Desperate Offense Logic. Opponent Score: ${opponentScore}`);
+        } else if (neededToWin <= 20) {
+          // Case 3: Can we guarantee a win?
+          // Non-Dealer: Counts first. Hand Min >= Needed?
+          // Dealer: Counts last. Hand Min + Crib Min >= Needed?
+          const safeWins = candidates.filter(r => {
+            const guaranteed = player.isDealer
+              ? (r.handStats.min + r.cribStats.min)
+              : r.handStats.min;
+            return guaranteed >= neededToWin;
+          });
+
+          if (safeWins.length > 0) {
+            // Pick highest Total EV among safe wins to be optimal
+            safeWins.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+            best = safeWins[0];
+            logicReason = `Guaranteed Win (Need ${neededToWin})`;
+            console.log(`[AutoSelect] Triggered Guaranteed Win Logic.`);
+          } else {
+            // No guarantee, fallback to Best Total
+            candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+            best = candidates[0];
+          }
+        } else {
+          // Standard: Best Total EV
+          candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+          best = candidates[0];
+        }
 
         // Update selection to match the DISCARDED cards from the best result
         // The user wants to "select the best cards to discard"
