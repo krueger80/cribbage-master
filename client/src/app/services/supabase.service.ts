@@ -74,7 +74,12 @@ export class SupabaseService {
     }
 
     async signInWithGoogle() {
-        return this.supabase.auth.signInWithOAuth({ provider: 'google' });
+        return this.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
     }
 
     async signOut() {
