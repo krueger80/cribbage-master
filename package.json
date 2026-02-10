@@ -2,17 +2,20 @@
     "name": "cribbage-master",
     "version": "1.0.0",
     "scripts": {
-        "start": "npm run start:client",
+        "config": "node tools/set-env.js",
+        "start": "npm run config && npm run start:client",
         "start:client": "cd client && npm start",
         "test:pegging": "npx ts-node test_pegging.ts",
-        "dev": "npm run start:client",
-        "dev:full": "vercel dev"
+        "dev": "npm run config && npm run start:client",
+        "dev:full": "npm run config && vercel dev",
+        "build": "npm run config && cd client && npm install && npx ng build"
     },
     "dependencies": {
         "@types/node": "^25.0.6",
         "@vercel/node": "^5.5.16"
     },
     "devDependencies": {
+        "dotenv": "^16.6.1",
         "vercel": "^50.9.6"
     }
 }

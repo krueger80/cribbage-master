@@ -27,6 +27,11 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Generated Environment Files
+# Generated Environment Files
+client/src/environments/environment.ts
+client/src/environments/environment.development.ts
+
 # Angular
 .angular/
 .sass-cache/
