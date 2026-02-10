@@ -19,6 +19,7 @@ export class GameService implements OnDestroy {
     private _cpuCutTimeout: any;
     private _peggingResetTimer: any;
     private _autoPlayTimer: any;
+    private _scoreClearTimer: any;
     private _beforeUnloadHandler: () => void;
 
     constructor(private supabase: SupabaseService, private api: ApiService, private translate: TranslateService) {
@@ -35,6 +36,7 @@ export class GameService implements OnDestroy {
         if (this._cpuCutTimeout) clearTimeout(this._cpuCutTimeout);
         if (this._peggingResetTimer) clearTimeout(this._peggingResetTimer);
         if (this._autoPlayTimer) clearTimeout(this._autoPlayTimer);
+        if (this._scoreClearTimer) clearTimeout(this._scoreClearTimer);
 
         if (typeof window !== 'undefined') {
             window.removeEventListener('beforeunload', this._beforeUnloadHandler);
@@ -909,7 +911,9 @@ export class GameService implements OnDestroy {
         const currentScore = this.snapshot.lastPeggingScore;
         if (currentScore && currentScore.playerId === playerId) {
             this._lastProcessedScoreId = currentScore.id;
-            setTimeout(() => {
+            if (this._scoreClearTimer) clearTimeout(this._scoreClearTimer);
+            this._scoreClearTimer = setTimeout(() => {
+                this._scoreClearTimer = null;
                 // Local clear only
                 const s = this._state.value.lastPeggingScore;
                 if (s && s.id === currentScore.id) {
