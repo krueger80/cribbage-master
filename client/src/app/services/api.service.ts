@@ -124,8 +124,8 @@ export class ApiService {
     });
   }
 
-  getPeggingCard(hand: string[], stack: string[], total: number): Observable<{ card: Card | null, score: number, debug?: string }> {
-    return this.http.post<{ card: Card | null, score: number, debug?: string }>(`${this.apiUrl}/pegging`, { hand, stack, total });
+  getPeggingCard(hand: string[], stack: string[], total: number): Observable<{ card: Card | null, score: number, actualPoints?: number, debug?: string }> {
+    return this.http.post<{ card: Card | null, score: number, actualPoints?: number, debug?: string }>(`${this.apiUrl}/pegging`, { hand, stack, total });
   }
 
   private _historySaved = new Subject<void>();

@@ -140,6 +140,18 @@
         "YOU": "Vous",
         "OPPONENT": "Adversaire",
         "AUTO_SELECT": "Sélection Auto",
+        "HINT": "Indice",
+        "HINT_DISCARD": "Garder {{cards}} (VE: {{ev}})",
+        "HINT_PEGGING": "Jouer {{card}}",
+        "HINT_SAY_GO": "Aucune carte jouable — dire Go",
+        "HINT_NO_DATA": "Aucune suggestion disponible",
+        "HINT_ERROR": "Impossible d'obtenir un indice",
+        "REASON_DEFAULT": "Meilleur valeur à long terme",
+        "REASON_ENDGAME_PEGGING": "Fin de partie : Pegging prioritaire",
+        "REASON_DESPERATE": "Désespéré : Attaque maximale requise",
+        "REASON_GUARANTEED": "Victoire sûre garantie",
+        "REASON_PEGGING_POINTS": "Marque {{points}} points",
+        "REASON_PEGGING_STRATEGY": "Positionnement stratégique",
         "NEW_GAME": "Nouvelle Partie",
         "CONFIRM_NEW_GAME": "Une partie est déjà en cours. Voulez-vous vraiment en commencer une nouvelle ?"
     }

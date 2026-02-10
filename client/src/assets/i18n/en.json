@@ -140,6 +140,18 @@
         "YOU": "You",
         "OPPONENT": "Opponent",
         "AUTO_SELECT": "Auto Select",
+        "HINT": "Hint",
+        "HINT_DISCARD": "Keep {{cards}} (EV: {{ev}})",
+        "HINT_PEGGING": "Play {{card}}",
+        "HINT_SAY_GO": "No playable card — say Go",
+        "HINT_NO_DATA": "No suggestion available",
+        "HINT_ERROR": "Could not get hint",
+        "REASON_DEFAULT": "Best long-term value",
+        "REASON_ENDGAME_PEGGING": "Endgame: Prioritizing pegging",
+        "REASON_DESPERATE": "Desperate: Max offense needed",
+        "REASON_GUARANTEED": "Safe win guaranteed",
+        "REASON_PEGGING_POINTS": "Scores {{points}} points",
+        "REASON_PEGGING_STRATEGY": "Strategic position",
         "NEW_GAME": "New Game",
         "CONFIRM_NEW_GAME": "A game is already in progress. Are you sure you want to start a new one?"
     }
