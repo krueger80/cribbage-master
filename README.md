@@ -30,4 +30,8 @@ The backend is hosted on Vercel. For local development, you can use `vercel dev`
 
 ## Development
 - **Client**: The client is a standard Angular application. Use `ng test` to run unit tests.
-- **Configuration**: Environment variables (Supabase keys) are managed in `client/src/environments/`.
+- **Configuration**: Environment variables (Supabase keys) are injected at build time.
+  - Create a `.env` file in the root directory (copied from the example or provided securely).
+  - Required variables: `SUPABASE_URL`, `SUPABASE_KEY`.
+  - On Vercel, set these in the Project Settings -> Environment Variables.
+

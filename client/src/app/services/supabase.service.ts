@@ -23,7 +23,9 @@ export class SupabaseService {
     private gameSubscription: RealtimeChannel | null = null;
 
     constructor() {
-        this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
+        // Use 'key' (Publishable Key) if available, otherwise fallback to 'anonKey'
+        const supabaseKey = environment.supabase.key || environment.supabase.anonKey;
+        this.supabase = createClient(environment.supabase.url, supabaseKey, {
             auth: {
                 storage: sessionStorage,
                 autoRefreshToken: true,
