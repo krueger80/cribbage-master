@@ -4,9 +4,9 @@ const path = require('path');
 // Load .env file for local development
 // We try to require 'dotenv' if available, otherwise we rely on process.env
 try {
-    require('dotenv').config();
+  require('dotenv').config();
 } catch (e) {
-    // dotenv not found, assuming variables are already in process.env (Vercel)
+  // dotenv not found, assuming variables are already in process.env (Vercel)
 }
 
 const targetPath = path.join(__dirname, '../client/src/environments/environment.ts');
@@ -17,8 +17,8 @@ const supabaseKey = process.env.SUPABASE_KEY || '';
 
 // Validation
 if (!supabaseUrl || !supabaseKey) {
-    console.warn('WARNING: SUPABASE_URL or SUPABASE_KEY not found in environment variables.');
-    console.warn('Ensure you have a .env file locally or Environment Variables set in Vercel.');
+  console.warn('WARNING: SUPABASE_URL or SUPABASE_KEY not found in environment variables.');
+  console.warn('Ensure you have a .env file locally or Environment Variables set in Vercel.');
 }
 
 const envConfigFile = `export const environment = {
@@ -43,19 +43,25 @@ const envConfigDevFile = `export const environment = {
 };
 `;
 
+// Ensure directory exists
+const dir = path.dirname(targetPath);
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
 // Write file
 fs.writeFile(targetPath, envConfigFile, (err) => {
-    if (err) {
-        console.error(err);
-        throw err;
-    }
-    console.log(`Environment file generated at ${targetPath}`);
+  if (err) {
+    console.error(err);
+    throw err;
+  }
+  console.log(`Environment file generated at ${targetPath}`);
 });
 
 fs.writeFile(targetPathDev, envConfigDevFile, (err) => {
-    if (err) {
-        console.error(err);
-        throw err;
-    }
-    console.log(`Environment file generated at ${targetPathDev}`);
+  if (err) {
+    console.error(err);
+    throw err;
+  }
+  console.log(`Environment file generated at ${targetPathDev}`);
 });
