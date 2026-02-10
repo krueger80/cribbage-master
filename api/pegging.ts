@@ -39,6 +39,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
         res.status(200).json({
             card: result.card,
             score: result.score,
+            actualPoints: result.actualPoints,
             debug: result.debug
         });
 

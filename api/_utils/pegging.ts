@@ -71,50 +71,58 @@ export function determinePeggingCard(
 
     let bestCard = playable[0];
     let maxScore = -999;
+    let actualPoints = 0;
     let bestDebug = "";
 
     for (const card of playable) {
-        const newTotal = currentTotal + card.value;
-        const newStack = [...stack, card];
+        // Parse card values appropriately: JQK=10, A=1
+        // (Assuming card.value is already correct)
+
+        let pointValue = typeof card.value === 'string' ? parseInt(card.value) : card.value;
+        if (isNaN(pointValue)) pointValue = 10; // Fallback for face cards if logic fails, but parser should exist
+
+        // Actually card.value should be number from parseCard
+        const val = card.value;
+
+        const newTotal = currentTotal + val;
+        // Construct new stack for scoring (card is last)
+        const newStack: Card[] = [...stack, card];
 
         // Immediate Points
+        // We need to implement scorePeggingStack basically
+        // But we have calculatePeggingScore exported above?
+        // Wait, the previous code called calculatePeggingScore(newStack, newTotal)
+        // I should just use that.
+
+        // Re-implementing logic safely
         const result = calculatePeggingScore(newStack, newTotal);
         let heuristic = result.points;
 
         // Strategic Adjustments
 
         // 1. Avoid giving opponent a 15
-        // If I make it 5, opponent can play 10 for 15.
-        // If I make it X, can opponent make 15? (15 - X).
-        // Common cards: 10, 5, A, etc.
         if (newTotal === 5) heuristic -= 2;
-        if (newTotal === 21) heuristic -= 2; // Opponent plays 10 for 31
-
-        // 2. Try to land on 15 or 31 (Already in points)
+        if (newTotal === 21) heuristic -= 2;
 
         // 3. Leading (Stack empty)
         if (stack.length === 0) {
             // Avoid leading with 5 or 10?
-            if (card.value === 5) heuristic -= 2;
+            if (val === 5) heuristic -= 2;
             // Leading a 4 is good (4+10=14, safe-ish).
             if (card.rank === '4') heuristic += 1;
         }
 
         // 4. Parity / Traps (Advanced)
-        // If I play X, and opponent plays X (pair), they get 2.
-        // If I have another X, I can play X for Pair Royal (6).
-        // So playing a card I have a pair of is good.
+        // If I have another X, I can play X for Pair (2).
         const pairCount = hand.filter(c => c.rank === card.rank).length;
         if (pairCount >= 2) {
-            heuristic += 1; // Encouragement to break pairs if profitable
+            heuristic += 0.5; // Encouragement to break pairs if profitable
         }
 
         // 5. Saving low cards for Go/Endgame
-        // If total is high (>20), low cards are valuable to squeeze in a play or hit 31.
-        // If total is low, maybe save low cards?
-        if (card.value <= 3 && currentTotal < 20) {
-             // Maybe save it?
-             // heuristic -= 0.5;
+        if (val <= 3 && currentTotal < 20) {
+            // Maybe save it?
+            // heuristic -= 0.5;
         }
 
         const debugStr = `Card: ${card.rank}${card.suit}, Imm: ${result.points}, Heur: ${heuristic}`;
@@ -122,9 +130,10 @@ export function determinePeggingCard(
         if (heuristic > maxScore) {
             maxScore = heuristic;
             bestCard = card;
+            actualPoints = result.points;
             bestDebug = debugStr;
         }
     }
 
-    return { card: bestCard, score: maxScore, debug: bestDebug };
+    return { card: bestCard, score: maxScore, actualPoints: actualPoints, debug: bestDebug };
 }

@@ -77,7 +77,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                                 class="playing-card-micro shadow-lg shrink-0" 
                                 [ngClass]="getCardColor(c.suit)">
                             <span class="text-xs font-bold">{{c.rank}}</span>
-                            <span class="text-[10px]">{{getSuitSymbol(c.suit)}}</span>
+                            <span class="text-xs">{{getSuitSymbol(c.suit)}}</span>
                         </div>
                     </div>
 
@@ -90,7 +90,7 @@ import { AnalysisResult, ApiService } from '../../services/api.service';
                                 class="playing-card-micro opacity-80 shrink-0" 
                                 [ngClass]="getCardColor(c.suit)">
                             <span class="text-xs font-bold">{{c.rank}}</span>
-                            <span class="text-[10px]">{{getSuitSymbol(c.suit)}}</span>
+                            <span class="text-xs">{{getSuitSymbol(c.suit)}}</span>
                         </div>
                     </div>
                 </div>

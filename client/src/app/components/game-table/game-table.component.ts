@@ -64,6 +64,10 @@ export class GameTableComponent implements OnInit {
 
   selectedCardIndices: Set<number> = new Set();
   isAnalyzing: boolean = false;
+  hintText: string | null = null;
+  hintReason: string | null = null;
+  hintedCardIndex: number | null = null;
+  private _hintTimeout: any = null;
 
 
   constructor(private gameService: GameService, private apiService: ApiService, private translate: TranslateService, private ngZone: NgZone) {
@@ -194,6 +198,7 @@ export class GameTableComponent implements OnInit {
         }
       }
     } else if (this.gameService.snapshot.phase === 'pegging') {
+      this.clearHint();
       this.gameService.playCard(this.bottomPlayer.id, index);
     }
   }
@@ -228,112 +233,124 @@ export class GameTableComponent implements OnInit {
 
   discard() {
     if (this.selectedCardIndices.size === 2) {
+      this.clearHint();
       this.gameService.discard(this.bottomPlayer.id, Array.from(this.selectedCardIndices));
       this.selectedCardIndices.clear();
     }
   }
-  autoSelect() {
+  showHint() {
     const state = this.gameService.snapshot;
-    if (state.phase !== 'discarding') return;
-
     const player = this.bottomPlayer;
-    if (!player.cards || player.cards.length === 0) return;
+
+    // If hint is already showing, dismiss it
+    if (this.hintText) {
+      this.clearHint();
+      return;
+    }
 
     this.isAnalyzing = true;
 
-    // Convert cards to string codes (Rank+Suit, e.g. "5H", "10S")
-    const cardCodes = player.cards.map(c => c.rank + c.suit);
+    if (state.phase === 'discarding') {
+      this.showDiscardHint(state, player);
+    } else if (state.phase === 'pegging') {
+      this.showPeggingHint(state, player);
+    } else {
+      this.isAnalyzing = false;
+    }
+  }
+
+  private clearHint() {
+    this.hintText = null;
+    this.hintReason = null;
+    this.hintedCardIndex = null;
+    if (this._hintTimeout) {
+      clearTimeout(this._hintTimeout);
+      this._hintTimeout = null;
+    }
+  }
+
+  private setHint(text: string, reason: string | null = null) {
+    this.clearHint();
+    this.hintText = text;
+    this.hintReason = reason;
+    this._hintTimeout = setTimeout(() => {
+      this.ngZone.run(() => {
+        this.hintText = null;
+        this.hintReason = null;
+        this._hintTimeout = null;
+      });
+    }, 8000);
+  }
+
+  private showDiscardHint(state: GameState, player: any) {
+    const cardCodes = player.cards.map((c: any) => c.rank + c.suit);
     const numPlayers = state.players.length;
 
     this.apiService.analyze(cardCodes, player.isDealer, numPlayers, 'quick').subscribe({
       next: (response) => {
-        // Find best result (highest EV)
         if (!response.results || response.results.length === 0) {
+          this.setHint(this.translate.instant('GAME.HINT_NO_DATA'));
           this.isAnalyzing = false;
           return;
         }
 
-        // Create a copy of results for sorting
         let candidates = [...response.results];
         let best = candidates[0];
-        let logicReason = "Best Overall Value";
+        let reasonKey = 'GAME.REASON_DEFAULT';
 
-        const currentScore = player.score;
-        const neededToWin = 121 - currentScore;
-
-        // Get Opponent Score to check if they are threatening to win
-        const opponent = state.players.find(p => p.id !== player.id);
+        // Same endgame logic as before
+        const neededToWin = 121 - player.score;
+        const opponent = state.players.find((p: any) => p.id !== player.id);
         const opponentScore = opponent ? opponent.score : 0;
-        const opponentThreatening = opponentScore >= 115; // Assume 115 is danger zone
 
-        // ENDGAME LOGIC
         if (neededToWin <= 5) {
-          // Case 1: Desperate / Very Close -> Prioritize Pegging
-          // If we are this close, pegging is often the fastest way out.
           candidates.sort((a, b) => b.peggingScore - a.peggingScore);
           best = candidates[0];
-          logicReason = `Endgame Pegging (Need ${neededToWin})`;
-          console.log(`[AutoSelect] Triggered Endgame Pegging Logic. Needed: ${neededToWin}`);
-        } else if (!player.isDealer && opponentThreatening && neededToWin <= 15) {
-          // Case 2: Desperate Offense
-          // Opponent is about to win. We are NOT dealer, so we count first.
-          // We need to win NOW. Maximize Hand + Pegging.
-          // Ignore Crib (since if we don't win, opponent wins anyway).
+          reasonKey = 'GAME.REASON_ENDGAME_PEGGING';
+        } else if (!player.isDealer && opponentScore >= 115 && neededToWin <= 15) {
           candidates.sort((a, b) => (b.handStats.avg + b.peggingScore) - (a.handStats.avg + a.peggingScore));
           best = candidates[0];
-          logicReason = `Desperate Offense (Opponent at ${opponentScore})`;
-          console.log(`[AutoSelect] Triggered Desperate Offense Logic. Opponent Score: ${opponentScore}`);
+          reasonKey = 'GAME.REASON_DESPERATE';
         } else if (neededToWin <= 20) {
-          // Case 3: Can we guarantee a win?
-          // Non-Dealer: Counts first. Hand Min >= Needed?
-          // Dealer: Counts last. Hand Min + Crib Min >= Needed?
           const safeWins = candidates.filter(r => {
             const guaranteed = player.isDealer
               ? (r.handStats.min + r.cribStats.min)
               : r.handStats.min;
             return guaranteed >= neededToWin;
           });
-
           if (safeWins.length > 0) {
-            // Pick highest Total EV among safe wins to be optimal
             safeWins.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
             best = safeWins[0];
-            logicReason = `Guaranteed Win (Need ${neededToWin})`;
-            console.log(`[AutoSelect] Triggered Guaranteed Win Logic.`);
+            reasonKey = 'GAME.REASON_GUARANTEED';
           } else {
-            // No guarantee, fallback to Best Total
             candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
             best = candidates[0];
           }
         } else {
-          // Standard: Best Total EV
           candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
           best = candidates[0];
         }
 
-        // Update selection to match the DISCARDED cards from the best result
-        // The user wants to "select the best cards to discard"
+        // Build hint text: "Keep X, Y, Z, W" with card names
+        const keepCards = best.kept.map((c: any) => this.formatCard(c));
+        const ev = best.totalExpectedValue.toFixed(1);
+        const hintMsg = this.translate.instant('GAME.HINT_DISCARD', {
+          cards: keepCards.join(', '),
+          ev: ev
+        });
+        const reasonMsg = this.translate.instant(reasonKey);
+
+        this.setHint(hintMsg, reasonMsg);
+
+        // Pre-select the discard cards so they visually move up
         this.selectedCardIndices.clear();
         const hand = player.cards;
-
-        best.discarded.forEach(discardCard => {
-          // Find index in hand
-          // We match by rank and suit
-          const index = hand.findIndex(c => c.rank === discardCard.rank && c.suit === discardCard.suit);
+        best.discarded.forEach((discardCard: any) => {
+          const index = hand.findIndex((c: any) => c.rank === discardCard.rank && c.suit === discardCard.suit);
           if (index !== -1) {
             this.selectedCardIndices.add(index);
           }
         });
-
-        // Save to History
-        const discardedCodes = best.discarded.map(c => c.rank + c.suit);
-        this.apiService.saveHistory({
-          original_hand: cardCodes,
-          discarded: discardedCodes,
-          expected_value: best.totalExpectedValue,
-          is_dealer: player.isDealer,
-          num_players: numPlayers
-        }).subscribe(); // Fire and forget
 
         // Share result with Analyzer View
         this.gameService.setLastAnalysis({
@@ -341,7 +358,6 @@ export class GameTableComponent implements OnInit {
           isDealer: player.isDealer,
           numPlayers: numPlayers,
           results: response.results,
-          logicReason: logicReason,
           isQuickMode: true
         });
 
@@ -349,9 +365,53 @@ export class GameTableComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
+        this.setHint(this.translate.instant('GAME.HINT_ERROR'));
         this.isAnalyzing = false;
       }
     });
+  }
+
+  private showPeggingHint(state: GameState, player: any) {
+    const handStrs = player.cards.map((c: any) => c.rank + c.suit);
+    const stackStrs = state.peggingStack.map((item: any) => item.card.rank + item.card.suit);
+
+    this.apiService.getPeggingCard(handStrs, stackStrs, state.currentPeggingTotal).subscribe({
+      next: (res) => {
+        if (res.card) {
+          const cardName = this.formatCard(res.card);
+          const hintMsg = this.translate.instant('GAME.HINT_PEGGING', { card: cardName });
+
+          let reasonMsg = '';
+          const points = res.actualPoints !== undefined ? res.actualPoints : res.score; // Fallback for old API
+          if (points > 0) {
+            reasonMsg = this.translate.instant('GAME.REASON_PEGGING_POINTS', { points: points });
+          } else {
+            reasonMsg = this.translate.instant('GAME.REASON_PEGGING_STRATEGY');
+          }
+
+          this.setHint(hintMsg, reasonMsg);
+
+          // Find the card index in hand and highlight it
+          const idx = player.cards.findIndex((c: any) => c.rank === res.card!.rank && c.suit === res.card!.suit);
+          if (idx !== -1) {
+            this.hintedCardIndex = idx;
+          }
+        } else {
+          this.setHint(this.translate.instant('GAME.HINT_SAY_GO'));
+        }
+        this.isAnalyzing = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.setHint(this.translate.instant('GAME.HINT_ERROR'));
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  private formatCard(card: any): string {
+    const suitSymbols: Record<string, string> = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
+    return `${card.rank}${suitSymbols[card.suit] || card.suit}`;
   }
 
   onPopupContinue() {
@@ -365,12 +425,12 @@ export class GameTableComponent implements OnInit {
 
   getCardClasses(card: any, index: number, playerId?: string): any {
     const isSelected = this.selectedCardIndices.has(index);
-    // Optional: Use playerId to distinctive styling if needed (e.g., border color)
+    const isHinted = this.hintedCardIndex === index && this.gameService.snapshot.phase === 'pegging';
     return {
       'red': card.suit === 'H' || card.suit === 'D',
       'black': card.suit === 'C' || card.suit === 'S',
-      'selected': isSelected,
-      'hover:-translate-y-2': !isSelected
+      'card-selected': isSelected || isHinted,
+      'hover:-translate-y-2': !isSelected && !isHinted
     };
   }
 

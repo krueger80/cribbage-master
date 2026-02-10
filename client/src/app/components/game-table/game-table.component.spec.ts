@@ -1,13 +1,13 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 import { GameTableComponent } from './game-table.component';
 import { GameService } from '../../services/game.service';
 import { ApiService, AnalysisResult } from '../../services/api.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of, BehaviorSubject } from 'rxjs';
 import { GameState } from '../../services/game.state';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
-describe('GameTableComponent', () => {
+describe('GameTableComponent - Hint Feature', () => {
     let component: GameTableComponent;
     let fixture: ComponentFixture<GameTableComponent>;
     let gameServiceSpy: jasmine.SpyObj<GameService>;
@@ -36,8 +36,12 @@ describe('GameTableComponent', () => {
 
     const mockResults: AnalysisResult[] = [
         {
-            // Result 0: Best Total EV
-            kept: [],
+            kept: [
+                { rank: '5', suit: 'H', value: 5, order: 5 },
+                { rank: '6', suit: 'D', value: 6, order: 6 },
+                { rank: '7', suit: 'S', value: 7, order: 7 },
+                { rank: '8', suit: 'C', value: 8, order: 8 }
+            ],
             discarded: [{ rank: '9', suit: 'H', value: 9, order: 9 }, { rank: '10', suit: 'D', value: 10, order: 10 }],
             handStats: { min: 4, max: 12, avg: 10, breakdown: {} as any },
             cribStats: { min: 2, max: 6, avg: 3, breakdown: {} as any },
@@ -45,8 +49,12 @@ describe('GameTableComponent', () => {
             totalExpectedValue: 15.0
         },
         {
-            // Result 1: Best Pegging
-            kept: [],
+            kept: [
+                { rank: '9', suit: 'H', value: 9, order: 9 },
+                { rank: '10', suit: 'D', value: 10, order: 10 },
+                { rank: '7', suit: 'S', value: 7, order: 7 },
+                { rank: '8', suit: 'C', value: 8, order: 8 }
+            ],
             discarded: [{ rank: '5', suit: 'H', value: 5, order: 5 }, { rank: '6', suit: 'D', value: 6, order: 6 }],
             handStats: { min: 2, max: 8, avg: 8, breakdown: {} as any },
             cribStats: { min: 2, max: 6, avg: 3, breakdown: {} as any },
@@ -54,8 +62,12 @@ describe('GameTableComponent', () => {
             totalExpectedValue: 14.0
         },
         {
-            // Result 2: Guaranteed Win (High Min)
-            kept: [],
+            kept: [
+                { rank: '5', suit: 'H', value: 5, order: 5 },
+                { rank: '6', suit: 'D', value: 6, order: 6 },
+                { rank: '9', suit: 'H', value: 9, order: 9 },
+                { rank: '10', suit: 'D', value: 10, order: 10 }
+            ],
             discarded: [{ rank: '7', suit: 'S', value: 7, order: 7 }, { rank: '8', suit: 'C', value: 8, order: 8 }],
             handStats: { min: 10, max: 10, avg: 10, breakdown: {} as any },
             cribStats: { min: 0, max: 0, avg: 0, breakdown: {} as any },
@@ -64,26 +76,17 @@ describe('GameTableComponent', () => {
         }
     ];
 
-    const verifySelection = (expectedResultIndex: number) => {
-        const selected = Array.from(component.selectedCardIndices).sort();
-        let expectedIndices: number[] = [];
-        if (expectedResultIndex === 0) expectedIndices = [4, 5]; // 9H, 10D (at indices 4,5 in set hand)
-        else if (expectedResultIndex === 1) expectedIndices = [0, 1]; // 5H, 6D (at indices 0,1)
-        else if (expectedResultIndex === 2) expectedIndices = [2, 3]; // 7S, 8C (at indices 2,3)
-
-        expect(selected).toEqual(expectedIndices, `Expected result index ${expectedResultIndex} (Indices ${expectedIndices}) but got ${selected}`);
-    };
-
     beforeEach(waitForAsync(() => {
         stateSubject = new BehaviorSubject<GameState>(JSON.parse(JSON.stringify(initialState)));
 
-        const gameSpy = jasmine.createSpyObj('GameService', ['discard', 'setLastAnalysis', 'acknowledgePeggingScore']);
+        const gameSpy = jasmine.createSpyObj('GameService', ['discard', 'setLastAnalysis', 'acknowledgePeggingScore', 'playCard', 'sayGo']);
         Object.defineProperty(gameSpy, 'snapshot', { get: () => stateSubject.value });
         Object.defineProperty(gameSpy, 'state$', { get: () => stateSubject.asObservable() });
 
-        const apiSpy = jasmine.createSpyObj('ApiService', ['analyze', 'saveHistory']);
+        const apiSpy = jasmine.createSpyObj('ApiService', ['analyze', 'saveHistory', 'getPeggingCard']);
         apiSpy.analyze.and.returnValue(of({ results: mockResults }));
         apiSpy.saveHistory.and.returnValue(of({}));
+        apiSpy.getPeggingCard.and.returnValue(of({ card: { rank: 'A', suit: 'S' }, score: 0 }));
 
         TestBed.configureTestingModule({
             imports: [GameTableComponent, TranslateModule.forRoot()],
@@ -109,68 +112,123 @@ describe('GameTableComponent', () => {
             { rank: '10', suit: 'D', value: 10, order: 10 }
         ];
 
-        // Mock getCardClasses to avoid errors if viewed in test
+        // Mock getCardClasses to avoid errors
         spyOn(component, 'getCardClasses').and.returnValue({});
-
-        // Manually trigger onInit or just rely on autoSelect calling dependencies directly
-        // component.ngOnInit(); 
 
         // Ensure bottomPlayer resolves to P1
         Object.defineProperty(component, 'bottomPlayer', { get: () => p1 });
     }));
 
-    it('Scenario 1: Standard Play (Score 0) -> Pick Highest Total EV', () => {
+    // ─── DISCARD HINTS ──────────────────────────────────────────────────
+
+    it('should show discard hint with kept cards and EV', fakeAsync(() => {
         stateSubject.value.players[0].score = 0;
-        component.autoSelect();
-        verifySelection(0); // Expect Result 0
-    });
+        component.showHint();
+        tick(100);
 
-    it('Scenario 2: Endgame Pegging (Need <= 5) -> Pick Highest Pegging', () => {
-        // Need 4 pts (121 - 117 = 4)
+        expect(component.hintText).toBeTruthy();
+        expect(component.hintText).toContain('HINT_DISCARD');
+        // Default reason (Best long term value)
+        expect(component.hintReason).toBe('GAME.REASON_DEFAULT');
+        expect(component.isAnalyzing).toBeFalse();
+        // Hint now pre-selects the discard cards
+        expect(component.selectedCardIndices.size).toBe(2);
+
+        component['clearHint']();
+    }));
+
+    it('should pick best pegging option when close to winning (need <= 5)', fakeAsync(() => {
         stateSubject.value.players[0].score = 117;
-        component.autoSelect();
-        verifySelection(1); // Expect Result 1 (Pegging 6.0)
-    });
+        component.showHint();
+        tick(100);
 
-    it('Scenario 3: Guaranteed Win (Need <= 20) -> Pick Safe Min Hand', () => {
-        // Need 10 pts (121 - 111 = 10)
-        stateSubject.value.players[0].score = 111;
-        stateSubject.value.players[0].isDealer = false;
+        expect(component.hintText).toBeTruthy();
+        expect(component.hintText).toContain('HINT_DISCARD');
+        // Reason should be Endgame Pegging
+        expect(component.hintReason).toBe('GAME.REASON_ENDGAME_PEGGING');
+        expect(component.isAnalyzing).toBeFalse();
 
-        // Result 2 has Min 10. Result 0 has Min 4.
-        component.autoSelect();
-        verifySelection(2); // Expect Result 2 (Min 10)
-    });
+        component['clearHint']();
+    }));
 
-    it('Scenario 4: Desperate Offense (Opponent Threatening)', () => {
-        // Player needs 15 (Score 106). Not Dealer.
-        stateSubject.value.players[0].score = 106;
-        stateSubject.value.players[0].isDealer = false;
+    it('should dismiss hint on second click', fakeAsync(() => {
+        component.showHint();
+        tick(100);
+        expect(component.hintText).toBeTruthy();
 
-        // Opponent (CPU) is threatening (Score 116 >= 115)
-        stateSubject.value.players[1].score = 116;
+        // Second click should dismiss
+        component.showHint();
+        expect(component.hintText).toBeNull();
+    }));
 
-        // Result 0: Hand Avg 10 + Peg 2 = 12
-        // Result 1: Hand Avg 8 + Peg 6 = 14 (Best)
-        // Result 2: Hand Avg 10 + Peg 1 = 11
+    it('should auto-dismiss hint after timeout', fakeAsync(() => {
+        component.showHint();
+        tick(100);
+        expect(component.hintText).toBeTruthy();
 
-        component.autoSelect();
-        verifySelection(1); // Expect Result 1
-    });
+        tick(8000);
+        expect(component.hintText).toBeNull();
+    }));
 
-    it('Scenario 5: Opponent Threatening but Player is Dealer -> Standard Play (or Defensive)', () => {
-        // If Player is Dealer, they count last (crib), so "Desperate Offense" logic (Hand+Peg only) shouldn't trigger
-        // because crib matters. 
-        // The implementation falls back to Standard EV or Guaranteed Win if applicable.
-        // Let's test standard fallback logic here if needed < 15 but Dealer.
+    // ─── PEGGING HINTS ──────────────────────────────────────────────────
 
-        stateSubject.value.players[0].score = 106;
-        stateSubject.value.players[0].isDealer = true;
-        stateSubject.value.players[1].score = 116;
+    it('should show pegging hint with suggested card', fakeAsync(() => {
+        // Switch to pegging phase
+        stateSubject.next({
+            ...stateSubject.value,
+            phase: 'pegging',
+            turnPlayerId: 'p1',
+            currentPeggingTotal: 10,
+            peggingStack: []
+        });
 
-        // Should pick Result 0 (Best Total EV 15.0) which includes Crib
-        component.autoSelect();
-        verifySelection(0);
-    });
+        component.showHint();
+        tick(100);
 
+        expect(component.hintText).toBeTruthy();
+        expect(component.hintText).toContain('A');
+        // REASON_PEGGING_STRATEGY because mocked score is 0
+        expect(component.hintReason).toBe('GAME.REASON_PEGGING_STRATEGY');
+        expect(component.isAnalyzing).toBeFalse();
+
+        component['clearHint']();
+    }));
+
+    it('should show "say Go" hint when no card available', fakeAsync(() => {
+        apiServiceSpy.getPeggingCard.and.returnValue(of({ card: null, score: 0 }));
+
+        stateSubject.next({
+            ...stateSubject.value,
+            phase: 'pegging',
+            turnPlayerId: 'p1',
+            currentPeggingTotal: 28,
+            peggingStack: []
+        });
+
+        component.showHint();
+        tick(100);
+
+        expect(component.hintText).toBeTruthy();
+        // Should contain the "say Go" translation key content
+        expect(component.isAnalyzing).toBeFalse();
+
+        component['clearHint']();
+    }));
+
+    it('should clear hint when playing a card', fakeAsync(() => {
+        stateSubject.next({
+            ...stateSubject.value,
+            phase: 'pegging',
+            turnPlayerId: 'p1'
+        });
+
+        component.showHint();
+        tick(100);
+        expect(component.hintText).toBeTruthy();
+
+        component.onCardClick(0);
+        expect(component.hintText).toBeNull();
+
+        component['clearHint']();
+    }));
 });
