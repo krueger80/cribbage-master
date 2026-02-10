@@ -258,6 +258,18 @@ export class AppComponent implements OnInit, OnDestroy {
       this.currentUser = user;
     });
 
+    // Listen for Auto-Select analysis from Game
+    this.gameService.lastAnalysis$.subscribe(analysis => {
+      if (analysis) {
+        this.cards = [...analysis.cards];
+        this.numPlayers = analysis.numPlayers;
+        this.isDealer = analysis.isDealer;
+        this.analysisResults = analysis.results;
+        // From game auto-select is always quick mode
+        this.isQuickMode = analysis.isQuickMode || false;
+      }
+    });
+
     // Auto-restore game state (Local or Cloud)
     setTimeout(() => {
       this.gameService.tryRestoreState().then(restored => {

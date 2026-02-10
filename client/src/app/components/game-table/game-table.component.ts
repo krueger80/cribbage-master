@@ -10,6 +10,8 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { ApiService } from '../../services/api.service';
+
 @Component({
   selector: 'app-game-table',
   standalone: true,
@@ -61,9 +63,10 @@ export class GameTableComponent implements OnInit {
   isLandscape: boolean = false;
 
   selectedCardIndices: Set<number> = new Set();
+  isAnalyzing: boolean = false;
 
 
-  constructor(private gameService: GameService, private translate: TranslateService, private ngZone: NgZone) {
+  constructor(private gameService: GameService, private apiService: ApiService, private translate: TranslateService, private ngZone: NgZone) {
     this.state$ = this.gameService.state$;
 
     const mq = window.matchMedia('(orientation: landscape)');
@@ -217,8 +220,8 @@ export class GameTableComponent implements OnInit {
     if (!this.isMyTurn) return false;
     const state = this.gameService.snapshot;
     const player = this.bottomPlayer;
-    // You can't "Say Go" if you have no cards (you're just out)
     if (!player.cards || player.cards.length === 0) return false;
+    if (state.currentPeggingTotal === 31) return false;
 
     return !this.canPlay(player.cards, state.currentPeggingTotal);
   }
@@ -229,6 +232,137 @@ export class GameTableComponent implements OnInit {
       this.selectedCardIndices.clear();
     }
   }
+  autoSelect() {
+    const state = this.gameService.snapshot;
+    if (state.phase !== 'discarding') return;
+
+    const player = this.bottomPlayer;
+    if (!player.cards || player.cards.length === 0) return;
+
+    this.isAnalyzing = true;
+
+    // Convert cards to string codes (Rank+Suit, e.g. "5H", "10S")
+    const cardCodes = player.cards.map(c => c.rank + c.suit);
+    const numPlayers = state.players.length;
+
+    this.apiService.analyze(cardCodes, player.isDealer, numPlayers, 'quick').subscribe({
+      next: (response) => {
+        // Find best result (highest EV)
+        if (!response.results || response.results.length === 0) {
+          this.isAnalyzing = false;
+          return;
+        }
+
+        // Create a copy of results for sorting
+        let candidates = [...response.results];
+        let best = candidates[0];
+        let logicReason = "Best Overall Value";
+
+        const currentScore = player.score;
+        const neededToWin = 121 - currentScore;
+
+        // Get Opponent Score to check if they are threatening to win
+        const opponent = state.players.find(p => p.id !== player.id);
+        const opponentScore = opponent ? opponent.score : 0;
+        const opponentThreatening = opponentScore >= 115; // Assume 115 is danger zone
+
+        // ENDGAME LOGIC
+        if (neededToWin <= 5) {
+          // Case 1: Desperate / Very Close -> Prioritize Pegging
+          // If we are this close, pegging is often the fastest way out.
+          candidates.sort((a, b) => b.peggingScore - a.peggingScore);
+          best = candidates[0];
+          logicReason = `Endgame Pegging (Need ${neededToWin})`;
+          console.log(`[AutoSelect] Triggered Endgame Pegging Logic. Needed: ${neededToWin}`);
+        } else if (!player.isDealer && opponentThreatening && neededToWin <= 15) {
+          // Case 2: Desperate Offense
+          // Opponent is about to win. We are NOT dealer, so we count first.
+          // We need to win NOW. Maximize Hand + Pegging.
+          // Ignore Crib (since if we don't win, opponent wins anyway).
+          candidates.sort((a, b) => (b.handStats.avg + b.peggingScore) - (a.handStats.avg + a.peggingScore));
+          best = candidates[0];
+          logicReason = `Desperate Offense (Opponent at ${opponentScore})`;
+          console.log(`[AutoSelect] Triggered Desperate Offense Logic. Opponent Score: ${opponentScore}`);
+        } else if (neededToWin <= 20) {
+          // Case 3: Can we guarantee a win?
+          // Non-Dealer: Counts first. Hand Min >= Needed?
+          // Dealer: Counts last. Hand Min + Crib Min >= Needed?
+          const safeWins = candidates.filter(r => {
+            const guaranteed = player.isDealer
+              ? (r.handStats.min + r.cribStats.min)
+              : r.handStats.min;
+            return guaranteed >= neededToWin;
+          });
+
+          if (safeWins.length > 0) {
+            // Pick highest Total EV among safe wins to be optimal
+            safeWins.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+            best = safeWins[0];
+            logicReason = `Guaranteed Win (Need ${neededToWin})`;
+            console.log(`[AutoSelect] Triggered Guaranteed Win Logic.`);
+          } else {
+            // No guarantee, fallback to Best Total
+            candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+            best = candidates[0];
+          }
+        } else {
+          // Standard: Best Total EV
+          candidates.sort((a, b) => b.totalExpectedValue - a.totalExpectedValue);
+          best = candidates[0];
+        }
+
+        // Update selection to match the DISCARDED cards from the best result
+        // The user wants to "select the best cards to discard"
+        this.selectedCardIndices.clear();
+        const hand = player.cards;
+
+        best.discarded.forEach(discardCard => {
+          // Find index in hand
+          // We match by rank and suit
+          const index = hand.findIndex(c => c.rank === discardCard.rank && c.suit === discardCard.suit);
+          if (index !== -1) {
+            this.selectedCardIndices.add(index);
+          }
+        });
+
+        // Save to History
+        const discardedCodes = best.discarded.map(c => c.rank + c.suit);
+        this.apiService.saveHistory({
+          original_hand: cardCodes,
+          discarded: discardedCodes,
+          expected_value: best.totalExpectedValue,
+          is_dealer: player.isDealer,
+          num_players: numPlayers
+        }).subscribe(); // Fire and forget
+
+        // Share result with Analyzer View
+        this.gameService.setLastAnalysis({
+          cards: cardCodes,
+          isDealer: player.isDealer,
+          numPlayers: numPlayers,
+          results: response.results,
+          logicReason: logicReason,
+          isQuickMode: true
+        });
+
+        this.isAnalyzing = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  onPopupContinue() {
+    const popupData = this.getPopupData();
+    if (popupData.type === 'pegging') {
+      this.gameService.acknowledgePeggingScore();
+    } else if (popupData.type === 'counting') {
+      this.advanceCounting();
+    }
+  }
+
   getCardClasses(card: any, index: number, playerId?: string): any {
     const isSelected = this.selectedCardIndices.has(index);
     // Optional: Use playerId to distinctive styling if needed (e.g., border color)
@@ -245,7 +379,6 @@ export class GameTableComponent implements OnInit {
     return map[suit] || '?';
   }
 
-  // Counting Phase Helpers
   // Counting Phase Helpers
   getCountingCards(state: GameState): any[] {
     // If not multiplayer, just show everything?
@@ -324,6 +457,14 @@ export class GameTableComponent implements OnInit {
   }
 
   restartGame() {
+    const state = this.gameService.snapshot;
+    // If game is in progress (not gameover), ask for confirmation
+    if (state.phase !== 'gameover') {
+      const confirmMsg = this.translate.instant('GAME.CONFIRM_NEW_GAME');
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    }
     this.gameService.restartGame();
   }
 

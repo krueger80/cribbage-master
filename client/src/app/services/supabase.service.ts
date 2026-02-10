@@ -238,7 +238,7 @@ export class SupabaseService {
 
     async saveHistory(entry: any) {
         const userId = this.currentUserId;
-        if (!userId) throw new Error('User not logged in');
+        if (!userId) return;
 
         const { error } = await this.supabase
             .from('hand_history')

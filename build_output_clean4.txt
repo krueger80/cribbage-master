@@ -1,0 +1,284 @@
+
+> cribbage-master@1.0.0 dev:full
+> vercel dev
+
+Vercel CLI 50.9.6
+Retrieving projectΓÇª
+> Running Dev Command ΓÇ£cd client && npx ng serve --port $PORTΓÇ¥
+Node.js version v25.2.1 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+[33m>[39m Building...
+[32mΓêÜ[39m Building...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 260.51 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+styles.css          | styles        |  55.78 kB | 
+
+                    | Initial total | 406.49 kB
+
+Application bundle generation complete. [5.766 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  Γ₧£  Local:   http://localhost:3000/
+> Ready! Available at http://localhost:3000
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 260.57 kB | 
+
+Application bundle generation complete. [3.888 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 260.60 kB | 
+
+Application bundle generation complete. [0.546 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 262.32 kB | 
+
+Application bundle generation complete. [0.501 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 262.31 kB | 
+
+Application bundle generation complete. [0.419 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 263.11 kB | 
+
+Application bundle generation complete. [0.407 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 264.14 kB | 
+
+Application bundle generation complete. [1.760 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+
+No output file changes.
+
+Application bundle generation complete. [0.256 seconds]
+
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+
+No output file changes.
+
+Application bundle generation complete. [0.120 seconds]
+
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+
+No output file changes.
+
+Application bundle generation complete. [0.194 seconds]
+
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 247.55 kB | 
+styles.css          | styles |  56.25 kB | 
+
+Application bundle generation complete. [1.549 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 264.14 kB | 
+
+Application bundle generation complete. [1.064 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 264.26 kB | 
+
+Application bundle generation complete. [2.264 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 265.46 kB | 
+
+Application bundle generation complete. [0.549 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 267.50 kB | 
+styles.css          | styles |  56.70 kB | 
+
+Application bundle generation complete. [0.523 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 267.70 kB | 
+
+Application bundle generation complete. [1.647 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 268.18 kB | 
+
+Application bundle generation complete. [1.480 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 268.18 kB | 
+
+Application bundle generation complete. [0.769 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   | 268.88 kB | 
+styles.css          | styles |  56.88 kB | 
+
+Application bundle generation complete. [0.963 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.14 kB | 
+
+Application bundle generation complete. [1.229 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.31 kB | 
+
+Application bundle generation complete. [0.724 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.60 kB | 
+
+Application bundle generation complete. [0.267 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Application bundle generation failed. [0.300 seconds]
+
+X [ERROR] TS2304: Cannot find name 'Subject'. [plugin angular-compiler]
+
+    src/app/services/api.service.ts:130:30:
+      130 Γöé   private _historySaved = new Subject<void>();
+          Γò╡                               ~~~~~~~
+
+
+X [ERROR] TS2304: Cannot find name 'tap'. [plugin angular-compiler]
+
+    src/app/services/api.service.ts:139:6:
+      139 Γöé       tap(() => this._historySaved.next())
+          Γò╡       ~~~
+
+
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 269.81 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+styles.css          | styles        |  56.88 kB | 
+
+                    | Initial total | 416.88 kB
+
+Application bundle generation complete. [0.363 seconds]
+
+Page reload sent to client(s).
+18 h 33 min 45 s [vite] Γ£¿ new dependencies optimized: rxjs/operators
+18 h 33 min 45 s [vite] Γ£¿ optimized dependencies changed. reloading
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+Error: Watcher error: Error: EPERM: operation not permitted, watch
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.96 kB | 
+
+Application bundle generation complete. [0.487 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 270.01 kB | 
+
+Application bundle generation complete. [0.751 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 270.07 kB | 
+
+Application bundle generation complete. [1.809 seconds]
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32mΓêÜ[39m Changes detected. Rebuilding...
+Initial chunk files | Names |  Raw size
+main.js             | main  | 269.99 kB | 
+
+Application bundle generation complete. [0.751 seconds]
+
+Page reload sent to client(s).
